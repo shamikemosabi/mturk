@@ -12,7 +12,8 @@
  *      - embed sound into jar file
  *      
  *      
- * TODO: - way to open up blah2.html
+ * TODO: - add autoaccept preview link 
+ *		 - way to open up blah2.html
  * 		 - make time lbl dependent on main program. (So user would know if it crashed)
  *       - Maybe alert for special requesters? (andyK, Acme, etc...)
  *       - it'll be nice to clear individual link blocks. (need a lot of work basically redesign whole thing)
