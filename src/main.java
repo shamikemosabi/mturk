@@ -1,4 +1,5 @@
 /*
+ * 4/30 - change back to http://mturkforum.com/
  * 3/10- changed server name to server.centivized.com
  * 		 Added check box to make sound optional
  * 		 Added check boc to with ability to pause program  
@@ -109,12 +110,12 @@ public class main extends TimerTask
 	}
 	public void TurkForum() throws Exception
 	{		
-		String todayLink = getTodayLink("http://server.centivized.com/forumdisplay.php?30-Great-HITS");
+		String todayLink = getTodayLink("http://mturkforum.com/forumdisplay.php?30-Great-HITS");
 		todayLink = window.getInstance().getURL().equals("") ? todayLink : window.getInstance().getURL();
 	//	todayLink =  "showthread.php?13640-Can-t-Find-FUN-HIT-s-01-30-Super-Funbowl-Friday!!";
 		if(!todayLink.equals(""))
 		{
-			processPage("http://server.centivized.com/"+todayLink+"/page1000"); //1000 so its greater so it's always the last page
+			processPage("http://mturkforum.com/"+todayLink+"/page1000"); //1000 so its greater so it's always the last page
 			
 		}
 		else
