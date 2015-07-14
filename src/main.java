@@ -36,6 +36,9 @@ public class main extends TimerTask
 	
 	boolean test = true;
 	
+	String jsonFile = "C:\\inetpub\\wwwroot\\www3\\test.aspx";
+	ArrayList<String> alJson = new ArrayList<String>();
+	
 	public main() throws Exception
 	{
 
@@ -115,7 +118,7 @@ public class main extends TimerTask
 	//	todayLink =  "showthread.php?13640-Can-t-Find-FUN-HIT-s-01-30-Super-Funbowl-Friday!!";
 		if(!todayLink.equals(""))
 		{
-			processPage("http://mturkforum.com/"+todayLink+"/page39"); //1000 so its greater so it's always the last page
+			processPage("http://mturkforum.com/"+todayLink+"/page73"); //1000 so its greater so it's always the last page
 			
 		}
 		else
@@ -207,9 +210,14 @@ public class main extends TimerTask
 			
 			
 		}
+		if(alJson.size()>0)
+		{
+			writeToJSON();
+		}
 		
 		if(newLink && window.getInstance().PlaySound())
 		{
+			
 			sound newSound = new sound();
 			try{
 				newSound.playSound("traffic.wav");
@@ -258,12 +266,101 @@ public class main extends TimerTask
 			myData.getArray().add(l);
 			
 			read.seralize(myData); //Write back data class
+			
+			
+			
+			/* - Here I have to write to JSON file.
+			 * on angular side, will read current JSON file, 
+			 * will compare it to angular's last read JSON file.
+			 *  if it's the same then that means there's no new records.
+			 *  if it's different, add it to local JSON file, update last read JSON file with current JSON file
+			 *  then store local JSON file (with new records).
+			 *  
+			 *  Angular will ng-repeat local JSON file.
+			 *  
+			 * 
+			 * - I should probably delete data.ser every day? (Don't want it to store forever, This program will now run indefinitely as a service)
+			 * 
+			 * - Delete current JSON file after every min of calling main(). Reason for this is because if I don't delete it, next run will end up 
+			 *   appending to it. When angular compare the 2 JSON, it will think it's different
+			 */
+			writeToJSONPerHIT(a,l);
 					
 			newLink = true;
 		}
 		
 		return newLink;
 
+	}
+	
+	
+	/*
+	 *  write to JSON file. file path is specified in variable jsonFile.
+	 *  
+	 *  will scan JSON array list.
+	 *  finalize string and save to JSON file.
+	 *  
+	 *  Json should look like:
+	 *  
+	 *  {"records" :
+	 *  	[ {
+	 *  		post:'<br> blah blah <div> </div> etc...
+	 *  		link:'http://blahblah...'
+	 *  	  },
+	 *  
+	 *  	  { 
+	 *  		post:'second post in html format'....
+	 *  		link:'http://...'
+	 *  	  }
+	 *  	]
+	 *  }
+	 * 
+	 */
+	public void writeToJSON()
+	{
+		String start = "{\"records\":[";
+		String end = "]}";
+		String str= "";
+		
+		for(int i=0; i < alJson.size(); i++)
+		{
+			str += alJson.get(i) + ",";
+		}
+		
+		str = str.substring(0,str.length()-1); //get rid of last character which should be ","
+		
+		String finalString = start+str+end;
+		
+		System.out.println(finalString);
+		// write to file
+	}
+	
+	/*
+	 * write to array list. Each index contains 1 hit, String that has {"Post":..."link":...}
+	 * 
+	 */
+	public void writeToJSONPerHIT(ArrayList<String> a, String l)
+	{
+		//String start = "{\"records\":[";
+		//String end = "]}";
+		
+		
+		String str = "";
+				
+		str += "{\"Post\":\"";
+	
+		//each a.get(i) is one line of post
+		for(int i=0; i< a.size(); i++)
+		{
+			str += a.get(i).replaceAll("\"", "'").replaceAll("\\s+", " ");
+		}		
+		str+="\",";		
+		// add link
+		str+= "\"link\":\"" + l.replaceAll("\"", "'").replaceAll("\\s+", " ");		
+		str+="\"}";
+		
+		//System.out.println(str);
+		alJson.add(str);
 	}
 	
 	/*
