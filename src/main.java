@@ -44,7 +44,7 @@ public class main extends TimerTask
 		read = new readData(); //object used to seralize and deseralize
 		
 
-	//	TurkForum();
+		TurkForum();
 	//	RedditHWTF(); FUCK REDDIT
 		
 	
@@ -115,7 +115,7 @@ public class main extends TimerTask
 	//	todayLink =  "showthread.php?13640-Can-t-Find-FUN-HIT-s-01-30-Super-Funbowl-Friday!!";
 		if(!todayLink.equals(""))
 		{
-			processPage("http://mturkforum.com/"+todayLink+"/page1000"); //1000 so its greater so it's always the last page
+			processPage("http://mturkforum.com/"+todayLink+"/page39"); //1000 so its greater so it's always the last page
 			
 		}
 		else
