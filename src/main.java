@@ -25,6 +25,7 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.text.*;
+import org.apache.commons.net.ftp.*;
 
 
 public class main extends TimerTask 
@@ -213,6 +214,7 @@ public class main extends TimerTask
 		if(alJson.size()>0)
 		{
 			writeToJSON();
+			alJson.clear();
 		}
 		
 		if(newLink && window.getInstance().PlaySound())
@@ -281,8 +283,6 @@ public class main extends TimerTask
 			 * 
 			 * - I should probably delete data.ser every day? (Don't want it to store forever, This program will now run indefinitely as a service)
 			 * 
-			 * - Delete current JSON file after every min of calling main(). Reason for this is because if I don't delete it, next run will end up 
-			 *   appending to it. When angular compare the 2 JSON, it will think it's different
 			 */
 			writeToJSONPerHIT(a,l);
 					
@@ -294,6 +294,22 @@ public class main extends TimerTask
 	}
 	
 	
+	
+	public void FTP(String FileName, String dir) throws IOException
+	{
+		FTPClient ftp = new FTPClient();
+		ftp.connect("31.170.160.97");
+		ftp.login("a9975584","Dodosucks11");
+		ftp.changeWorkingDirectory(dir);
+		
+		File f = new File(FileName);
+		final InputStream is = new FileInputStream(f.getPath());
+		ftp.storeFile(f.getName(), is);
+		
+		ftp.disconnect();
+		is.close();
+		
+	}
 	/*
 	 *  write to JSON file. file path is specified in variable jsonFile.
 	 *  
@@ -316,6 +332,8 @@ public class main extends TimerTask
 	 *  }
 	 * 
 	 */
+	
+	
 	public void writeToJSON()
 	{
 		String start = "{\"records\":[";
@@ -338,6 +356,13 @@ public class main extends TimerTask
 			PrintWriter pw = new PrintWriter(new FileWriter(jsonFile));
 			pw.print(finalString);
 			pw.close();
+			
+			FTP(jsonFile,"public_html");
+		}
+		catch(IOException e)
+		{
+			e.printStackTrace();
+			System.out.println("error FTP");
 		}
 		catch(Exception e)
 		{
