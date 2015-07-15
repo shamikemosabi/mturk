@@ -118,7 +118,7 @@ public class main extends TimerTask
 	//	todayLink =  "showthread.php?13640-Can-t-Find-FUN-HIT-s-01-30-Super-Funbowl-Friday!!";
 		if(!todayLink.equals(""))
 		{
-			processPage("http://mturkforum.com/"+todayLink+"/page73"); //1000 so its greater so it's always the last page
+			processPage("http://mturkforum.com/"+todayLink+"/page1000"); //1000 so its greater so it's always the last page
 			
 		}
 		else
@@ -331,8 +331,21 @@ public class main extends TimerTask
 		
 		String finalString = start+str+end;
 		
-		System.out.println(finalString);
+		//System.out.println(finalString);
 		// write to file
+		try
+		{
+			PrintWriter pw = new PrintWriter(new FileWriter(jsonFile));
+			pw.print(finalString);
+			pw.close();
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			System.out.println("error writing to JSON file");
+		}
+		
+		
 	}
 	
 	/*
