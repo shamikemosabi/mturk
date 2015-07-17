@@ -43,7 +43,7 @@ public class main extends TimerTask
 	public main() throws Exception
 	{
 
-		//w = window.getInstance();
+		w = window.getInstance();
 				
 		read = new readData(); //object used to seralize and deseralize
 		
@@ -201,7 +201,7 @@ public class main extends TimerTask
 				if(hit)
 				{
 					// we gotta match the link with our records to see if we've sent it before
-					newLink = checkIfLinkExist(text, hitLink);
+						newLink = checkIfLinkExist(text, hitLink);
 				}
 				
 				//reset hit and text
