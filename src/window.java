@@ -9,9 +9,11 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -202,6 +204,22 @@ public class window
 	    DateFormat dateFormat = new SimpleDateFormat("h:mm:ss");
 		 Date d = new Date();
 		lblTime.setText(dateFormat.format(d));
+		
+		
+		// lets delete data.ser file name every hour.
+		// doing it here because I already have a timer created for lblTime
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(d);
+		int minutes = calendar.get(Calendar.MINUTE);
+		
+		//delete once every hour
+		if(minutes==30)
+		{
+			File f = new File(readData.fileName);
+			f.delete();			
+		}
+
+
 	}
 	public String getURL()
 	{

@@ -2,7 +2,7 @@ import java.io.*;
 
 public class readData
 {
-	String fileName = "data.ser";
+	 static String fileName = "data.ser";
 	
 	public readData()
 	{		
