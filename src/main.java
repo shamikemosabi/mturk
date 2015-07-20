@@ -298,8 +298,8 @@ public class main extends TimerTask
 	public void FTP(String FileName, String dir) throws IOException
 	{
 		FTPClient ftp = new FTPClient();
-		ftp.connect("31.170.160.97");
-		ftp.login("a9975584","Dodosucks11");
+		ftp.connect("31.170.160.105");
+		ftp.login("a3097139","000webhostsucks11");
 		ftp.changeWorkingDirectory(dir);
 		
 		File f = new File(FileName);
