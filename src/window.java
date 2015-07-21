@@ -142,7 +142,7 @@ public class window
 		  
 		  frame.setLocationRelativeTo(null); 
 		  frame.pack();
-		 // frame.setVisible(true);
+		  frame.setVisible(true);
 
 		  //set up frame 
 		  
