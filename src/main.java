@@ -124,6 +124,7 @@ public class main extends TimerTask
 				boolean hit = false;
 				ArrayList<String> text = new ArrayList<String>();
 				String hitLink = "";
+				String PandA ="";
 				while(!temp.equals("</blockquote>")) // keep looping all the text the poster did store them
 				{
 					temp =reader.readLine().trim();
@@ -140,15 +141,34 @@ public class main extends TimerTask
 						temp2 = temp2.substring(temp2.indexOf("https:"), temp2.indexOf("\"", 50)); // 50 is to ensure we pass all the " and the next " should be the end quotation
 						hitLink = temp2;
 						
+						//could potentially be previewandaccept
+						if(temp.contains("<a href=\"https://www.mturk.com/mturk/preview"))
+						{
+							if(temp2.toLowerCase().contains("previewandaccept")) // it's a PandA link
+							{
+								PandA = temp2;
+							}
+							else // it's just a regular preview... link. Let's converted it to previewand accept
+							{
+								PandA = temp2.replaceAll("preview", "previewandaccept");
+							}
+						}
 					}
 					text.add(temp);
+				}
+				
+				//coming out, if my PandA is still empty, then that means there was no preview link, It's either an "accept" link or a "searchbar" link.
+				// let's just assign that hitlink to PandA.
+				if(PandA.equals(""))
+				{
+					PandA = hitLink;
 				}
 				
 				// if hit = true then we have to do more stuff, if not we keep looping
 				if(hit)
 				{
 					// we gotta match the link with our records to see if we've sent it before
-						newLink = checkIfLinkExist(text, hitLink);
+						newLink = checkIfLinkExist(text, PandA);
 				}
 				
 				//reset hit and text
@@ -435,6 +455,7 @@ public class main extends TimerTask
 				boolean hit = false;
 				ArrayList<String> text = new ArrayList<String>();
 				String hitLink = "";
+				String PandA = "";
 				while(!temp.equals("</blockquote>")) // keep looping all the text the poster did store them
 				{
 					temp =reader.readLine().trim();
@@ -450,16 +471,36 @@ public class main extends TimerTask
 						temp2 = temp.substring(temp.indexOf("<a href=\"https:")); // lets trim the crap before <a href
 						temp2 = temp2.substring(temp2.indexOf("https:"), temp2.indexOf("\"", 50)); // 50 is to ensure we pass all the " and the next " should be the end quotation
 						hitLink = temp2;
+
+						//could potentially be previewandaccept
+						if(temp.contains("<a href=\"https://www.mturk.com/mturk/preview"))
+						{
+							if(temp2.toLowerCase().contains("previewandaccept")) // it's a PandA link
+							{
+								PandA = temp2;
+							}
+							else // it's just a regular preview... link. Let's converted it to previewand accept
+							{
+								PandA = temp2.replaceAll("preview", "previewandaccept");
+							}
+						}
 						
 					}
 					text.add(temp);
+				}
+				
+				//coming out, if my PandA is still empty, then that means there was no preview link, It's either an "accept" link or a "searchbar" link.
+				// let's just assign that hitlink to PandA.
+				if(PandA.equals(""))
+				{
+					PandA = hitLink;
 				}
 				
 				// if hit = true then we have to do more stuff, if not we keep looping
 				if(hit)
 				{
 					// we gotta match the link with our records to see if we've sent it before
-						newLink = checkIfLinkExist(text, hitLink);
+						newLink = checkIfLinkExist(text, PandA);
 				}
 				
 				//reset hit and text
