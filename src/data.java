@@ -7,7 +7,7 @@ import java.util.*;
 
 public class data implements Serializable
 {
-	private ArrayList<String> array;
+	private ArrayList<hitData> array;
 	
 	
 	public data() throws Exception
@@ -21,13 +21,30 @@ public class data implements Serializable
 	
 	public void init() throws Exception	
 	{
-		array = new ArrayList<String>();
+		array = new ArrayList<hitData>();
 	}
 	
-	public ArrayList<String> getArray()
+	public ArrayList<hitData> getArray()
 	{
 		return array;
 	}
+	
+	/*
+	 * loops thru my array and see if I have the matching link.
+	 */
+	public boolean contains(String s)
+	{
+		for(int i=0; i< array.size(); i++)
+		{
+			String currentLink = array.get(i).getLink();
+			if(currentLink.equals(s))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	
 	
 }

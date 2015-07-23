@@ -122,6 +122,8 @@ public class window
 
 		   
 		   //This is to delete data.ser file after application closes.
+		   // Don't want to DELTE this anymore!, main.java has cleanHit() that will clean up hits
+		   /*
 		    WindowAdapter listener = new WindowAdapter() {		      
 		        @Override
 		        public void windowClosing(WindowEvent e) {
@@ -129,7 +131,7 @@ public class window
 		            read.DeleteDataFile();
 		        }		      
 		    }; 
-			 
+			 */
 		    
 		  //set up frame 
 		  frame = new JFrame("");
@@ -138,7 +140,7 @@ public class window
 		  frame.getContentPane().add(scroller, BorderLayout.CENTER);
 		  
 		  frame.getContentPane().add(pnlNorth, BorderLayout.NORTH);
-		   frame.addWindowListener(listener);		  
+	//	   frame.addWindowListener(listener);		  
 		  
 		  frame.setLocationRelativeTo(null); 
 		  frame.pack();
@@ -206,6 +208,7 @@ public class window
 		lblTime.setText(dateFormat.format(d));
 		
 		
+		/* DOn't need this anymore
 		// lets delete data.ser file name every hour.
 		// doing it here because I already have a timer created for lblTime
 		Calendar calendar = Calendar.getInstance();
@@ -218,6 +221,7 @@ public class window
 			File f = new File(readData.fileName);
 			f.delete();			
 		}
+		*/	
 
 
 	}

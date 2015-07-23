@@ -57,19 +57,51 @@ public class main extends TimerTask
 			alJson.clear();
 		}
 		
+		cleanHit();		
+
+		
 	//	RedditHWTF(); FUCK REDDIT
 		
 	
 		
 	}	
 	
+	/**
+	 * Remove hits that's been over 1 hr.
+	 */
+	public void cleanHit() throws Exception
+	{
+		myData  = read.deSeralize();
+		Date currDate = new Date();
+		ArrayList remIndex = new ArrayList();
+		
+		for(int i=0; i< myData.getArray().size(); i++)
+		{
+			hitData hd = myData.getArray().get(i);
+			Date hitDate = hd.getDate();
+			System.out.println((currDate.getTime() - hitDate.getTime())/60000);
+			if(currDate.getTime() - hitDate.getTime() >= 3600000) // 60 mins
+			{				
+				remIndex.add(i);				
+			}	
+		}
+
+		// loop reverse, because ArrayList remove will shift index
+		for(int j = remIndex.size() - 1; j >= 0; j--){			 
+			int i = (int)remIndex.get(j);
+			myData.getArray().remove(i);
+			
+		}
+	
+		read.seralize(myData); //Write back data class
+	}
 	public void turkerNation() throws Exception
 	{
-		String todayLink = getTodayLinkTN("http://turkernation.com/forumdisplay.php?157-Daily-HIT-Threads&s=ca61dd26c7855c91401d0d5e9201fdbf", false);
+		String todayLink = getTodayLinkTN("http://turkernation.com/forumdisplay.php?157-Daily-HIT-Threads&s=ca61dd26c7855c91401d0d5e9201fdbf", true);
 		
 		if(!todayLink.equals(""))
 		{
-			//processPageTN("http://turkernation.com/showthread.php?25043-07-22-15-Let-s-see-what-today-brings!-)/page40");
+			//processPageTN("http://turkernation.com/showthread.php?25061-07-23-15-Doomsday-is-over!!!!!/page24");
 			processPageTN("http://turkernation.com/"+todayLink+"/page1000"); //1000 so its greater so it's always the last page
 			
 		}
@@ -813,7 +845,7 @@ public class main extends TimerTask
 		// but now that i have a display screen it doesn't matter
 				
 		myData  = read.deSeralize();
-		if(!myData.getArray().contains(l)) // we don't have the hit need to send out email
+		if(!myData.contains(l)) // we don't have the hit need to send out email
 		{
 			//option to send email out			
 //			/new SendEmail(a, l);
@@ -821,7 +853,8 @@ public class main extends TimerTask
 			w.addLinkToPanel(a,l);
 			
 			// add the link to our list
-			myData.getArray().add(l);
+			hitData hd = new hitData(l, new Date());
+			myData.getArray().add(hd);
 			
 			read.seralize(myData); //Write back data class
 			
@@ -1128,7 +1161,8 @@ public class main extends TimerTask
 		}
 		catch(Exception e)
 		{
-			window.getInstance().addText(e.getMessage());						
+			//window.getInstance().addText(e.getMessage());		
+			e.printStackTrace();
 		}
 		
 		
