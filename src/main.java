@@ -47,12 +47,9 @@ public class main extends TimerTask
 				
 		read = new readData(); //object used to seralize and deseralize
 		
-		
 		turkerNation();
-		
-		System.exit(0);
-	//	mturkGrind();
-		//TurkForum();
+		mturkGrind();
+		TurkForum();
 		
 		if(alJson.size()>0)
 		{
