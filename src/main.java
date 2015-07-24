@@ -79,7 +79,6 @@ public class main extends TimerTask
 		{
 			hitData hd = myData.getArray().get(i);
 			Date hitDate = hd.getDate();
-			System.out.println((currDate.getTime() - hitDate.getTime())/60000);
 			if(currDate.getTime() - hitDate.getTime() >= 3600000) // 60 mins
 			{				
 				remIndex.add(i);				
@@ -97,6 +96,7 @@ public class main extends TimerTask
 	}
 	public void turkerNation() throws Exception
 	{
+		System.out.println(new Date() + " Started Turker Nation");
 		String todayLink = getTodayLinkTN("http://turkernation.com/forumdisplay.php?157-Daily-HIT-Threads&s=ca61dd26c7855c91401d0d5e9201fdbf", true);
 		
 		if(!todayLink.equals(""))
@@ -112,6 +112,7 @@ public class main extends TimerTask
 		}
 		
 		window.getInstance().setLblTime();
+		System.out.println(new Date() + " Finished Turker Nation");
 		
 	}
 	public void processPageTN(String u) throws Exception 
@@ -356,6 +357,7 @@ public class main extends TimerTask
 	
 	public void mturkGrind() throws Exception
 	{
+		System.out.println(new Date() + " Started Mturk Grind");
 		String todayLink = getTodayLinkMG("http://www.mturkgrind.com/forums/awesome-hits.4/", true);
 		
 		if(!todayLink.equals(""))
@@ -371,6 +373,7 @@ public class main extends TimerTask
 		}
 		
 		window.getInstance().setLblTime();
+		System.out.println(new Date() + " Finished Mturk Grind");
 	}
 	
 	
@@ -684,6 +687,7 @@ public class main extends TimerTask
 	}
 	public void TurkForum() throws Exception
 	{		
+		System.out.println(new Date() + " Started Mturk Forum");
 		String todayLink = getTodayLink("http://mturkforum.com/forumdisplay.php?30-Great-HITS", true);
 		todayLink = window.getInstance().getURL().equals("") ? todayLink : window.getInstance().getURL();
 	//	todayLink =  "showthread.php?13640-Can-t-Find-FUN-HIT-s-01-30-Super-Funbowl-Friday!!";
@@ -700,6 +704,7 @@ public class main extends TimerTask
 		}
 		
 		window.getInstance().setLblTime();
+		System.out.println(new Date() + " Finished Mturk Forum");
 	}
 	
 	/*
