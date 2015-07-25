@@ -2,11 +2,20 @@ import java.io.*;
 
 public class readData
 {
-	 static String fileName = "data.ser";
+	  String fileName = "";
 	
-	public readData()
+	 
+	 /*
+	  * we now can specify different files.
+	  */
+	public readData(String f)
 	{		
-		
+		fileName = f;
+	}
+	
+	public String getFileName()
+	{
+		return fileName;
 	}
 		
 	public void seralize(data d) throws Exception
@@ -20,6 +29,8 @@ public class readData
 	      	      
 	      output.writeObject(d);
 	      output.close();
+	      file.close();
+	      buffer.close();
 	      
 	      
 	}
@@ -34,7 +45,10 @@ public class readData
 	    
 	    l =  (data)input.readObject(); 		
 	    
-		  input.close();
+	    file.close();
+	    buffer.close();
+	    input.close();
+	    
 		}
 		catch(FileNotFoundException fnfe) // returns a brand new Data, if data.ser does not exist, first time
 		{

@@ -7,15 +7,18 @@ import java.util.Date;
 	{
 		String link;
 		Date d ;
+		String src;
 		public hitData()
 		{
 			link="";
 			d = new Date();
+			src ="";
 		}
-		public hitData(String s, Date dtm)
+		public hitData(String s, Date dtm, String sr)
 		{
 			link=s;
 			d = dtm;
+			src = sr;
 		}
 		
 		public void setLink(String s)
@@ -26,6 +29,10 @@ import java.util.Date;
 		{
 			d = dtm;
 		}
+		public void setSrc(String sr)
+		{
+			src = sr;
+		}
 		
 		public String getLink()
 		{
@@ -34,5 +41,9 @@ import java.util.Date;
 		public Date getDate()
 		{
 			return d;
+		}
+		public String getSrc()
+		{
+			return src;
 		}
 	}

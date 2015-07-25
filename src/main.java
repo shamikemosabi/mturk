@@ -33,6 +33,8 @@ public class main extends TimerTask
 	data myData ;
 	readData read;
 	
+	readData readFull;
+	
 	static window w;
 	
 	boolean test = true;
@@ -45,7 +47,9 @@ public class main extends TimerTask
 
 		w = window.getInstance();
 				
-		read = new readData(); //object used to seralize and deseralize
+		read = new readData("data.ser"); //object used to seralize and deseralize
+		readFull = new readData("dataFull.ser");
+		
 		
 		turkerNation();
 		mturkGrind();
@@ -151,8 +155,8 @@ public class main extends TimerTask
 		while((s = reader.readLine()) != null)
 		{
 			String temp = s.toLowerCase().trim(); //let's trim it first
-
-			if(temp.startsWith("<blockquote class="))
+			
+			if(temp.startsWith("<blockquote class=\"postcontent"))
 			{
 				boolean hit = false;
 				ArrayList<String> text = new ArrayList<String>();
@@ -202,7 +206,7 @@ public class main extends TimerTask
 				if(hit)
 				{
 					// we gotta match the link with our records to see if we've sent it before
-						newLink = checkIfLinkExist(text, PandA);
+						newLink = checkIfLinkExist(text, PandA, "TN");
 				}
 				
 				//reset hit and text
@@ -463,7 +467,7 @@ public class main extends TimerTask
 				if(hit)
 				{
 					// we gotta match the link with our records to see if we've sent it before
-						newLink = checkIfLinkExist(text, PandA);
+						newLink = checkIfLinkExist(text, PandA, "MG");
 				}
 				
 				//reset hit and text
@@ -798,7 +802,7 @@ public class main extends TimerTask
 				if(hit)
 				{
 					// we gotta match the link with our records to see if we've sent it before
-						newLink = checkIfLinkExist(text, PandA);
+						newLink = checkIfLinkExist(text, PandA, "MF");
 				}
 				
 				//reset hit and text
@@ -840,9 +844,9 @@ public class main extends TimerTask
 	
 	// This method will check to see if our link already exist in our record
 	// if it already does then we don't do anything.
-	public boolean checkIfLinkExist(ArrayList<String> a, String l) throws Exception
+	public boolean checkIfLinkExist(ArrayList<String> a, String l, String source) throws Exception
 	{		
-		
+		 
 		
 		boolean newLink = false;
 		// I don't know if I need to check to see if we have data already or not.
@@ -858,26 +862,15 @@ public class main extends TimerTask
 			w.addLinkToPanel(a,l);
 			
 			// add the link to our list
-			hitData hd = new hitData(l, new Date());
+			hitData hd = new hitData(l, new Date(), source);
 			myData.getArray().add(hd);
 			
 			read.seralize(myData); //Write back data class
 			
+			//write to full data
+			addSeralize(readFull,hd);
 			
 			
-			/* - Here I have to write to JSON file.
-			 * on angular side, will read current JSON file, 
-			 * will compare it to angular's last read JSON file.
-			 *  if it's the same then that means there's no new records.
-			 *  if it's different, add it to local JSON file, update last read JSON file with current JSON file
-			 *  then store local JSON file (with new records).
-			 *  
-			 *  Angular will ng-repeat local JSON file.
-			 *  
-			 * 
-			 * - I should probably delete data.ser every day? (Don't want it to store forever, This program will now run indefinitely as a service)
-			 * 
-			 */
 			writeToJSONPerHIT(a,l);
 					
 			newLink = true;
@@ -887,6 +880,19 @@ public class main extends TimerTask
 
 	}
 	
+	// searlize  hd into rd unconditionally.
+	public void addSeralize(readData rd, hitData hd) throws Exception
+	{
+		try{
+			data d = rd.deSeralize();
+			d.getArray().add(hd);
+			rd.seralize(d);	
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}	
+	}
 	
 	
 	public void FTP(String FileName, String dir) throws IOException
@@ -951,7 +957,7 @@ public class main extends TimerTask
 			pw.print(finalString);
 			pw.close();
 			
-			FTP(jsonFile,"public_html");
+		//	FTP(jsonFile,"public_html");
 		}
 		catch(IOException e)
 		{
