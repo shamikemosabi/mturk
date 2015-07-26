@@ -467,7 +467,7 @@ public class main extends TimerTask
 				if(hit)
 				{
 					// we gotta match the link with our records to see if we've sent it before
-						newLink = checkIfLinkExist(text, PandA, "MG");
+						newLink = checkIfLinkExist(text, PandA, "MTG");
 				}
 				
 				//reset hit and text
@@ -802,7 +802,7 @@ public class main extends TimerTask
 				if(hit)
 				{
 					// we gotta match the link with our records to see if we've sent it before
-						newLink = checkIfLinkExist(text, PandA, "MF");
+						newLink = checkIfLinkExist(text, PandA, "MTF");
 				}
 				
 				//reset hit and text
@@ -847,7 +847,6 @@ public class main extends TimerTask
 	public boolean checkIfLinkExist(ArrayList<String> a, String l, String source) throws Exception
 	{		
 		 
-		
 		boolean newLink = false;
 		// I don't know if I need to check to see if we have data already or not.
 		// reason was because I didn't want to spawn an email every time process run,
@@ -937,7 +936,8 @@ public class main extends TimerTask
 	public void writeToJSON()
 	{
 		String start = "{\"records\":[";
-		String end = "]}";
+		//String end = "]}";
+		String end = "], \"date\": \""+ new Date() +"\"}";
 		String str= "";
 		
 		for(int i=0; i < alJson.size(); i++)
@@ -957,7 +957,7 @@ public class main extends TimerTask
 			pw.print(finalString);
 			pw.close();
 			
-		//	FTP(jsonFile,"public_html");
+			//FTP(jsonFile,"public_html");
 		}
 		catch(IOException e)
 		{
