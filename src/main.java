@@ -45,6 +45,7 @@ public class main extends TimerTask
 	public main() throws Exception
 	{
 
+	
 		w = window.getInstance();
 				
 		read = new readData("data.ser"); //object used to seralize and deseralize
@@ -52,18 +53,18 @@ public class main extends TimerTask
 		
 		
 		turkerNation();
-		mturkGrind();
+		//mturkGrind();
 		TurkForum();
 		
 		if(alJson.size()>0)
 		{
+			System.out.println(new Date() + " New hits writing to JSON");
 			writeToJSON();
 			alJson.clear();
 		}
 		
 		cleanHit();		
 
-		
 	//	RedditHWTF(); FUCK REDDIT
 		
 	
@@ -79,6 +80,7 @@ public class main extends TimerTask
 		Date currDate = new Date();
 		ArrayList remIndex = new ArrayList();
 		
+		System.out.println(new Date() + " cleaning hits");
 		for(int i=0; i< myData.getArray().size(); i++)
 		{
 			hitData hd = myData.getArray().get(i);
@@ -94,29 +96,38 @@ public class main extends TimerTask
 			int i = (int)remIndex.get(j);
 			myData.getArray().remove(i);
 			
+			System.out.println(new Date() + " Removing hits");
+			
 		}
 	
 		read.seralize(myData); //Write back data class
 	}
 	public void turkerNation() throws Exception
 	{
-		System.out.println(new Date() + " Started Turker Nation");
-		String todayLink = getTodayLinkTN("http://turkernation.com/forumdisplay.php?157-Daily-HIT-Threads&s=ca61dd26c7855c91401d0d5e9201fdbf", true);
-		
-		if(!todayLink.equals(""))
+		try
 		{
-			//processPageTN("http://turkernation.com/showthread.php?25061-07-23-15-Doomsday-is-over!!!!!/page24");
-			processPageTN("http://turkernation.com/"+todayLink+"/page1000"); //1000 so its greater so it's always the last page
+			System.out.println(new Date() + " Started Turker Nation");
+			String todayLink = getTodayLinkTN("http://turkernation.com/forumdisplay.php?157-Daily-HIT-Threads&s=ca61dd26c7855c91401d0d5e9201fdbf", true);
 			
+			if(!todayLink.equals(""))
+			{
+				//processPageTN("http://turkernation.com/showthread.php?25061-07-23-15-Doomsday-is-over!!!!!/page24");
+				processPageTN("http://turkernation.com/"+todayLink+"/page1000"); //1000 so its greater so it's always the last page
+				
+			}
+			else
+			{
+				//System.out.println("error grabbing today's thread");
+				window.getInstance().addText("error grabbing TN thread");
+			}
+			
+			window.getInstance().setLblTime();
+			System.out.println(new Date() + " Finished Turker Nation");
 		}
-		else
+		catch(Exception e)
 		{
-			//System.out.println("error grabbing today's thread");
-			window.getInstance().addText("error grabbing TN thread");
+			System.out.println(e.getMessage());
 		}
-		
-		window.getInstance().setLblTime();
-		System.out.println(new Date() + " Finished Turker Nation");
 		
 	}
 	public void processPageTN(String u) throws Exception 
@@ -192,7 +203,10 @@ public class main extends TimerTask
 						}
 						
 					}
-					text.add(temp);
+					if(filterPost(temp))
+					{
+						text.add(temp);
+					}
 				}
 				
 				//coming out, if my PandA is still empty, then that means there was no preview link, It's either an "accept" link or a "searchbar" link.
@@ -351,7 +365,7 @@ public class main extends TimerTask
 			
 			if(ret.equals(""))
 			{
-				ret = getTodayLinkMG(u, false);
+				ret = getTodayLinkTN(u, false);
 			}
 			
 			return ret;
@@ -361,6 +375,7 @@ public class main extends TimerTask
 	
 	public void mturkGrind() throws Exception
 	{
+		try{
 		System.out.println(new Date() + " Started Mturk Grind");
 		String todayLink = getTodayLinkMG("http://www.mturkgrind.com/forums/awesome-hits.4/", true);
 		
@@ -378,6 +393,11 @@ public class main extends TimerTask
 		
 		window.getInstance().setLblTime();
 		System.out.println(new Date() + " Finished Mturk Grind");
+		}
+		catch(Exception e)
+		{
+			System.out.println(e.getMessage());
+		}
 	}
 	
 	
@@ -454,7 +474,10 @@ public class main extends TimerTask
 						}						
 						
 					}
-					text.add(temp);
+					if(filterPost(temp))
+					{
+						text.add(temp);
+					}
 				}
 				
 				//coming out, if my PandA is still empty, then that means there was no preview link, It's either an "accept" link or a "searchbar" link.
@@ -691,6 +714,7 @@ public class main extends TimerTask
 	}
 	public void TurkForum() throws Exception
 	{		
+		try{
 		System.out.println(new Date() + " Started Mturk Forum");
 		String todayLink = getTodayLink("http://mturkforum.com/forumdisplay.php?30-Great-HITS", true);
 		todayLink = window.getInstance().getURL().equals("") ? todayLink : window.getInstance().getURL();
@@ -709,6 +733,12 @@ public class main extends TimerTask
 		
 		window.getInstance().setLblTime();
 		System.out.println(new Date() + " Finished Mturk Forum");
+		
+		}
+		catch (Exception e)
+		{
+			System.out.println(e.getMessage());
+		}
 	}
 	
 	/*
@@ -788,7 +818,10 @@ public class main extends TimerTask
 						}	
 						
 					}
-					text.add(temp);
+					if(filterPost(temp))
+					{
+						text.add(temp);
+					}
 				}
 
 				//coming out, if my PandA is still empty, then that means there was no preview link, It's either an "accept" link or a "searchbar" link.
@@ -839,6 +872,22 @@ public class main extends TimerTask
 
 		}
 		return "";
+	}
+	
+	/*
+	 *
+	 * filters post to get rid of things like images gifs
+	 */
+	
+	public boolean filterPost(String a)
+	{
+		boolean ret= true;
+		if(a.contains("<img src=\""))
+		{
+			ret = false;
+		}
+		
+		return ret;
 	}
 	
 	
@@ -957,17 +1006,19 @@ public class main extends TimerTask
 			pw.print(finalString);
 			pw.close();
 			
-			//FTP(jsonFile,"public_html");
+			System.out.println(new Date() + "Starting FTP...");
+			FTP(jsonFile,"public_html");	
+			System.out.println(new Date() + "Finished FTP...");
 		}
 		catch(IOException e)
 		{
 			e.printStackTrace();
-			System.out.println("error FTP");
+			System.out.println(new Date() + "error FTP");
 		}
 		catch(Exception e)
 		{
 			e.printStackTrace();
-			System.out.println("error writing to JSON file");
+			System.out.println(new Date() + "error writing to JSON file");
 		}
 		
 		
