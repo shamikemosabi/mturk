@@ -51,11 +51,11 @@ public class main extends TimerTask
 		read = new readData("data.ser"); //object used to seralize and deseralize
 		readFull = new readData("dataFull.ser");
 		
-		
-		turkerNation();
+		TurkForum();
+
 		//mturkGrind();
 		TurkForum();
-		
+
 		if(alJson.size()>0)
 		{
 			System.out.println(new Date() + " New hits writing to JSON");
@@ -721,7 +721,7 @@ public class main extends TimerTask
 	//	todayLink =  "showthread.php?13640-Can-t-Find-FUN-HIT-s-01-30-Super-Funbowl-Friday!!";
 		if(!todayLink.equals(""))
 		{
-			//processPage("http://mturkforum.com/showthread.php?33565-Cant-find-Great-HITS-7-20-More-Money-Monday!/page88");
+			//processPage("http://mturkforum.com/showthread.php?33612-Can-t-find-Rick-tastic-HITS-7-27-Morty-fying-Monday!/page79");
 			processPage("http://mturkforum.com/"+todayLink+"/page1000"); //1000 so its greater so it's always the last page
 			
 		}
@@ -878,7 +878,7 @@ public class main extends TimerTask
 	 *
 	 * filters post to get rid of things like images gifs
 	 */
-	
+
 	public boolean filterPost(String a)
 	{
 		boolean ret= true;
