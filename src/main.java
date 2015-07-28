@@ -51,7 +51,7 @@ public class main extends TimerTask
 		read = new readData("data.ser"); //object used to seralize and deseralize
 		readFull = new readData("dataFull.ser");
 		
-		TurkForum();
+		turkerNation();
 
 		//mturkGrind();
 		TurkForum();
