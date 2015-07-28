@@ -353,7 +353,7 @@ public class main extends TimerTask
 			
 			if(ret.equals(""))
 			{
-				ret = getTodayLinkMG(u, false);
+				ret = getTodayLinkTN(u, false);
 			}
 			
 			return ret;
