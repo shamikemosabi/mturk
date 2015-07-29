@@ -8,17 +8,20 @@ import java.util.Date;
 		String link;
 		Date d ;
 		String src;
+		int timeExpire; //milliseconds when expired
 		public hitData()
 		{
 			link="";
 			d = new Date();
 			src ="";
+			timeExpire=0;
 		}
-		public hitData(String s, Date dtm, String sr)
+		public hitData(String s, Date dtm, String sr, int t)
 		{
 			link=s;
 			d = dtm;
 			src = sr;
+			timeExpire = t;
 		}
 		
 		public void setLink(String s)
@@ -33,6 +36,10 @@ import java.util.Date;
 		{
 			src = sr;
 		}
+		public void setTimeExpire(int i)
+		{
+			timeExpire= i;
+		}
 		
 		public String getLink()
 		{
@@ -45,5 +52,9 @@ import java.util.Date;
 		public String getSrc()
 		{
 			return src;
+		}
+		public int getTimeExpire()
+		{
+			return timeExpire;
 		}
 	}

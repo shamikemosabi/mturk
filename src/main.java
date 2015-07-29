@@ -51,11 +51,12 @@ public class main extends TimerTask
 		read = new readData("data.ser"); //object used to seralize and deseralize
 		readFull = new readData("dataFull.ser");
 		
+		
 		turkerNation();
-
-		//mturkGrind();
+		mturkGrind();
 		TurkForum();
-
+		RedditHWTF();
+		
 		if(alJson.size()>0)
 		{
 			System.out.println(new Date() + " New hits writing to JSON");
@@ -65,7 +66,7 @@ public class main extends TimerTask
 		
 		cleanHit();		
 
-	//	RedditHWTF(); FUCK REDDIT
+	
 		
 	
 		
@@ -220,7 +221,7 @@ public class main extends TimerTask
 				if(hit)
 				{
 					// we gotta match the link with our records to see if we've sent it before
-						newLink = checkIfLinkExist(text, PandA, "TN");
+						newLink = checkIfLinkExist(text, PandA, "TN",3600000);
 				}
 				
 				//reset hit and text
@@ -249,7 +250,7 @@ public class main extends TimerTask
 		reader.close();
 		
 		//delete file
-		File newFile = new File("blah2.html");
+		File newFile = new File("blahTN2.html");
 		if(newFile.exists()&& (!test))
 		{
 			newFile.delete();
@@ -490,7 +491,7 @@ public class main extends TimerTask
 				if(hit)
 				{
 					// we gotta match the link with our records to see if we've sent it before
-						newLink = checkIfLinkExist(text, PandA, "MTG");
+						newLink = checkIfLinkExist(text, PandA, "MTG", 3600000);
 				}
 				
 				//reset hit and text
@@ -519,7 +520,7 @@ public class main extends TimerTask
 		reader.close();
 		
 		//delete file
-		File newFile = new File("blah2.html");
+		File newFile = new File("blahMG2.html");
 		if(newFile.exists()&& (!test))
 		{
 			newFile.delete();
@@ -657,6 +658,8 @@ public class main extends TimerTask
 	
 	public void RedditHWTF() throws Exception
 	{
+		
+		try{
 		ArrayList<String> list =  new ArrayList<String>();
 		String url ="http://www.reddit.com/r/HITsWorthTurkingFor/new/";
 		URL pageURL = new URL(url); 
@@ -692,7 +695,7 @@ public class main extends TimerTask
 				     while (st.hasMoreTokens()) {
 				    	 String test = st.nextToken();
 				    	 test = test.trim();
-				    	 
+ 
 				    	 if(test.startsWith("a class=\"title")) // This is going to get all the thread on the new page
 				    	 {
 				    		 //we need to grab the href link:
@@ -700,15 +703,118 @@ public class main extends TimerTask
 				    		 test = test.substring(test.indexOf("href=\""), test.indexOf("\"", 50)); // 50 to insure we hit the " we want
 				    		 test = test.replace("href=\"", "");
 				    		 
-				    		 list.add("http://www.reddit.com"+test);
+				    		 //if 2 below this contain dead then it's dead, we dont add
+				    		 st.nextToken().trim();
+				    		 String tempStr = st.nextToken().trim().toLowerCase();
+				    		 if(!tempStr.contains("dead"))
+				    		 {
+				    			 list.add("http://www.reddit.com"+test);				    			 
+				    		 }
+				    		 				    		
 				    	 }
 				     }
 				}
 				
 			}
 			
-			//we now have our list array with all the thread links.
 			
+			//list.clear();
+			//list.add("https://www.reddit.com/r/HITsWorthTurkingFor/comments/3eyuj7/us_judging_various_events_nazli_turan_050325_94/");
+			
+			//we now have our list array with all the thread links.
+			for(int i=0; i< list.size(); i++)
+			{
+				
+				url = list.get(i);
+				pageURL = new URL(url); 
+				urlConnection = (HttpURLConnection) pageURL.openConnection();
+				urlConnection.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3");
+				urlConnection.setRequestMethod("GET");
+				urlConnection.connect();
+								in = new BufferedInputStream(urlConnection.getInputStream()); 
+				pw = new PrintWriter(new FileWriter("blah2HWTF.html"));
+				r = new InputStreamReader(in);
+			
+				 while((c = r.read()) != -1) 
+				 {         	
+				     pw.print(String.valueOf((char)c)); 
+				 } 
+				   r.close();
+				   pw.close();
+				
+				 reader = new BufferedReader(new FileReader("blah2HWTF.html"));	
+				 boolean llbreak = false;
+				 while((s = reader.readLine()) != null || llbreak)
+				 {	
+					s = s.trim();
+					if(s.startsWith("</div></form><div class=\"bottom\">"))
+					{
+						StringTokenizer st = new StringTokenizer(s,"<");
+						String PandA="";
+						ArrayList<String> text= new ArrayList<String>();
+					     while (st.hasMoreTokens()) 
+					     {
+					    	 String test = st.nextToken();
+					    	 test = test.trim();
+					    	 
+					    	 if(test.startsWith("a class=\"title")) // get the thread name
+					    	 {					    		
+					    		 test = test.substring(test.indexOf(">")); 
+					    		 text.add( test + "</br></br></br></br></br></br></br>");
+					    		 System.out.println(text.get(0));
+					    		 
+					    	 }
+
+					    	 if(test.startsWith("a href=\"https://www.mturk.com"))
+					    	 {
+					    		 test = test.substring(test.indexOf("href=\"")); //trim the crap before href
+					    		 test = test.substring(test.indexOf("href=\""), test.indexOf("\"", 50)); // 50 to insure we hit the " we want
+					    		 test = test.replace("href=\"", "");
+					    		 test = test.replace("&amp;", "&");
+					    		 				    		 
+					    			//could potentially be previewandaccept
+								if(test.contains("https://www.mturk.com/mturk/preview"))
+								{
+									if(test.toLowerCase().contains("previewandaccept")) // it's a PandA link
+									{
+										PandA = test;
+									}
+									else // it's just a regular preview... link. Let's converted it to previewand accept
+									{
+										PandA = test.replaceAll("preview", "previewandaccept");
+									}
+								}
+								else // some kind of other mturk link, for reddint search bar for requester name is very common.
+								{
+									PandA = test;
+								}
+								
+								// we gotta match the link with our records to see if we've sent it before
+								checkIfLinkExist(text, PandA, "HWTF", 3600000);
+							
+					    		 System.out.println(PandA);
+					    		 
+					    		 llbreak = true; //break out
+					    		 break;
+					    	 }
+					    	 
+					     }
+								
+					}
+					
+					if(llbreak)
+					{
+						break;
+					}
+					 
+				 }
+				
+			}
+		}
+		catch(Exception e)
+		{
+			System.out.println(e.getMessage());
+		}
 			
 		
 	}
@@ -835,7 +941,7 @@ public class main extends TimerTask
 				if(hit)
 				{
 					// we gotta match the link with our records to see if we've sent it before
-						newLink = checkIfLinkExist(text, PandA, "MTF");
+						newLink = checkIfLinkExist(text, PandA, "MTF", 3600000);
 				}
 				
 				//reset hit and text
@@ -893,7 +999,7 @@ public class main extends TimerTask
 	
 	// This method will check to see if our link already exist in our record
 	// if it already does then we don't do anything.
-	public boolean checkIfLinkExist(ArrayList<String> a, String l, String source) throws Exception
+	public boolean checkIfLinkExist(ArrayList<String> a, String l, String source, int time) throws Exception
 	{		
 		 
 		boolean newLink = false;
@@ -910,7 +1016,7 @@ public class main extends TimerTask
 			w.addLinkToPanel(a,l);
 			
 			// add the link to our list
-			hitData hd = new hitData(l, new Date(), source);
+			hitData hd = new hitData(l, new Date(), source, time);
 			myData.getArray().add(hd);
 			
 			read.seralize(myData); //Write back data class
@@ -1007,7 +1113,10 @@ public class main extends TimerTask
 			pw.close();
 			
 			System.out.println(new Date() + "Starting FTP...");
-			FTP(jsonFile,"public_html");	
+			if(!test)
+			{
+				FTP(jsonFile,"public_html");
+			}
 			System.out.println(new Date() + "Finished FTP...");
 		}
 		catch(IOException e)
