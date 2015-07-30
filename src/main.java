@@ -42,6 +42,11 @@ public class main extends TimerTask
 	String jsonFile = "C:\\inetpub\\wwwroot\\www3\\test.aspx";
 	ArrayList<String> alJson = new ArrayList<String>();
 	
+	// specifically for HWTF hits
+	ArrayList<String> alJsonReddit = new ArrayList<String>();
+	
+
+	
 	public main() throws Exception
 	{
 
@@ -51,16 +56,36 @@ public class main extends TimerTask
 		read = new readData("data.ser"); //object used to seralize and deseralize
 		readFull = new readData("dataFull.ser");
 		
-		RedditHWTF();
-	//	turkerNation();
+		
+		/*
+		 * reddit scraps take too long, have to thread it.
+		 */
+		Thread t1 = new Thread(new Runnable() {
+		     public void run() {
+		    	 try{
+		    		 if(timer.runHWTF) //if still true then run. False means it's still 
+		    		 {
+		    			 RedditHWTF();
+		    		 }
+		    	 }
+		    	 catch(Exception e)
+		    	 {
+		    		 System.out.println(e.getMessage());
+		    	 }
+		     }
+		});  
+		t1.start();
+		
+
+		turkerNation();
 		mturkGrind();
-	//	TurkForum();
-		
-		
+		TurkForum();
+
+	
 		if(alJson.size()>0)
 		{
 			System.out.println(new Date() + " New hits writing to JSON");
-			writeToJSON();
+			writeToJSON(alJson);
 			alJson.clear();
 		}
 		
@@ -221,7 +246,7 @@ public class main extends TimerTask
 				if(hit)
 				{
 					// we gotta match the link with our records to see if we've sent it before
-						newLink = checkIfLinkExist(text, PandA, "TN",3600000);
+						newLink = checkIfLinkExist(text, PandA, "TN",3600000, alJson);
 				}
 				
 				//reset hit and text
@@ -491,7 +516,7 @@ public class main extends TimerTask
 				if(hit)
 				{
 					// we gotta match the link with our records to see if we've sent it before
-						newLink = checkIfLinkExist(text, PandA, "MTG", 3600000);
+						newLink = checkIfLinkExist(text, PandA, "MTG", 3600000, alJson);
 				}
 				
 				//reset hit and text
@@ -658,7 +683,8 @@ public class main extends TimerTask
 	
 	public void RedditHWTF() throws Exception
 	{
-		
+		System.out.println(new Date() + " Started Reddit HWTF");
+		timer.runHWTF = false;
 		try{
 		ArrayList<String> list =  new ArrayList<String>();
 		String url ="http://www.reddit.com/r/HITsWorthTurkingFor/new/";
@@ -718,6 +744,7 @@ public class main extends TimerTask
 			}
 			
 			
+			boolean newLink = false;
 			//list.clear();
 			//list.add("https://www.reddit.com/r/HITsWorthTurkingFor/comments/3eyuj7/us_judging_various_events_nazli_turan_050325_94/");
 			
@@ -761,14 +788,18 @@ public class main extends TimerTask
 					    	 {					    		
 					    		 test = test.substring(test.indexOf(">")); 
 					    		 text.add( test + "</br></br></br></br></br></br></br>");
-					    		 System.out.println(text.get(0));
+					    		// System.out.println(new Date() + " "+ text.get(0));
 					    		 
 					    	 }
 
 					    	 if(test.startsWith("a href=\"https://www.mturk.com"))
 					    	 {
-					   
-					    		 text.set(0, text.get(0)+ "<"+test+"</a>"); // lets add to the post
+					    		 
+					    		 String temp =  "<"+test+"</a>";
+					    		 //Need to add open to new tab
+					    		 temp = temp.substring(0,3) + "target=_blank " + temp.substring(3);					    		
+					    		 
+					    		 text.set(0, text.get(0)+ temp); // lets add to the post
 					    		 
 					    		 test = test.substring(test.indexOf("href=\"")); //trim the crap before href
 					    		 test = test.substring(test.indexOf("href=\""), test.indexOf("\"", 50)); // 50 to insure we hit the " we want
@@ -793,10 +824,10 @@ public class main extends TimerTask
 								}
 								
 								// we gotta match the link with our records to see if we've sent it before
-								checkIfLinkExist(text, PandA, "HWTF", 3600000);
-							
-					    		 System.out.println(PandA);
+								newLink = checkIfLinkExist(text, PandA, "HWTF", 3600000, alJsonReddit);												    	
 					    		 
+								System.out.println(new Date() + " "+ PandA);
+								
 					    		 llbreak = true; //break out
 					    		 break;
 					    	 }
@@ -813,11 +844,43 @@ public class main extends TimerTask
 				 }
 				
 			}
+			
+			if(newLink && window.getInstance().PlaySound())
+			{
+				
+				sound newSound = new sound();
+				try{
+					newSound.playSound("traffic.wav");
+				}
+				catch(Exception e)
+				{
+					// problem playing sound
+					window.getInstance().addText("Error playing sound");
+					e.printStackTrace();
+				}
+			}
+			
+			
+			//Reddit scrapes take too long... if there are too many new hits it takes more then a min to finish
+			// have to thread this method.
+			
+			if(alJsonReddit.size()>0)
+			{
+				System.out.println(new Date() + " New REDDIT HITS writing to JSON");
+				
+				// I have to hope that main loop's writeToJSON already finished and FTP.
+				// chances are it will, then there won't be overlap
+				writeToJSON(alJsonReddit);
+				alJsonReddit.clear();
+			}
+			
 		}
 		catch(Exception e)
 		{
 			System.out.println(e.getMessage());
 		}
+		timer.runHWTF = true;
+		System.out.println(new Date() + " Finished Reddit HWTF");
 			
 		
 	}
@@ -944,7 +1007,7 @@ public class main extends TimerTask
 				if(hit)
 				{
 					// we gotta match the link with our records to see if we've sent it before
-						newLink = checkIfLinkExist(text, PandA, "MTF", 3600000);
+						newLink = checkIfLinkExist(text, PandA, "MTF", 3600000, alJson);
 				}
 				
 				//reset hit and text
@@ -1002,7 +1065,8 @@ public class main extends TimerTask
 	
 	// This method will check to see if our link already exist in our record
 	// if it already does then we don't do anything.
-	public boolean checkIfLinkExist(ArrayList<String> a, String l, String source, int time) throws Exception
+	// specify which json array list to add hits
+	public boolean checkIfLinkExist(ArrayList<String> a, String l, String source, int time , ArrayList<String> jsonList) throws Exception
 	{		
 		 
 		boolean newLink = false;
@@ -1028,7 +1092,7 @@ public class main extends TimerTask
 			addSeralize(readFull,hd);
 			
 			
-			writeToJSONPerHIT(a,l);
+			writeToJSONPerHIT(a,l, jsonList);
 					
 			newLink = true;
 		}
@@ -1091,16 +1155,16 @@ public class main extends TimerTask
 	 */
 	
 	
-	public void writeToJSON()
+	public void writeToJSON(ArrayList<String> jsonList)
 	{
 		String start = "{\"records\":[";
 		//String end = "]}";
 		String end = "], \"date\": \""+ new Date() +"\"}";
 		String str= "";
 		
-		for(int i=0; i < alJson.size(); i++)
+		for(int i=0; i < jsonList.size(); i++)
 		{
-			str += alJson.get(i) + ",";
+			str += jsonList.get(i) + ",";
 		}
 		
 		str = str.substring(0,str.length()-1); //get rid of last character which should be ","
@@ -1140,7 +1204,7 @@ public class main extends TimerTask
 	 * write to array list. Each index contains 1 hit, String that has {"Post":..."link":...}
 	 * 
 	 */
-	public void writeToJSONPerHIT(ArrayList<String> a, String l)
+	public void writeToJSONPerHIT(ArrayList<String> a, String l, ArrayList<String> jsonList)
 	{
 		//String start = "{\"records\":[";
 		//String end = "]}";
@@ -1161,7 +1225,7 @@ public class main extends TimerTask
 		str+="\"}";
 		
 		//System.out.println(str);
-		alJson.add(str);
+		jsonList.add(str);
 	}
 	
 	/*

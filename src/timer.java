@@ -3,7 +3,7 @@ import java.util.*;
 
 public class timer extends TimerTask
 {
-	
+	public static boolean runHWTF = true;
 	
 	public void run()
 	{
