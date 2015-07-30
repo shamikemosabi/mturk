@@ -37,7 +37,7 @@ public class main extends TimerTask
 	
 	static window w;
 	
-	boolean test = true;
+	boolean test = false;
 	
 	String jsonFile = "C:\\inetpub\\wwwroot\\www3\\test.aspx";
 	ArrayList<String> alJson = new ArrayList<String>();
@@ -51,11 +51,11 @@ public class main extends TimerTask
 		read = new readData("data.ser"); //object used to seralize and deseralize
 		readFull = new readData("dataFull.ser");
 		
-		
-		turkerNation();
-		mturkGrind();
-		TurkForum();
 		RedditHWTF();
+	//	turkerNation();
+		mturkGrind();
+	//	TurkForum();
+		
 		
 		if(alJson.size()>0)
 		{
@@ -767,6 +767,9 @@ public class main extends TimerTask
 
 					    	 if(test.startsWith("a href=\"https://www.mturk.com"))
 					    	 {
+					   
+					    		 text.set(0, text.get(0)+ "<"+test+"</a>"); // lets add to the post
+					    		 
 					    		 test = test.substring(test.indexOf("href=\"")); //trim the crap before href
 					    		 test = test.substring(test.indexOf("href=\""), test.indexOf("\"", 50)); // 50 to insure we hit the " we want
 					    		 test = test.replace("href=\"", "");

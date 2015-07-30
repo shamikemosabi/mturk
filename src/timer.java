@@ -137,7 +137,7 @@ public class timer extends TimerTask
 				
 				min =  (min * mod1) + (mod2*1000);			
 			}		
-			else if(isTimeBetweenTwoTime("01:00:00","03:00:00")) //12 am - 3 am
+			else if(isTimeBetweenTwoTime("24:00:00","03:00:00")) //12 am - 3 am
 			{
 				System.out.println(new Date() +" Between 1am - 3 am");
 				mod1 = rand.nextInt(15 - 5)+5;				
