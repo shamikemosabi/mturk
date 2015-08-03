@@ -23,9 +23,14 @@
 
 import java.io.*;
 import java.net.*;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.text.*;
+
 import org.apache.commons.net.ftp.*;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 
 public class main extends TimerTask 
@@ -37,7 +42,7 @@ public class main extends TimerTask
 	
 	static window w;
 	
-	boolean test = false;
+	boolean test = true;
 	
 	String jsonFile = "C:\\inetpub\\wwwroot\\www3\\test.aspx";
 	ArrayList<String> alJson = new ArrayList<String>();
@@ -56,10 +61,10 @@ public class main extends TimerTask
 		read = new readData("data.ser"); //object used to seralize and deseralize
 		readFull = new readData("dataFull.ser");
 		
-		
 		/*
 		 * reddit scraps take too long, have to thread it.
 		 */
+		
 		Thread t1 = new Thread(new Runnable() {
 		     public void run() {
 		    	 try{
@@ -76,9 +81,10 @@ public class main extends TimerTask
 		});  
 		t1.start();
 		
-
+		
+		mturkList();
 		turkerNation();
-		mturkGrind();
+		//mturkGrind();
 		TurkForum();
 
 	
@@ -128,6 +134,260 @@ public class main extends TimerTask
 	
 		read.seralize(myData); //Write back data class
 	}
+	
+	public void mturkList() throws Exception
+	{
+		try{
+			System.out.println(new Date() + " Started Mturk List");
+			
+			String url ="http://www.mturklist.com/";
+			URL pageURL = new URL(url); 
+			HttpURLConnection urlConnection = (HttpURLConnection) pageURL.openConnection();
+			urlConnection.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3");
+			urlConnection.setRequestMethod("GET");
+			urlConnection.connect();
+		
+			
+			InputStream in = new BufferedInputStream(urlConnection.getInputStream()); 
+			PrintWriter pw = new PrintWriter(new FileWriter("blahML.html"));
+			Reader r = new InputStreamReader(in);
+			
+			int c;
+			 while((c = r.read()) != -1) 
+		     {         	
+		           pw.print(String.valueOf((char)c)); 
+		     } 
+		     r.close();
+			 pw.close();
+			 
+			BufferedReader reader = new BufferedReader(new FileReader("blahML.html"));	
+			String s;
+			
+			String link = "";
+			String requester="";
+			
+			String title = "";
+			String requesterURL="";
+			String requesterID = "";
+			
+			String reward = "";
+			
+			boolean newLink = false;
+			
+			
+			while((s = reader.readLine()) != null)
+			{	
+				s = s.trim();
+				boolean hit = false;
+			//	System.out.println(s);
+				if(s.startsWith("<div class=\"left\">")) // hit link
+				{
+					s = filterWebURL(s);
+					s  = s.substring(s.indexOf("https://"));
+					link  = s.substring(0, s.indexOf("\""));
+					
+					s = s.substring(s.indexOf("title="));
+					s = s.substring(7);
+					title = s.substring(0, s.indexOf("\""));
+		
+					
+				}
+				if(s.startsWith("<div class=\"right\">")) // requester link
+				{
+				//	System.out.println(filterWebURL(s));
+					
+					s = filterWebURL(s);
+					s  = s.substring(s.indexOf("https://"));
+					requesterURL = s.substring(0, s.indexOf("\""));
+					
+					
+					s = s.substring(s.indexOf("title="));
+					s = s.substring(7);
+					requester = s.substring(0, s.indexOf("\""));
+
+					requesterID = requesterURL.substring(requesterURL.indexOf("Id=") + 3);
+				
+				
+					
+				}
+				if(s.startsWith("<div class=\"money\">")) // requester link
+				{
+					
+					s = s.substring(s.indexOf("[Pay:"));					
+					reward = s.substring(s.indexOf("$"), s.indexOf("]"));
+					
+				}
+				
+				//by the time I get into this if, I should have all my data already.
+				if(s.startsWith("<button class=\"deadButt\"") || s.startsWith("<button class=\"aliveButt\""))
+				{
+					if(s.startsWith("<button class=\"aliveButt\"")) // if there is an alive button, then this means the hit has been marked dead
+					{
+						hit = false;
+						
+						//reset variable
+						link = "";
+						requester="";
+						title = "";
+						requesterURL="";
+						requesterID = "";
+						reward = "";
+						
+					}
+					else// shows dead button, meaning it's still alive
+					{
+						
+						hit =true;
+					}
+
+				}
+				
+				//will go in here if we already have all the URL ready.
+				if(hit)
+				{
+					String PandA = "";
+					if(link.toLowerCase().contains("previewandaccept")) // it's a PandA link
+					{
+						PandA = link;
+					}
+					else // it's just a regular preview... link. Let's converted it to previewand accept
+					{
+						PandA = link.replaceAll("preview", "previewandaccept");
+					}		
+					
+					/*
+					System.out.println(title);
+					System.out.println(link);
+					System.out.println(requester);
+					System.out.println(requesterURL);
+					System.out.println(requesterID);
+					System.out.println(PandA);
+					System.out.println(reward);
+					*/
+					
+					newLink = checkIfLinkExist(createExportHit(title, link, requester, requesterURL, requesterID, PandA, reward), PandA, "ML",3600000, alJson);
+					
+					
+					link = "";
+					requester="";
+					title = "";
+					requesterURL="";
+					requesterID = "";
+					reward = "";
+					
+				}
+				
+				
+				if(newLink && window.getInstance().PlaySound())
+				{
+					
+					sound newSound = new sound();
+					try{
+						newSound.playSound("traffic.wav");
+					}
+					catch(Exception e)
+					{
+						// problem playing sound
+						window.getInstance().addText("Error playing sound");
+						e.printStackTrace();
+					}
+				}
+				
+				newLink = false;
+				
+			}
+				
+			System.out.println(new Date() + " Finished Mturk List");
+		}
+		catch(Exception e)
+		{
+			System.out.println(e.getMessage());
+		}
+	}
+	
+	public ArrayList<String> createExportHit(String title, String link, String requester, String requesterURL, String requesterID, String Panda, String reward){
+		ArrayList<String> text = new ArrayList<String>();
+	
+			String TOURL = "https://turkopticon.ucsd.edu/api/multi-attrs.php?ids=";
+			String imgURL = "";
+			try
+			{
+				 imgURL = getTOImage(TOURL, requesterID);
+			}
+			catch(Exception e) // might error if there is no TO JSON data for this requester
+			{
+				System.out.println(e.getMessage());
+				
+				imgURL = "";
+			}
+			
+			String temp = "";
+			//lets build our string
+			temp = "<b>Title:</b> <a href=\" " + link + " \" target=\"_blank\">";	
+			text.add(temp);
+			
+			temp = "<font color=\"blue\">" + title +" </font></a><br>";
+			text.add(temp);
+			
+			temp = "<b>Requester:</b> <a href=\""+ requesterURL +"\" target=\"_blank\"> <font color=\"blue\">" + requester+ "</font></a> "+ requesterID;
+			text.add(temp);
+			
+			temp = "(<a href=\"http://turkopticon.ucsd.edu/"+ requesterID +"\" target=\"_blank\"><font color=\"blue\">TO</font></a>)";
+			text.add(temp);
+			
+			temp="<br><b>TO Ratings:</b><br>";
+			text.add(temp);
+			
+			text.add(imgURL);
+			
+			temp = "<br> <b>Reward:</b> <font color=\"green\"><b>" +reward + "</b></font><br>";
+			text.add(temp);
+
+		return text;
+		
+	}
+	
+	public String getTOImage(String url, String requesterID) throws Exception 
+	{
+		
+			JSONObject json = readJsonFromUrl(url + requesterID);
+		 
+		    JSONObject jsonReq  = (JSONObject) json.get(requesterID);
+		    JSONObject jsonReqAttrs = (JSONObject) jsonReq.get("attrs");
+		    
+			
+		    String imgURL = "http://data.istrack.in/turkopticon.php?data="+ jsonReqAttrs.get("comm")+"," + jsonReqAttrs.get("pay")+ "," + jsonReqAttrs.get("fair")+","+jsonReqAttrs.get("fast"); 
+		    
+			
+		     imgURL = "<img src=\" " + imgURL + "\" > </img> <br>Number of Reviews: " + jsonReq.get("reviews") +"";
+		    		     
+		    return imgURL;    	    
+		    
+	}
+	
+	 private static String readAll(Reader rd) throws IOException {
+		    StringBuilder sb = new StringBuilder();
+		    int cp;
+		    while ((cp = rd.read()) != -1) {
+		      sb.append((char) cp);
+		    }
+		    return sb.toString();
+		  }
+
+		  public static JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
+		    InputStream is = new URL(url).openStream();
+		    try {
+		      BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
+		      String jsonText = readAll(rd);
+		      JSONObject json = new JSONObject(jsonText);
+		      return json;
+		    } finally {
+		      is.close();
+		    }
+	  }
+
+		  
+		  
 	public void turkerNation() throws Exception
 	{
 		try
@@ -554,6 +814,18 @@ public class main extends TimerTask
 
 	}
 	
+	public String filterWebURL(String s)
+	{
+		s = s.replaceAll("%3A", ":");
+		s = s.replaceAll("%2F", "/");
+		s = s.replaceAll("%3F", "?");
+		s = s.replaceAll("%3D", "=");
+		s = s.replaceAll("%26", "&");
+		
+		
+		return s;
+		
+	}
 	
 	/**
 	 * 
