@@ -42,7 +42,7 @@ public class main extends TimerTask
 	
 	static window w;
 	
-	boolean test = true;
+	boolean test = false;
 	
 	String jsonFile = "C:\\inetpub\\wwwroot\\www3\\test.aspx";
 	ArrayList<String> alJson = new ArrayList<String>();
@@ -94,7 +94,7 @@ public class main extends TimerTask
 		Date currDate = new Date();
 		ArrayList remIndex = new ArrayList();
 		
-		System.out.println(new Date() + " cleaning hits");
+		System.out.println(new Date() + " <<FTP>> cleaning hits");
 		for(int i=0; i< myData.getArray().size(); i++)
 		{
 			hitData hd = myData.getArray().get(i);
@@ -110,7 +110,7 @@ public class main extends TimerTask
 			int i = (int)remIndex.get(j);
 			myData.getArray().remove(i);
 			
-			System.out.println(new Date() + " Removing hits");
+			System.out.println(new Date() + " <<FTP>> Removing hits");
 			
 		}
 	
@@ -125,11 +125,11 @@ public class main extends TimerTask
 		    		 
 		    		 while(true)
 		    		 {
-		    			System.out.println(new Date() + " DoMturkList STARTED");
+		    			System.out.println(new Date() + " <<FORUM>> STARTED");
 		    				
 		    			mturkList();
 		    			
-		    			System.out.println(new Date() + " DoMturkList FINISHED");	
+		    			System.out.println(new Date() + " <<FORUM>> FINISHED");	
 		    			Thread.sleep(timer.timeInterval(5,10)); //FTP every minute	
 	    				
 		    		 }
@@ -156,17 +156,17 @@ public class main extends TimerTask
 		    		 
 		    		 while(true)
 		    		 {
-		    			 System.out.println(new Date() + " DOWRITEFTP STARTED");
+		    			 System.out.println(new Date() + " <<FTP>> DOWRITEFTP STARTED");
 		    				if(alJson.size()>0)
 		    				{
-		    					System.out.println(new Date() + " New hits writing to JSON");
+		    					System.out.println(new Date() + " <<FTP>> New hits writing to JSON");
 		    					writeToJSON(alJson);
 		    					alJson.clear();
-		    					System.out.println(new Date() + " Cleared alJSON");
+		    					System.out.println(new Date() + " <<FTP>> Cleared alJSON");
 		    				}
 		    				
 		    				cleanHit();
-		    				System.out.println(new Date() + " DOWRITEFTP FINISHED");	
+		    				System.out.println(new Date() + " <<FTP>> DOWRITEFTP FINISHED");	
 		    				Thread.sleep(60000); //FTP every minute	
 	    				
 		    		 }
@@ -197,11 +197,11 @@ public class main extends TimerTask
 		    		 
 		    		 while(true)
 		    		 {
-		    			 System.out.println(new Date() + " DoForum STARTED");	
+		    			 System.out.println(new Date() + " <<FORUM>> STARTED");	
 		    			 turkerNation();
 			    	    //mturkGrind();
 		    			 TurkForum();
-			    		 System.out.println(new Date() + " DoForum FINISHED");
+			    		 System.out.println(new Date() + " <<FORUM>> FINISHED");
 			    		 Thread.sleep(timer.timeInterval());	
 
 		    		 }
@@ -232,9 +232,9 @@ public class main extends TimerTask
 		    		 
 		    		 while(true)
 		    		 {
-		    			 System.out.println(new Date() + " doRedditHWTF STARTED");		
+		    			 System.out.println(new Date() + " <<REDDIT>> STARTED");		
 			    		 RedditHWTF();
-			    		 System.out.println(new Date() + " doRedditHWTF FINISHED");	 
+			    		 System.out.println(new Date() + " <<REDDIT>> FINISHED");	 
 			    		 Thread.sleep(60000);
 			    		
 		    		 }
@@ -254,7 +254,7 @@ public class main extends TimerTask
 	public void mturkList() throws Exception
 	{
 		try{
-			System.out.println(new Date() + " Started Mturk List");
+			System.out.println(new Date() + " <<FORUM>> Started Mturk List");
 				
 			String url ="http://www.mturklist.com/";
 			URL pageURL = new URL(url); 
@@ -413,7 +413,7 @@ public class main extends TimerTask
 				
 			}
 				
-			System.out.println(new Date() + " Finished Mturk List");
+			System.out.println(new Date() + " <<FORUM>> Finished Mturk List");
 		}
 		catch(Exception e)
 		{
@@ -508,7 +508,7 @@ public class main extends TimerTask
 	{
 		try
 		{
-			System.out.println(new Date() + " Started Turker Nation");
+			System.out.println(new Date() + " <<FORUM>> Started Turker Nation");
 			String todayLink = getTodayLinkTN("http://turkernation.com/forumdisplay.php?157-Daily-HIT-Threads&s=ca61dd26c7855c91401d0d5e9201fdbf", true);
 			
 			if(!todayLink.equals(""))
@@ -524,7 +524,7 @@ public class main extends TimerTask
 			}
 			
 			window.getInstance().setLblTime();
-			System.out.println(new Date() + " Finished Turker Nation");
+			System.out.println(new Date() + " <<FORUM>> Finished Turker Nation");
 		}
 		catch(Exception e)
 		{
@@ -778,7 +778,7 @@ public class main extends TimerTask
 	public void mturkGrind() throws Exception
 	{
 		try{
-		System.out.println(new Date() + " Started Mturk Grind");
+		System.out.println(new Date() + " <<FORUM>> Started Mturk Grind");
 		String todayLink = getTodayLinkMG("http://www.mturkgrind.com/forums/awesome-hits.4/", true);
 		
 		if(!todayLink.equals(""))
@@ -794,7 +794,7 @@ public class main extends TimerTask
 		}
 		
 		window.getInstance().setLblTime();
-		System.out.println(new Date() + " Finished Mturk Grind");
+		System.out.println(new Date() + " <<FORUM>> Finished Mturk Grind");
 		}
 		catch(Exception e)
 		{
@@ -1071,7 +1071,7 @@ public class main extends TimerTask
 	
 	public void RedditHWTF() throws Exception
 	{
-		System.out.println(new Date() + " Started Reddit HWTF");
+		System.out.println(new Date() + " <<REDDIT>> Started Reddit HWTF");
 		timer.runHWTF = false;
 		try{
 		ArrayList<String> list =  new ArrayList<String>();
@@ -1214,7 +1214,7 @@ public class main extends TimerTask
 								// we gotta match the link with our records to see if we've sent it before
 								newLink = checkIfLinkExist(text, PandA, "HWTF", 3600000, alJson);												    	
 					    		 
-								System.out.println(new Date() + " "+ PandA);
+								System.out.println(new Date() + " <<REDDIT>> "+ PandA);
 								
 					    		 llbreak = true; //break out
 					    		 break;
@@ -1269,14 +1269,14 @@ public class main extends TimerTask
 			System.out.println(e.getMessage());
 		}
 	//	timer.runHWTF = true;
-		System.out.println(new Date() + " Finished Reddit HWTF");
+		System.out.println(new Date() + " <<REDDIT>> Finished Reddit HWTF");
 			
 		
 	}
 	public void TurkForum() throws Exception
 	{		
 		try{
-		System.out.println(new Date() + " Started Mturk Forum");
+		System.out.println(new Date() + " <<FORUM>> Started Mturk Forum");
 		String todayLink = getTodayLink("http://mturkforum.com/forumdisplay.php?30-Great-HITS", true);
 		todayLink = window.getInstance().getURL().equals("") ? todayLink : window.getInstance().getURL();
 	//	todayLink =  "showthread.php?13640-Can-t-Find-FUN-HIT-s-01-30-Super-Funbowl-Friday!!";
@@ -1293,7 +1293,7 @@ public class main extends TimerTask
 		}
 		
 		window.getInstance().setLblTime();
-		System.out.println(new Date() + " Finished Mturk Forum");
+		System.out.println(new Date() + " <<FORUM>> Finished Mturk Forum");
 		
 		}
 		catch (Exception e)
@@ -1571,12 +1571,12 @@ public class main extends TimerTask
 			pw.print(finalString);
 			pw.close();
 			
-			System.out.println(new Date() + "Starting FTP...");
+			System.out.println(new Date() + " <<FTP>> Starting FTP...");
 			if(!test)
 			{
 				FTP(jsonFile,"public_html");
 			}
-			System.out.println(new Date() + "Finished FTP...");
+			System.out.println(new Date() + " <<FTP>> Finished FTP...");
 		}
 		catch(IOException e)
 		{
