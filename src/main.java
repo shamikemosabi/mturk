@@ -60,28 +60,10 @@ public class main extends TimerTask
 				
 		read = new readData("data.ser"); //object used to seralize and deseralize
 		readFull = new readData("dataFull.ser");
+
 		
 		/*
-		 * reddit scraps take too long, have to thread it.
-		 */
-		
-		Thread t1 = new Thread(new Runnable() {
-		     public void run() {
-		    	 try{
-		    		 if(timer.runHWTF) //if still true then run. False means it's still 
-		    		 {
-		    			 RedditHWTF();
-		    		 }
-		    	 }
-		    	 catch(Exception e)
-		    	 {
-		    		 System.out.println(e.getMessage());
-		    	 }
-		     }
-		});  
-		t1.start();
-		
-		
+				mturkList();
 		mturkList();
 		turkerNation();
 		//mturkGrind();
@@ -98,7 +80,7 @@ public class main extends TimerTask
 		cleanHit();		
 
 	
-		
+		*/
 	
 		
 	}	
@@ -135,11 +117,145 @@ public class main extends TimerTask
 		read.seralize(myData); //Write back data class
 	}
 	
+	public void doMturkList()
+	{
+		Thread t1 = new Thread(new Runnable() {
+		     public void run() {
+		    	 try{
+		    		 
+		    		 while(true)
+		    		 {
+		    			System.out.println(new Date() + " DoMturkList STARTED");
+		    				
+		    			mturkList();
+		    			
+		    			System.out.println(new Date() + " DoMturkList FINISHED");	
+		    			Thread.sleep(timer.timeInterval(5,10)); //FTP every minute	
+	    				
+		    		 }
+		    		 
+		    	 }
+		    	 catch(Exception e)
+		    	 {
+		    		 System.out.println(e.getMessage());
+		    		 e.printStackTrace();
+		    	 }
+		     }
+		});  
+		t1.start();
+		
+		
+	}
+	
+	public void doWriteFTP()
+	{
+		
+		Thread t1 = new Thread(new Runnable() {
+		     public void run() {
+		    	 try{
+		    		 
+		    		 while(true)
+		    		 {
+		    			 System.out.println(new Date() + " DOWRITEFTP STARTED");
+		    				if(alJson.size()>0)
+		    				{
+		    					System.out.println(new Date() + " New hits writing to JSON");
+		    					writeToJSON(alJson);
+		    					alJson.clear();
+		    					System.out.println(new Date() + " Cleared alJSON");
+		    				}
+		    				
+		    				cleanHit();
+		    				System.out.println(new Date() + " DOWRITEFTP FINISHED");	
+		    				Thread.sleep(60000); //FTP every minute	
+	    				
+		    		 }
+		    		 
+		    	 }
+		    	 catch(Exception e)
+		    	 {
+		    		 System.out.println(e.getMessage());
+		    		 e.printStackTrace();
+		    	 }
+		     }
+		});  
+		t1.start();
+		
+		
+
+	}
+	
+	public void doForum()
+	{
+		/*
+		 * reddit scraps take too long, have to thread it.
+		 */
+		
+		Thread t1 = new Thread(new Runnable() {
+		     public void run() {
+		    	 try{
+		    		 
+		    		 while(true)
+		    		 {
+		    			 System.out.println(new Date() + " DoForum STARTED");	
+		    			 turkerNation();
+			    	    //mturkGrind();
+		    			 TurkForum();
+			    		 System.out.println(new Date() + " DoForum FINISHED");
+			    		 Thread.sleep(timer.timeInterval());	
+
+		    		 }
+		    		 
+		    	 }
+		    	 catch(Exception e)
+		    	 {
+		    		 System.out.println(e.getMessage());
+		    		 e.printStackTrace();
+		    	 }
+		     }
+		});  
+		t1.start();
+		
+	}
+	
+	
+	
+	public void doRedditHWTF()
+	{
+		/*
+		 * reddit scraps take too long, have to thread it.
+		 */
+		
+		Thread t1 = new Thread(new Runnable() {
+		     public void run() {
+		    	 try{
+		    		 
+		    		 while(true)
+		    		 {
+		    			 System.out.println(new Date() + " doRedditHWTF STARTED");		
+			    		 RedditHWTF();
+			    		 System.out.println(new Date() + " doRedditHWTF FINISHED");	 
+			    		 Thread.sleep(60000);
+			    		
+		    		 }
+		    		 
+		    	 }
+		    	 catch(Exception e)
+		    	 {
+		    		 System.out.println(e.getMessage());
+		    		 e.printStackTrace();
+		    	 }
+		     }
+		});  
+		t1.start();
+		
+	}
+	
 	public void mturkList() throws Exception
 	{
 		try{
 			System.out.println(new Date() + " Started Mturk List");
-			
+				
 			String url ="http://www.mturklist.com/";
 			URL pageURL = new URL(url); 
 			HttpURLConnection urlConnection = (HttpURLConnection) pageURL.openConnection();
@@ -1096,7 +1212,7 @@ public class main extends TimerTask
 								}
 								
 								// we gotta match the link with our records to see if we've sent it before
-								newLink = checkIfLinkExist(text, PandA, "HWTF", 3600000, alJsonReddit);												    	
+								newLink = checkIfLinkExist(text, PandA, "HWTF", 3600000, alJson);												    	
 					    		 
 								System.out.println(new Date() + " "+ PandA);
 								
@@ -1135,7 +1251,7 @@ public class main extends TimerTask
 			
 			//Reddit scrapes take too long... if there are too many new hits it takes more then a min to finish
 			// have to thread this method.
-			
+			/*
 			if(alJsonReddit.size()>0)
 			{
 				System.out.println(new Date() + " New REDDIT HITS writing to JSON");
@@ -1145,13 +1261,14 @@ public class main extends TimerTask
 				writeToJSON(alJsonReddit);
 				alJsonReddit.clear();
 			}
+			*/
 			
 		}
 		catch(Exception e)
 		{
 			System.out.println(e.getMessage());
 		}
-		timer.runHWTF = true;
+	//	timer.runHWTF = true;
 		System.out.println(new Date() + " Finished Reddit HWTF");
 			
 		
@@ -1367,6 +1484,9 @@ public class main extends TimerTask
 			writeToJSONPerHIT(a,l, jsonList);
 					
 			newLink = true;
+			
+			
+			System.out.println(new Date() + " FOUND NEW HIT FROM " + source);
 		}
 		
 		return newLink;

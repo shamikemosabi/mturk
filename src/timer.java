@@ -32,6 +32,7 @@ public class timer extends TimerTask
 		timer.scheduleAtFixedRate(task,new Date(), test()); //1 min
 		*/
 		
+		/*
 		while(true) 
 		{
 	 
@@ -47,6 +48,20 @@ public class timer extends TimerTask
 			 	System.out.println(e.getMessage());
 			 }
 		}
+		
+		*/
+		try{
+			main task = new main();
+			task.doRedditHWTF();
+			task.doForum();
+			task.doMturkList();
+			task.doWriteFTP();
+		}
+		catch(Exception e)
+		 {
+		 	System.out.println(e.getMessage());
+		 	e.printStackTrace();
+		 }
 	 
 		
 	}	
@@ -162,6 +177,36 @@ public class timer extends TimerTask
 
 		return min;
 		
+	}
+	
+	/*
+	 *mi - lower value
+	 *ma - higher value
+	 *
+	 * ex. 5,10
+	 * 
+	 * return random time interval between 5 mins and 10 mins.
+	 */
+	public static int timeInterval(int mi, int ma)
+	{
+		int min = 60000;
+		Random rand = new Random();
+		int mod1 =0;
+		int mod2 =0;
+		//	min = min* (rand.nextInt(3)+1);
+		// System.out.println(min);
+		try{	
+			mod1 = rand.nextInt(ma - mi)+mi;				
+			mod2 = rand.nextInt(60)+1;
+			System.out.println(mod1 + " " + mod2);
+			min =  (min * mod1) + (mod2*1000);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		System.out.println((float)min/60000);
+		return min;
 	}
 	
 	
