@@ -32,6 +32,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.UUID;
+
 
 public class main extends TimerTask 
 {
@@ -42,7 +44,7 @@ public class main extends TimerTask
 	
 	static window w;
 	
-	boolean test = false;
+	boolean test = true;
 	
 	String jsonFile = "C:\\inetpub\\wwwroot\\www3\\test.aspx";
 	ArrayList<String> alJson = new ArrayList<String>();
@@ -61,7 +63,11 @@ public class main extends TimerTask
 		read = new readData("data.ser"); //object used to seralize and deseralize
 		readFull = new readData("dataFull.ser");
 
+		createExportHitLink("https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&requesterId=A230RE9FSQ9SE7");
 		
+	//	createExportHitLink("https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&requesterId=A1AQHR31NR4J6N"); //1 hit	
+		//createExportHitLink("https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&requesterId=A1J2SRHRJ991YJ");  // no hit
+		System.exit(0);
 		/*
 				mturkList();
 		mturkList();
@@ -125,11 +131,11 @@ public class main extends TimerTask
 		    		 
 		    		 while(true)
 		    		 {
-		    			System.out.println(new Date() + " <<FORUM>> STARTED");
+		    			System.out.println(new Date() + " <<MTURK LIST>> STARTED");
 		    				
 		    			mturkList();
 		    			
-		    			System.out.println(new Date() + " <<FORUM>> FINISHED");	
+		    			System.out.println(new Date() + " <<MTURK LIST>> FINISHED");	
 		    			Thread.sleep(timer.timeInterval(5,10)); //FTP every minute	
 	    				
 		    		 }
@@ -254,7 +260,7 @@ public class main extends TimerTask
 	public void mturkList() throws Exception
 	{
 		try{
-			System.out.println(new Date() + " <<FORUM>> Started Mturk List");
+			System.out.println(new Date() + " <<MTURK LIST>> Started Mturk List");
 				
 			String url ="http://www.mturklist.com/";
 			URL pageURL = new URL(url); 
@@ -413,7 +419,7 @@ public class main extends TimerTask
 				
 			}
 				
-			System.out.println(new Date() + " <<FORUM>> Finished Mturk List");
+			System.out.println(new Date() + " <<MTURK LIST>> Finished Mturk List");
 		}
 		catch(Exception e)
 		{
@@ -1193,7 +1199,10 @@ public class main extends TimerTask
 					    		 test = test.substring(test.indexOf("href=\""), test.indexOf("\"", 50)); // 50 to insure we hit the " we want
 					    		 test = test.replace("href=\"", "");
 					    		 test = test.replace("&amp;", "&");
-					    		 				    		 
+					    		 			
+					    		 
+					    		 
+					    		 //createExportHitLink();
 					    			//could potentially be previewandaccept
 								if(test.contains("https://www.mturk.com/mturk/preview"))
 								{
@@ -1272,6 +1281,67 @@ public class main extends TimerTask
 		System.out.println(new Date() + " <<REDDIT>> Finished Reddit HWTF");
 			
 		
+	}
+	
+	public void createExportHitLink(String u) throws Exception
+	{	
+		if(u.startsWith("https://www.mturk.com/mturk/searchbar"))
+		{
+			getSearchBarHit( u);
+		}
+		
+		
+		
+	}
+	
+	public void getSearchBarHit(String u) throws Exception
+	{
+		String url = u;
+				//String url = "https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&requesterId=A2MY681P424NK";
+				URL pageURL = new URL(url); 
+				HttpURLConnection urlConnection = (HttpURLConnection) pageURL.openConnection();
+				urlConnection.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3");
+				urlConnection.setRequestMethod("GET");
+				urlConnection.connect();
+				
+
+				String fileName = "temp"+UUID.randomUUID().toString()+".html";
+				
+				
+				InputStream in = new BufferedInputStream(urlConnection.getInputStream()); 
+				PrintWriter pw = new PrintWriter(new FileWriter(fileName));
+				
+				Reader r = new InputStreamReader(in);
+			
+				int c;
+				 while((c = r.read()) != -1) 
+			        {         	
+			           pw.print(String.valueOf((char)c)); 
+			        } 
+			        r.close();
+					pw.close();
+						
+					
+					
+				boolean newLink = false;	
+				//after writing into file we will read it.
+					
+				BufferedReader reader = new BufferedReader(new FileReader(fileName));	
+				String s;
+				while((s = reader.readLine()) != null)
+				{
+					System.out.println(s);
+				}
+				
+				reader.close();
+				
+				
+				
+				File f= new File(fileName);
+				if(f.exists())
+				{
+					f.delete();
+				}
 	}
 	public void TurkForum() throws Exception
 	{		
