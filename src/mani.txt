@@ -1,4 +1,4 @@
 Manifest-Version: 1.0
-Class-path: activation.jar mail.jar commons-net-1.4.1.jar
+Class-path: activation.jar mail.jar commons-net-1.4.1.jar java-json.jar
 Main-Class: timer
 Sealed: true

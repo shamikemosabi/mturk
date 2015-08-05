@@ -44,7 +44,7 @@ public class main extends TimerTask
 	
 	static window w;
 	
-	boolean test = true;
+	boolean test = false;
 	
 	String jsonFile = "C:\\inetpub\\wwwroot\\www3\\test.aspx";
 	ArrayList<String> alJson = new ArrayList<String>();
@@ -59,15 +59,15 @@ public class main extends TimerTask
 
 	
 		w = window.getInstance();
-				
+			
+		String d = (test)? "dataTEST.ser": "data.ser";
 		read = new readData("data.ser"); //object used to seralize and deseralize
 		readFull = new readData("dataFull.ser");
 
-		createExportHitLink("https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&requesterId=A230RE9FSQ9SE7");
+		//createExportHitLink("https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&requesterId=A15WOBQI9EYR8Q");
 		
-	//	createExportHitLink("https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&requesterId=A1AQHR31NR4J6N"); //1 hit	
-		//createExportHitLink("https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&requesterId=A1J2SRHRJ991YJ");  // no hit
-		System.exit(0);
+		//createExportHitLink("https://www.mturk.com/mturk/searchbar?requesterId=A2UIH3CID7L92X&selectedSearchType=hitgroups");	
+		//System.exit(0);
 		/*
 				mturkList();
 		mturkList();
@@ -127,25 +127,25 @@ public class main extends TimerTask
 	{
 		Thread t1 = new Thread(new Runnable() {
 		     public void run() {
-		    	 try{
-		    		 
-		    		 while(true)
-		    		 {
+		    	 
+		    	 while(true)
+	    		 {
+		    	 	try{
+		     
 		    			System.out.println(new Date() + " <<MTURK LIST>> STARTED");
 		    				
 		    			mturkList();
 		    			
 		    			System.out.println(new Date() + " <<MTURK LIST>> FINISHED");	
-		    			Thread.sleep(timer.timeInterval(5,10)); //FTP every minute	
-	    				
+		    			Thread.sleep(timer.timeInterval(5,10)); //FTP every minute		    				
 		    		 }
-		    		 
+		    	 	 catch(Exception e)
+			    	 {
+			    		 System.out.println(e.getMessage());
+			    		 e.printStackTrace();
+			    	 }		    		 
 		    	 }
-		    	 catch(Exception e)
-		    	 {
-		    		 System.out.println(e.getMessage());
-		    		 e.printStackTrace();
-		    	 }
+		    	
 		     }
 		});  
 		t1.start();
@@ -158,11 +158,11 @@ public class main extends TimerTask
 		
 		Thread t1 = new Thread(new Runnable() {
 		     public void run() {
-		    	 try{
-		    		 
-		    		 while(true)
-		    		 {
-		    			 System.out.println(new Date() + " <<FTP>> DOWRITEFTP STARTED");
+		    	 
+		    	 while(true)
+	    		 {		    	 
+		    		 try{
+		    		 		System.out.println(new Date() + " <<FTP>> DOWRITEFTP STARTED");
 		    				if(alJson.size()>0)
 		    				{
 		    					System.out.println(new Date() + " <<FTP>> New hits writing to JSON");
@@ -176,13 +176,14 @@ public class main extends TimerTask
 		    				Thread.sleep(60000); //FTP every minute	
 	    				
 		    		 }
+		    		 catch(Exception e)
+			    	 {
+			    		 System.out.println(e.getMessage());
+			    		 e.printStackTrace();
+			    	 }
 		    		 
 		    	 }
-		    	 catch(Exception e)
-		    	 {
-		    		 System.out.println(e.getMessage());
-		    		 e.printStackTrace();
-		    	 }
+		    	 
 		     }
 		});  
 		t1.start();
@@ -199,25 +200,26 @@ public class main extends TimerTask
 		
 		Thread t1 = new Thread(new Runnable() {
 		     public void run() {
-		    	 try{
-		    		 
-		    		 while(true)
-		    		 {
+		    	
+		    	 while(true)
+	    		 {
+		    	   try{
+
 		    			 System.out.println(new Date() + " <<FORUM>> STARTED");	
 		    			 turkerNation();
 			    	    //mturkGrind();
 		    			 TurkForum();
 			    		 System.out.println(new Date() + " <<FORUM>> FINISHED");
 			    		 Thread.sleep(timer.timeInterval());	
-
 		    		 }
+		    	   catch(Exception e)
+			    	 {
+			    		 System.out.println(e.getMessage());
+			    		 e.printStackTrace();
+			    	 }
 		    		 
 		    	 }
-		    	 catch(Exception e)
-		    	 {
-		    		 System.out.println(e.getMessage());
-		    		 e.printStackTrace();
-		    	 }
+		    	 
 		     }
 		});  
 		t1.start();
@@ -234,23 +236,25 @@ public class main extends TimerTask
 		
 		Thread t1 = new Thread(new Runnable() {
 		     public void run() {
-		    	 try{
-		    		 
-		    		 while(true)
-		    		 {
+		    	
+		    	 while(true)
+	    		 {
+		    		 try{
+		    			 
 		    			 System.out.println(new Date() + " <<REDDIT>> STARTED");		
 			    		 RedditHWTF();
 			    		 System.out.println(new Date() + " <<REDDIT>> FINISHED");	 
 			    		 Thread.sleep(60000);
-			    		
+			    		 		    					    		
 		    		 }
+		    		 catch(Exception e)
+			    	 {
+			    		 System.out.println(e.getMessage());
+			    		 e.printStackTrace();
+			    	 }		    		 		    		
 		    		 
 		    	 }
-		    	 catch(Exception e)
-		    	 {
-		    		 System.out.println(e.getMessage());
-		    		 e.printStackTrace();
-		    	 }
+		    	
 		     }
 		});  
 		t1.start();
@@ -427,6 +431,81 @@ public class main extends TimerTask
 		}
 	}
 	
+	
+	/*
+	 * overload method,
+	 * 
+	 * make it more general, I can have some fields that are empty
+	 * so I dont want export it to show.
+	 */
+	public ArrayList<String> createExportHit(createExportData CED, ArrayList<String> a){
+		ArrayList<String> text = new ArrayList<String>();
+		String TOURL = "https://turkopticon.ucsd.edu/api/multi-attrs.php?ids=";
+		String imgURL = "";
+		
+		if(!CED.getRequesterID().equals(""))
+		{
+			try{
+				imgURL = getTOImage(TOURL, CED.getRequesterID());
+			}
+			catch(Exception e) // might error if there is no TO JSON data for this requester
+			{
+				System.out.println(e.getMessage());
+				
+				imgURL = "";
+			}
+		}
+		
+		String temp = "";
+		if(!CED.getLink().equals(""))
+		{
+			temp = "<b>Title:</b> <a href=\" " + CED.getLink() + " \" target=\"_blank\">";	
+			text.add(temp);
+		}
+		
+		if(!CED.getTitle().equals(""))
+		{
+			temp = "<font color=\"blue\">" + CED.getTitle() +" </font></a><br>";
+			text.add(temp);
+		}
+
+		
+		if(!CED.getRequesterURL().equals(""))
+		{
+			temp = "<b>Requester:</b> <a href=\""+ CED.getRequesterURL() +"\" target=\"_blank\">";	
+			text.add(temp);
+		}
+		
+		if(!CED.getRequester().equals(""))
+		{
+			temp = "<font color=\"blue\">" + CED.getRequester() + "</font></a> "+ (CED.getRequester().equals("")?"":CED.getRequester());
+			text.add(temp);
+		}
+		
+		if(!CED.getRequesterID().equals(""))
+		{
+			temp = "(<a href=\"http://turkopticon.ucsd.edu/"+ CED.getRequesterID()  +"\" target=\"_blank\"><font color=\"blue\">TO</font></a>)";
+			text.add(temp);
+			
+			// if I have requester ID I will also have TO Rating, imgURL.
+			temp="<br><b>TO Ratings:</b><br>";
+			text.add(temp);
+			text.add(imgURL);
+			
+		}
+		
+		if(!CED.getReward().equals(""))
+		{
+			temp = "<br> <b>Reward:</b> <font color=\"green\"><b>" + CED.getReward() + "</b></font><br>";
+			text.add(temp);
+			
+		}
+		
+		
+		a.addAll(text);
+		return  a;
+		
+	}
 	public ArrayList<String> createExportHit(String title, String link, String requester, String requesterURL, String requesterID, String Panda, String reward){
 		ArrayList<String> text = new ArrayList<String>();
 	
@@ -1181,7 +1260,7 @@ public class main extends TimerTask
 					    	 if(test.startsWith("a class=\"title")) // get the thread name
 					    	 {					    		
 					    		 test = test.substring(test.indexOf(">")); 
-					    		 text.add( test + "</br></br></br></br></br></br></br>");
+					    		 text.add(test + "</br>");
 					    		// System.out.println(new Date() + " "+ text.get(0));
 					    		 
 					    	 }
@@ -1193,7 +1272,7 @@ public class main extends TimerTask
 					    		 //Need to add open to new tab
 					    		 temp = temp.substring(0,3) + "target=_blank " + temp.substring(3);					    		
 					    		 
-					    		 text.set(0, text.get(0)+ temp); // lets add to the post
+					    		 text.set(0, text.get(0)+ temp + "</br>"); // lets add to the post
 					    		 
 					    		 test = test.substring(test.indexOf("href=\"")); //trim the crap before href
 					    		 test = test.substring(test.indexOf("href=\""), test.indexOf("\"", 50)); // 50 to insure we hit the " we want
@@ -1201,27 +1280,42 @@ public class main extends TimerTask
 					    		 test = test.replace("&amp;", "&");
 					    		 			
 					    		 
-					    		 
-					    		 //createExportHitLink();
-					    			//could potentially be previewandaccept
-								if(test.contains("https://www.mturk.com/mturk/preview"))
-								{
-									if(test.toLowerCase().contains("previewandaccept")) // it's a PandA link
-									{
-										PandA = test;
-									}
-									else // it's just a regular preview... link. Let's converted it to previewand accept
-									{
-										PandA = test.replaceAll("preview", "previewandaccept");
-									}
-								}
-								else // some kind of other mturk link, for reddint search bar for requester name is very common.
-								{
-									PandA = test;
-								}
+			
 								
 								// we gotta match the link with our records to see if we've sent it before
-								newLink = checkIfLinkExist(text, PandA, "HWTF", 3600000, alJson);												    	
+								
+								// don't need text anymore
+								// createExportHitLink returns createExportData object, 
+								// which createExportHit method takes and create an ArrayList.
+								createExportData CED = createExportHitLink(test);
+								// if I have link then I should Panda it. 
+								
+								if(!CED.getLink().equals(""))
+								{
+									
+									PandA = CED.getLink().replaceAll("preview", "previewandaccept");
+									CED.setPandA(PandA);
+								}
+								else //not able to scrape a hit link
+								{
+									if(test.contains("https://www.mturk.com/mturk/preview"))
+									{
+										if(test.toLowerCase().contains("previewandaccept")) // it's a PandA link
+										{
+											PandA = test;
+										}
+										else // it's just a regular preview... link. Let's converted it to previewand accept
+										{
+											PandA = test.replaceAll("preview", "previewandaccept");
+										}
+									}
+									else // some kind of other mturk link, for reddint search bar for requester name is very common.
+									{
+										PandA = test;
+									}									
+								}
+								
+								newLink = checkIfLinkExist(createExportHit(CED, text), PandA, "HWTF", 3600000, alJson);												    	
 					    		 
 								System.out.println(new Date() + " <<REDDIT>> "+ PandA);
 								
@@ -1276,6 +1370,7 @@ public class main extends TimerTask
 		catch(Exception e)
 		{
 			System.out.println(e.getMessage());
+			e.printStackTrace();
 		}
 	//	timer.runHWTF = true;
 		System.out.println(new Date() + " <<REDDIT>> Finished Reddit HWTF");
@@ -1283,21 +1378,46 @@ public class main extends TimerTask
 		
 	}
 	
-	public void createExportHitLink(String u) throws Exception
+	public createExportData createExportHitLink(String u) throws Exception
 	{	
+		
 		if(u.startsWith("https://www.mturk.com/mturk/searchbar"))
 		{
-			getSearchBarHit( u);
+			return getSearchBarHit( u);
 		}
 		
-		
-		
+		// have to do preview links too. If no qual I can still see the hit and grab info. 
+		return new createExportData();
 	}
 	
-	public void getSearchBarHit(String u) throws Exception
+	/*
+	 * Search result may contain more then 1. There is no way of knowing which one the link is for, so Always assume the first one.
+	 * 
+	 * read search result, take first record and grab info like link, requester, etc...
+	 */
+	public createExportData getSearchBarHit(String u) throws Exception
 	{
-		String url = u;
-				//String url = "https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&requesterId=A2MY681P424NK";
+			String requestID = "";
+			// if my URL contains requesterID I can use it to find TO rating			
+			if(u.toLowerCase().contains("requesterid"))
+			{
+				String temp = u.substring(u.toLowerCase().indexOf("requesterid")+12);
+				//Oyie.. ID could be 13 chars??
+				
+				if(temp.length()<=14) // assume requesterid is last parameter on URL , so can just grab everything
+				{
+					requestID  = temp;
+				}
+				else // requesterid is NOT the last parameter on URL... 
+				{					
+					requestID = temp.substring(0, temp.indexOf("&"));
+				}
+				
+				requestID = temp.substring(0, 14);
+				//System.out.println("REquest ID " + requestID);
+			}
+			String url = u;
+			
 				URL pageURL = new URL(url); 
 				HttpURLConnection urlConnection = (HttpURLConnection) pageURL.openConnection();
 				urlConnection.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3");
@@ -1328,10 +1448,131 @@ public class main extends TimerTask
 					
 				BufferedReader reader = new BufferedReader(new FileReader(fileName));	
 				String s;
+				createExportData CEData = new createExportData();
 				while((s = reader.readLine()) != null)
-				{
-					System.out.println(s);
+				{				
+					
+					s = s.trim();
+					
+					if(s.startsWith("Your search did not match any HITs."))
+					{
+						//System.out.println("No Hit Found, Hit dead");
+						break;
+					}
+					
+					if(s.startsWith("<a class=\"capsulelink\"")) //next line hould be requester name
+					{
+						s = reader.readLine();
+						s = s.trim();
+						s = s.replaceAll("&quot;", "'");
+						
+						CEData.setTitle(s);
+						//System.out.println("title " + CEData.getTitle());
+					}
+					
+					if(s.contains("View a HIT in this group") && s.contains("a href")) // We may have a preview link, if qualify
+					{
+						s = s.substring(s.indexOf("/mturk"));
+						s = "https://www.mturk.com" + s.substring(0, s.indexOf(">")-1);
+						
+						CEData.setLink(s);
+					}
+					
+					if(s.startsWith("<span class=\"requesterIdentity\"")) //requester name
+					{
+						s = s.substring(s.indexOf(">")+1, s.lastIndexOf("<"));
+						CEData.setRequester(s);
+						//System.out.println("requester " + CEData.getRequester());
+					}
+					
+					if(s.toLowerCase().startsWith("time allotted")) // time allotted
+					{
+						//have to read 3 lines then will have line with time.
+						reader.readLine();
+						reader.readLine();
+						s = reader.readLine();
+						
+						s =s.substring(s.indexOf(">")+1);
+						s = s.substring(0,s.indexOf("<"));
+						
+						CEData.setTime(s);
+						//System.out.println("TIME " + CEData.getTime());
+					}
+					
+					if(s.contains("<span class=\"reward\">"))  // reward amount
+					{
+						s = s.substring(s.indexOf("\"reward\"") + 9);
+						s = s.substring(0, s.indexOf("<"));
+						CEData.setReward(s);
+						//System.out.println(CEData.getReward());
+					}
+					
+					
+					if(s.startsWith("Description:"))  // description
+					{
+						reader.readLine();
+						reader.readLine();
+						s = reader.readLine();
+						
+						s =s.substring(s.indexOf(">")+1);
+						s = s.substring(0,s.indexOf("<"));
+						
+						CEData.setDesc(s);
+						//System.out.println(CEData.getDesc());
+					}
+					
+					if(s.startsWith("Qualifications Required:"))  // QUAL
+					{
+						reader.readLine();
+						reader.readLine();
+						reader.readLine();
+						reader.readLine();
+						reader.readLine();
+						reader.readLine();
+						s = reader.readLine();//7						
+						String temp = s;
+						String qual = "";
+						while(!(temp.startsWith("</table>")))
+						{
+							temp = reader.readLine().trim();
+																		
+							if(temp.startsWith("<td style=\"padding-right: 2em; white-space: nowrap;\">"))
+							{
+								reader.readLine();								
+								temp = reader.readLine();
+								while(!(temp.startsWith("</td>")))
+								{
+									temp = reader.readLine().trim();
+									if(!temp.startsWith("<"))
+									{
+										qual += temp.trim()+" ";
+									}
+								
+								}
+								qual = qual + "</br>";
+							}
+						}
+						
+						
+						qual = qual.replaceAll("</div>", "");
+						CEData.setQual(qual);
+						//System.out.println(CEData.getQual());
+						
+						// I only assume first one, break out of while loop now,
+						break;
+					}
+					
+					
+					//System.out.println(s);
+					
 				}
+				
+				//coming out of while loop, I either found a hit, with CEData populated
+				// or a dead hit( a dead hit with requester ID in URL, or dead hit with absolutely nothing)
+				// with empty CEData. Either case I have an object of CEData.
+				// I still want to export the hit, DOA
+				
+				CEData.setRequesterID(requestID);
 				
 				reader.close();
 				
@@ -1342,6 +1583,8 @@ public class main extends TimerTask
 				{
 					f.delete();
 				}
+				
+				return CEData;
 	}
 	public void TurkForum() throws Exception
 	{		
