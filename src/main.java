@@ -457,18 +457,28 @@ public class main extends TimerTask
 		}
 		
 		String temp = "";
+		String t1="";
+		String t2="";
+				
 		if(!CED.getLink().equals(""))
 		{
-			temp = "<b>Title:</b> <a href=\" " + CED.getLink() + " \" target=\"_blank\">";	
-			text.add(temp);
+			temp = "<a href=\" " + CED.getLink() + " \" target=\"_blank\">";	
+			t1 = temp;
+			//text.add(temp);
 		}
 		
 		if(!CED.getTitle().equals(""))
 		{
-			temp = "<font color=\"blue\">" + CED.getTitle() +" </font></a><br>";
-			text.add(temp);
-		}
+			temp = "<font color=\"blue\">" + CED.getTitle() +" </font>";
+			t2 = temp;
+			//text.add(temp);
+		}					
+		// I can have link but no title, and vice versa. 
+		// This could be a problem I want to display the Title only 
+		// but it doesn't make sense, if I only have the link, what do I want to display?
+		text.add(((!CED.getTitle().equals("")) ? "<b>Title:</b>": "") + t1 + t2 +((!CED.getLink().equals("")) ? "</a>":"") + "</br>" );
 
+		
 		
 		if(!CED.getRequesterURL().equals(""))
 		{
@@ -478,7 +488,7 @@ public class main extends TimerTask
 		
 		if(!CED.getRequester().equals(""))
 		{
-			temp = "<font color=\"blue\">" + CED.getRequester() + "</font></a> "+ (CED.getRequester().equals("")?"":CED.getRequester());
+			temp = "<font color=\"blue\">" + CED.getRequester() + "</font></a> "+ (CED.getRequesterID().equals("")?"":CED.getRequesterID());
 			text.add(temp);
 		}
 		
