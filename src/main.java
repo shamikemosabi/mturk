@@ -44,7 +44,7 @@ public class main extends TimerTask
 	
 	static window w;
 	
-	boolean test = false;
+	boolean test = true;
 	
 	String jsonFile = "C:\\inetpub\\wwwroot\\www3\\test.aspx";
 	ArrayList<String> alJson = new ArrayList<String>();
@@ -61,12 +61,12 @@ public class main extends TimerTask
 		w = window.getInstance();
 			
 		String d = (test)? "dataTEST.ser": "data.ser";
-		read = new readData("data.ser"); //object used to seralize and deseralize
+		read = new readData(d); //object used to seralize and deseralize
 		readFull = new readData("dataFull.ser");
 
-		//createExportHitLink("https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&requesterId=A15WOBQI9EYR8Q");
+		//createExportHitLink("https://www.mturk.com/mturk/preview?groupId=3K8YRYAXUO2L318WRK1I6OE99TADG3");
 		
-		//createExportHitLink("https://www.mturk.com/mturk/searchbar?requesterId=A2UIH3CID7L92X&selectedSearchType=hitgroups");	
+	//	createExportHitLink("https://www.mturk.com/mturk/preview?groupId=32JRJ3GOYGBCMRXUD1MS45U6YA61UT");	
 		//System.exit(0);
 		/*
 				mturkList();
@@ -173,7 +173,7 @@ public class main extends TimerTask
 		    				
 		    				cleanHit();
 		    				System.out.println(new Date() + " <<FTP>> DOWRITEFTP FINISHED");	
-		    				Thread.sleep(60000); //FTP every minute	
+		    				Thread.sleep(30000); //FTP every minute	
 	    				
 		    		 }
 		    		 catch(Exception e)
@@ -504,6 +504,13 @@ public class main extends TimerTask
 			
 		}
 		
+		if(!CED.getTime().equals(""))
+		{
+			
+			temp = "</br> <b>Time:</b> " + CED.getTime();
+			text.add(temp);
+		}
+		
 		if(!CED.getReward().equals(""))
 		{
 			temp = "<br> <b>Reward:</b> <font color=\"green\"><b>" + CED.getReward() + "</b></font><br>";
@@ -511,6 +518,13 @@ public class main extends TimerTask
 			
 		}
 		
+		if(!CED.foundHit)
+		{
+			a.add("</br>");
+			a.add("</br>");
+			a.add("</br>");
+			a.add("</br>");
+		}
 		
 		a.addAll(text);
 		return  a;
@@ -1393,19 +1407,180 @@ public class main extends TimerTask
 		
 		if(u.startsWith("https://www.mturk.com/mturk/searchbar"))
 		{
-			return getSearchBarHit( u);
+			return getSearchBarHitInfo( u);
+		}		
+		// have to do preview links too. If no qual I can still see the hit and grab info.
+		else if(u.contains("preview"))
+		{
+			return getPreviewHitInfo(u);
+			
 		}
-		
-		// have to do preview links too. If no qual I can still see the hit and grab info. 
 		return new createExportData();
 	}
 	
+	public createExportData getPreviewHitInfo(String u) throws Exception
+	{
+		createExportData CED = new createExportData();
+		//link has to be regular preview link, NOT Panda
+		if(u.contains("previewandaccept"))
+		{
+			CED.setLink(u.replaceAll("previewandaccept", "preview"));
+		}
+		else // just regular link
+		{
+			CED.setLink(u);
+		}
+		
+		
+		// Now have to read the preview link,
+		// 3 things can happen:
+		// - hit is available to be view, no qual.  I have to extract data
+		// - hit has qual, can't view
+		// - ran out of hits
+		
+		
+		String url = u;
+		
+		URL pageURL = new URL(url); 
+		HttpURLConnection urlConnection = (HttpURLConnection) pageURL.openConnection();
+		urlConnection.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3");
+		urlConnection.setRequestMethod("GET");
+		urlConnection.connect();
+		
+
+		String fileName = "temp"+UUID.randomUUID().toString()+".html";
+		
+		
+		InputStream in = new BufferedInputStream(urlConnection.getInputStream()); 
+		PrintWriter pw = new PrintWriter(new FileWriter(fileName));
+		
+		Reader r = new InputStreamReader(in);
+	
+		int c;
+		 while((c = r.read()) != -1) 
+	        {         	
+	           pw.print(String.valueOf((char)c)); 
+	        } 
+	        r.close();
+			pw.close();
+				
+			
+			
+		boolean newLink = false;	
+		//after writing into file we will read it.
+			
+		BufferedReader reader = new BufferedReader(new FileReader(fileName));	
+		String s;
+	
+		while((s = reader.readLine()) != null)
+		{				
+			
+			s = s.trim();
+			
+			if(s.startsWith("Your Qualifications do not meet"))
+			{
+				CED.setFoundHit(false);
+				break;
+			}
+			
+			if(s.startsWith("There are no more available HITs in this group. More HITs are shown below."))
+			{
+				CED.setFoundHit(false);
+				break;
+			}
+								
+			if(s.startsWith("<input type=\"hidden\" name=\"prevRequester\"")) // requester name
+			{
+				s = s.substring(s.indexOf("value=")+6, s.lastIndexOf(">"));
+				s = s.replaceAll("\"", "");
+				CED.setRequester(s);
+				
+			//	System.out.println("Requester : " + CED.getRequester());
+			}
+			
+			if(s.startsWith("<input type=\"hidden\" name=\"requesterId\""))  // requester ID
+			{
+				s = s.substring(s.indexOf("value=")+6, s.lastIndexOf(">"));
+				s = s.replaceAll("\"", "");
+				CED.setRequesterID(s);
+				
+			//	System.out.println("Requester : " + CED.getRequesterID());
+			}
+			
+			if(s.startsWith("<input type=\"hidden\" name=\"prevReward\"")) // reward
+			{
+				s = s.substring(s.indexOf("value=")+6, s.lastIndexOf(">"));
+				s = s.replaceAll("\"", "");
+				s = s.replace("USD", "$ ");
+				CED.setReward(s);
+				
+			//	System.out.println("Requester : " + CED.getReward());
+			}
+			
+			
+			if(s.startsWith("<div style=\"white-space:nowrap;")) //title
+			{
+				//next line is title
+				s = reader.readLine();
+				s=s.trim();
+				CED.setTitle(s);
+				
+			//	System.out.println("Title : " + CED.getTitle());
+				
+			}
+			
+			if(s.startsWith("Duration"))
+			{
+				reader.readLine();
+				reader.readLine();
+				reader.readLine();
+				s = reader.readLine();
+				s = s.trim();
+				
+				CED.setTime(s);
+				
+				//System.out.println("Time : " + CED.getTime());
+			}
+			
+			
+			if(s.startsWith("Qualifications Required:"))  // QUAL
+			{
+				reader.readLine();
+				reader.readLine();
+				reader.readLine();
+				reader.readLine();
+				s = reader.readLine();
+				
+				s = s.trim();
+				s = s.replaceAll(";", "</br>");
+				CED.setQual(s);
+				
+				//System.out.println("QUAL : " + CED.getQual());
+				
+				break; // get out of while, currently there's no info after this we care about.
+			}
+			
+			
+		}
+		
+		reader.close();
+		
+		
+		File f= new File(fileName);
+		if(f.exists())
+		{
+			f.delete();
+		}
+		
+		return CED;
+		
+	}
 	/*
 	 * Search result may contain more then 1. There is no way of knowing which one the link is for, so Always assume the first one.
 	 * 
 	 * read search result, take first record and grab info like link, requester, etc...
 	 */
-	public createExportData getSearchBarHit(String u) throws Exception
+	public createExportData getSearchBarHitInfo(String u) throws Exception
 	{
 			String requestID = "";
 			// if my URL contains requesterID I can use it to find TO rating			
@@ -1467,10 +1642,11 @@ public class main extends TimerTask
 					if(s.startsWith("Your search did not match any HITs."))
 					{
 						//System.out.println("No Hit Found, Hit dead");
+						CEData.setFoundHit(false);
 						break;
 					}
 					
-					if(s.startsWith("<a class=\"capsulelink\"")) //next line hould be requester name
+					if(s.startsWith("<a class=\"capsulelink\"")) //next line hould be title
 					{
 						s = reader.readLine();
 						s = s.trim();

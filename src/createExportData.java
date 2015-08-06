@@ -12,6 +12,8 @@ public class createExportData
 	String hitsAva =""; // only ava when log in... damn it
 	String qual = "";
 	
+	boolean foundHit;
+	
 	
 	public createExportData(String t, String l, String req, String reqURL, String reqID, String p)
 	{
@@ -32,6 +34,7 @@ public class createExportData
 		 requesterURL = "";
 		 requesterID = "";
 		 PandA  = "";
+		 foundHit = true; // initally set to true, if no hit found then set to false
 	}
 
 
@@ -142,6 +145,16 @@ public class createExportData
 
 	public void setQual(String qual) {
 		this.qual = qual;
+	}
+
+
+	public boolean isFoundHit() {
+		return foundHit;
+	}
+
+
+	public void setFoundHit(boolean foundHit) {
+		this.foundHit = foundHit;
 	}
 	
 	

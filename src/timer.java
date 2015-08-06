@@ -53,8 +53,8 @@ public class timer extends TimerTask
 		try{
 			main task = new main();
 			task.doRedditHWTF();
-			task.doForum();
-			task.doMturkList();
+		//	task.doForum();
+		//	task.doMturkList();
 			task.doWriteFTP();
 		}
 		catch(Exception e)
