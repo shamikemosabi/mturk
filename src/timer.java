@@ -20,6 +20,7 @@ public class timer extends TimerTask
 	}
 	public static void main(String[] args)
 	{
+
 		
 		/*
 		TimerTask task = new timer();
@@ -55,7 +56,7 @@ public class timer extends TimerTask
 			task.doRedditHWTF();
 		//	task.doForum();
 		//	task.doMturkList();
-			task.doWriteFTP();
+		//	task.doWriteFTP();
 		}
 		catch(Exception e)
 		 {

@@ -1311,7 +1311,9 @@ public class main extends TimerTask
 								// don't need text anymore
 								// createExportHitLink returns createExportData object, 
 								// which createExportHit method takes and create an ArrayList.
-								createExportData CED = createExportHitLink(test);
+					    		 
+					    		 //let's take text, need title to do potential search bar hit
+								createExportData CED = createExportHitLink(test, text);
 								// if I have link then I should Panda it. 
 								
 								if(!CED.getLink().equals(""))
@@ -1402,23 +1404,23 @@ public class main extends TimerTask
 		
 	}
 	
-	public createExportData createExportHitLink(String u) throws Exception
+	public createExportData createExportHitLink(String u , ArrayList<String> a) throws Exception
 	{	
 		
 		if(u.startsWith("https://www.mturk.com/mturk/searchbar"))
 		{
-			return getSearchBarHitInfo( u);
+			return getSearchBarHitInfo(u, new createExportData());
 		}		
 		// have to do preview links too. If no qual I can still see the hit and grab info.
 		else if(u.contains("preview"))
 		{
-			return getPreviewHitInfo(u);
+			return getPreviewHitInfo(u,a);
 			
 		}
 		return new createExportData();
 	}
 	
-	public createExportData getPreviewHitInfo(String u) throws Exception
+	public createExportData getPreviewHitInfo(String u, ArrayList<String> a) throws Exception
 	{
 		createExportData CED = new createExportData();
 		//link has to be regular preview link, NOT Panda
@@ -1439,7 +1441,8 @@ public class main extends TimerTask
 		// - ran out of hits
 		
 		
-		String url = u;
+		// HAS to be preview link, NOT PANDA
+		String url = CED.getLink();
 		
 		URL pageURL = new URL(url); 
 		HttpURLConnection urlConnection = (HttpURLConnection) pageURL.openConnection();
@@ -1565,11 +1568,40 @@ public class main extends TimerTask
 		
 		reader.close();
 		
-		
 		File f= new File(fileName);
 		if(f.exists())
 		{
 			f.delete();
+		}
+		
+		//Here either CED found hit or not. If it didn't then let's try and search
+		// reddit hit title usually starts like US - THIS IS MY TITLE - REQUESTER - etc...
+		// So I can try to take title and query search bar and see what I get.
+		// better to get No hit, then wrong hit.. so adding title and requester
+		
+		if(!CED.isFoundHit())
+		{
+			String title =a.get(0);			
+			 StringTokenizer st = new StringTokenizer(title, "-");
+			 int count =0;
+			 String title2="";
+			 while(st.hasMoreTokens())
+			 {
+				 String temp =st.nextToken();
+				 if(count==1||count==2)  // 0 is ICA/US, 1 is Title, 2 is REquester, the rest I don't care
+				 {
+					 title2+=temp;
+				 }
+				 count++;
+			 }
+			title2= title2.replaceAll("\\s","+");
+			
+			url = "https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&searchWords=" + title2 + "&minReward=0.00&x=0&y=0";
+			
+			// reset found hit 
+			CED.setFoundHit(true);
+			
+			CED = getSearchBarHitInfo(url, CED);
 		}
 		
 		return CED;
@@ -1580,7 +1612,7 @@ public class main extends TimerTask
 	 * 
 	 * read search result, take first record and grab info like link, requester, etc...
 	 */
-	public createExportData getSearchBarHitInfo(String u) throws Exception
+	public createExportData getSearchBarHitInfo(String u, createExportData CEData) throws Exception
 	{
 			String requestID = "";
 			// if my URL contains requesterID I can use it to find TO rating			
@@ -1588,8 +1620,9 @@ public class main extends TimerTask
 			{
 				String temp = u.substring(u.toLowerCase().indexOf("requesterid")+12);
 				//Oyie.. ID could be 13 chars??
+				// and apprently 15...
 				
-				if(temp.length()<=14) // assume requesterid is last parameter on URL , so can just grab everything
+				if(temp.length()<=16) // assume requesterid is last parameter on URL , so can just grab everything
 				{
 					requestID  = temp;
 				}
@@ -1597,8 +1630,7 @@ public class main extends TimerTask
 				{					
 					requestID = temp.substring(0, temp.indexOf("&"));
 				}
-				
-				requestID = temp.substring(0, 14);
+			
 				//System.out.println("REquest ID " + requestID);
 			}
 			String url = u;
@@ -1633,7 +1665,7 @@ public class main extends TimerTask
 					
 				BufferedReader reader = new BufferedReader(new FileReader(fileName));	
 				String s;
-				createExportData CEData = new createExportData();
+				
 				while((s = reader.readLine()) != null)
 				{				
 					
