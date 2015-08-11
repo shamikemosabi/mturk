@@ -152,7 +152,17 @@ public class main extends TimerTask
 		
 		
 	}
-	
+	public void test()
+	{
+		try{
+			FTP("C:\\inetpub\\wwwroot\\www3\\stats.aspx","public_html\\views");
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+	}
 	public void doWriteFTP()
 	{
 		
@@ -163,6 +173,7 @@ public class main extends TimerTask
 	    		 {		    	 
 		    		 try{
 		    		 		System.out.println(new Date() + " <<FTP>> DOWRITEFTP STARTED");
+		    		 				
 		    				if(alJson.size()>0)
 		    				{
 		    					System.out.println(new Date() + " <<FTP>> New hits writing to JSON");
@@ -173,7 +184,7 @@ public class main extends TimerTask
 		    				
 		    				cleanHit();
 		    				System.out.println(new Date() + " <<FTP>> DOWRITEFTP FINISHED");	
-		    				Thread.sleep(30000); //FTP every minute	
+		    				Thread.sleep(60000); //FTP every minute	
 	    				
 		    		 }
 		    		 catch(Exception e)
@@ -207,7 +218,7 @@ public class main extends TimerTask
 
 		    			 System.out.println(new Date() + " <<FORUM>> STARTED");	
 		    			 turkerNation();
-			    	    //mturkGrind();
+		    			 //mturkGrind();
 		    			 TurkForum();
 			    		 System.out.println(new Date() + " <<FORUM>> FINISHED");
 			    		 Thread.sleep(timer.timeInterval());	
@@ -622,7 +633,7 @@ public class main extends TimerTask
 			
 			if(!todayLink.equals(""))
 			{
-				//processPageTN("http://turkernation.com/showthread.php?25061-07-23-15-Doomsday-is-over!!!!!/page24");
+				//processPageTN("http://turkernation.com/showthread.php?25195-08-11-15-Turk-ON!!!!!!!!!!/page22");
 				processPageTN("http://turkernation.com/"+todayLink+"/page1000"); //1000 so its greater so it's always the last page
 				
 			}
@@ -684,9 +695,31 @@ public class main extends TimerTask
 				ArrayList<String> text = new ArrayList<String>();
 				String hitLink = "";
 				String PandA ="";
+				
+				boolean hasTable = false; 
+				ArrayList<String> textTable = new ArrayList<String>();
+				
 				while(!temp.equals("</blockquote>")) // keep looping all the text the poster did store them
 				{
 					temp =reader.readLine().trim();
+					
+					// if we are in a post, and there is a table, chances are it's a hit
+					if(temp.contains("<table class=\""))
+					{						
+						hasTable=true;
+					}
+					if(temp.contains("</table>")) // we hit the end of table, textTable should contain all the strings within table
+					{
+						hasTable=false;
+					}
+					
+					if(hasTable)
+					{
+						if(filterPost(temp))
+						{
+							textTable.add(temp);
+						}
+					}
 					
 					if(temp.contains("<a href=\"https://www.mturk.com/mturk/preview") || temp.contains("<a href=\"https://www.mturk.com/mturk/accept") || temp.contains("<a href=\"https://www.mturk.com/mturk/searchbar") ) //we found a mturk link posible hit!
 					{
@@ -696,7 +729,7 @@ public class main extends TimerTask
 						String temp2 = "";
 						temp2 = temp.replace("&amp;", "&");
 										
-						temp2 = temp.substring(temp.indexOf("<a href=\"https:")); // lets trim the crap before <a href
+						temp2 = temp2.substring(temp.indexOf("<a href=\"https:")); // lets trim the crap before <a href
 						temp2 = temp2.substring(temp2.indexOf("https:"), temp2.indexOf("\"", 50)); // 50 is to ensure we pass all the " and the next " should be the end quotation
 						hitLink = temp2;
 						
@@ -714,22 +747,69 @@ public class main extends TimerTask
 						}
 						
 					}
+					
 					if(filterPost(temp))
 					{
 						text.add(temp);
 					}
-				}
+				}  //while , end of comment post							
 				
 				//coming out, if my PandA is still empty, then that means there was no preview link, It's either an "accept" link or a "searchbar" link.
 				// let's just assign that hitlink to PandA.
 				if(PandA.equals(""))
 				{
 					PandA = hitLink;
-				}				
+				}
+				
+				
+				createExportData CED = new createExportData();
+				// if I have hit, lets see if I have textTable populated, if I do then I Only use textTable
+				// Also need to add some logic to see if this is likely a hit, We assume if it is in <table></table> it's probably a hit.
+				// but lets add additional checks so probablity is higher.
+								
+				if(hit)
+				{
+					if(textTable.size()>0)
+					{
+						if(isAHit(textTable)) // if it's likely a hit
+						{
+							text = textTable;							
+						}
+						else // if we have table, but turns out it's not a hit, DO NOT continue
+						{
+							hit = false;
+						}
+					}
+					//If textTable is EMPTY, AND hit is true, this means that user posted a link without export style.
+					// in this scenario I don't want to use it, because I don't want user's other comment. 
+					// Instead let's call createExportHitLink
+					else
+					{
+						//yes I'm passing textTable
+						// doesn't make sense, because it takes arraylist at index 0, assuming it's title from reddit
+						// but this is not reddit
+						CED = createExportHitLink(hitLink, textTable); // hitLink most likely preview link
+						
+						if(!CED.isFoundHit()) // if I don't find hit, either none left, or can't view because of qual 
+						{
+							hit = false;
+						}
+						//I found the hit and I can view it
+						// call createExportHit to retrieve ArrayList for export style
+						else
+						{
+							//Again textTable at second parameter doesn't matter
+							text = createExportHit(CED, textTable);
+							
+						}
+						
+					}
+				}
 				
 				// if hit = true then we have to do more stuff, if not we keep looping
 				if(hit)
 				{
+					
 					// we gotta match the link with our records to see if we've sent it before
 						newLink = checkIfLinkExist(text, PandA, "TN",3600000, alJson);
 				}
@@ -767,6 +847,66 @@ public class main extends TimerTask
 
 		}
 		
+		
+	}
+	
+	/*
+	 * take a, which is lines of comments.
+	 * Lets search for text like 'title' , 'requester', 'reward', 'TO Rating'
+	 * if it has most of them then high probablity it's a hit.
+	 */
+	public boolean isAHit(ArrayList<String> a)
+	{
+		int countTitle = 0;
+		int countRequester = 0;
+		int countReward = 0;
+		int countTo = 0;
+		int countDesc = 0;
+		
+		boolean lTitle = true;
+		boolean lRequester = true;
+		boolean lReward = true;
+		boolean lTo = true;
+		boolean lDesc = true;
+		
+		for(int i=0; i < a.size(); i++)
+		{
+			String temp = a.get(i).toLowerCase().trim();
+			
+			if(temp.contains("title") && lTitle)
+			{
+				countTitle++;
+				lTitle = false;
+			}
+			if(temp.contains("requester") && lRequester)
+			{
+				countRequester++;
+				lRequester = false;
+			}
+			if(temp.contains("reward") && lReward)
+			{
+				countReward++;
+				lReward = false;
+			}
+			if(temp.contains("to rating") && lTo)
+			{
+				countTo++;
+				lTo = false;
+			}
+			if(temp.contains("description") && lDesc)
+			{
+				countDesc++;
+				lDesc = false;
+			}
+			
+		}
+		
+		if(countTitle + countRequester + countReward + countTo + countDesc > 3 ) // if I have 4 out of the 5
+		{
+			return true;
+		}
+		
+		return false;
 		
 	}
 	
@@ -870,6 +1010,12 @@ public class main extends TimerTask
 				newFile.delete();			
 			}
 			
+			
+			// Break out of method if, tried to find today and tomorrows link.
+			if(!b && ret.equals(""))
+			{
+				return ret;
+			}
 
 				
 			// if we don't find anything return empty which means error
@@ -967,7 +1113,7 @@ public class main extends TimerTask
 						String temp2 = "";
 						temp2 = temp.replace("&amp;", "&");
 										
-						temp2 = temp.substring(temp.indexOf("<a href=\"https:")); // lets trim the crap before <a href
+						temp2 = temp2.substring(temp.indexOf("<a href=\"https:")); // lets trim the crap before <a href
 						temp2 = temp2.substring(temp2.indexOf("https:"), temp2.indexOf("\"", 50)); // 50 is to ensure we pass all the " and the next " should be the end quotation
 						hitLink = temp2;
 						
@@ -1813,7 +1959,7 @@ public class main extends TimerTask
 	//	todayLink =  "showthread.php?13640-Can-t-Find-FUN-HIT-s-01-30-Super-Funbowl-Friday!!";
 		if(!todayLink.equals(""))
 		{
-			//processPage("http://mturkforum.com/showthread.php?33612-Can-t-find-Rick-tastic-HITS-7-27-Morty-fying-Monday!/page79");
+			//processPage("http://mturkforum.com/showthread.php?33678-Can-t-find-Fantastic-HITs-8-11-Tantalizing-Tuesday!/page42");
 			processPage("http://mturkforum.com/"+todayLink+"/page1000"); //1000 so its greater so it's always the last page
 			
 		}
@@ -1880,9 +2026,30 @@ public class main extends TimerTask
 				ArrayList<String> text = new ArrayList<String>();
 				String hitLink = "";
 				String PandA = "";
+				
+				boolean hasTable = false; 
+				ArrayList<String> textTable = new ArrayList<String>();
+				
 				while(!temp.equals("</blockquote>")) // keep looping all the text the poster did store them
 				{
 					temp =reader.readLine().trim();
+					
+					if(temp.contains("<table class=\""))
+					{						
+						hasTable=true;
+					}
+					if(temp.contains("</table>")) // we hit the end of table, textTable should contain all the strings within table
+					{
+						hasTable=false;
+					}
+					
+					if(hasTable)
+					{
+						if(filterPost(temp))
+						{
+							textTable.add(temp);
+						}
+					}
 					
 					if(temp.contains("<a href=\"https://www.mturk.com/mturk/preview") || temp.contains("<a href=\"https://www.mturk.com/mturk/accept") || temp.contains("<a href=\"https://www.mturk.com/mturk/searchbar") ) //we found a mturk link posible hit!
 					{
@@ -1892,7 +2059,7 @@ public class main extends TimerTask
 						String temp2 = "";
 						temp2 = temp.replace("&amp;", "&");
 										
-						temp2 = temp.substring(temp.indexOf("<a href=\"https:")); // lets trim the crap before <a href
+						temp2 = temp2.substring(temp.indexOf("<a href=\"https:")); // lets trim the crap before <a href
 						temp2 = temp2.substring(temp2.indexOf("https:"), temp2.indexOf("\"", 50)); // 50 is to ensure we pass all the " and the next " should be the end quotation
 						hitLink = temp2;
 
@@ -1922,6 +2089,51 @@ public class main extends TimerTask
 				{
 					PandA = hitLink;
 				}
+				
+				createExportData CED = new createExportData();
+				// if I have hit, lets see if I have textTable populated, if I do then I Only use textTable
+				// Also need to add some logic to see if this is likely a hit, We assume if it is in <table></table> it's probably a hit.
+				// but lets add additional checks so probablity is higher.
+				
+				if(hit)
+				{
+					if(textTable.size()>0)
+					{
+						if(isAHit(textTable)) // if it's likely a hit
+						{
+							text = textTable;							
+						}
+						else // if we have table, but turns out it's not a hit, DO NOT continue
+						{
+							hit = false;
+						}
+					}
+					//If textTable is EMPTY, AND hit is true, this means that user posted a link without export style.
+					// in this scenario I don't want to use it, because I don't want user's other comment. 
+					// Instead let's call createExportHitLink
+					else
+					{
+						//yes I'm passing textTable
+						// doesn't make sense, because it takes arraylist at index 0, assuming it's title from reddit
+						// but this is not reddit
+						CED = createExportHitLink(hitLink, textTable); // hitLink most likely preview link
+						
+						if(!CED.isFoundHit()) // if I don't find hit, either none left, or can't view because of qual 
+						{
+							hit = false;
+						}
+						//I found the hit and I can view it
+						// call createExportHit to retrieve ArrayList for export style
+						else
+						{
+							//Again textTable at second parameter doesn't matter
+							text = createExportHit(CED, textTable);
+							
+						}
+						
+					}
+				}
+				
 				
 				// if hit = true then we have to do more stuff, if not we keep looping
 				if(hit)
@@ -1995,7 +2207,9 @@ public class main extends TimerTask
 		// but now that i have a display screen it doesn't matter
 				
 		myData  = read.deSeralize();
-		if(!myData.contains(l)) // we don't have the hit need to send out email
+		
+		
+		if(true)//if(!myData.contains(l)) // we don't have the hit need to send out email
 		{
 			//option to send email out			
 //			/new SendEmail(a, l);
