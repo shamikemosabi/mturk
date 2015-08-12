@@ -152,17 +152,7 @@ public class main extends TimerTask
 		
 		
 	}
-	public void test()
-	{
-		try{
-			FTP("C:\\inetpub\\wwwroot\\www3\\stats.aspx","public_html\\views");
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-		}
-		
-	}
+
 	public void doWriteFTP()
 	{
 		
@@ -218,7 +208,7 @@ public class main extends TimerTask
 
 		    			 System.out.println(new Date() + " <<FORUM>> STARTED");	
 		    			 turkerNation();
-		    			 //mturkGrind();
+		    			 mturkGrind();
 		    			 TurkForum();
 			    		 System.out.println(new Date() + " <<FORUM>> FINISHED");
 			    		 Thread.sleep(timer.timeInterval());	
@@ -1038,7 +1028,7 @@ public class main extends TimerTask
 		
 		if(!todayLink.equals(""))
 		{
-			//processPageMG("http://www.mturkgrind.com/threads/07-20-masterful-monday.28298/page-68");
+			processPageMG("http://mturkgrind.com/threads/08-11-today-is-tuesday.28431/page-52");
 			processPageMG("http://mturkgrind.com/"+todayLink+"/page-1000"); //1000 so its greater so it's always the last page
 			
 		}
@@ -1101,9 +1091,33 @@ public class main extends TimerTask
 				ArrayList<String> text = new ArrayList<String>();
 				String hitLink = "";
 				String PandA ="";
+				boolean hasTable = false;
+				ArrayList<String> textTable = new ArrayList<String>();
+				
 				while(!temp.equals("</blockquote>")) // keep looping all the text the poster did store them
 				{
 					temp =reader.readLine().trim();
+					
+					if(temp.contains("<table class=\""))
+					{						
+						hasTable=true;
+					}
+					if(temp.contains("</table>")) // we hit the end of table, textTable should contain all the strings within table
+					{
+						hasTable=false;
+												
+						//mturk grind forum have </table> on the same line, I need to extract what's before </table>
+						String t = temp.substring(0, temp.lastIndexOf("</table>")+ 8);
+						textTable.add(t);
+					}
+					
+					if(hasTable)
+					{
+						if(filterPost(temp))
+						{
+							textTable.add(temp);
+						}
+					}
 					
 					if(temp.contains("<a href=\"https://www.mturk.com/mturk/preview") || temp.contains("<a href=\"https://www.mturk.com/mturk/accept") || temp.contains("<a href=\"https://www.mturk.com/mturk/searchbar") ) //we found a mturk link posible hit!
 					{
@@ -1143,6 +1157,51 @@ public class main extends TimerTask
 				{
 					PandA = hitLink;
 				}				
+				
+				createExportData CED = new createExportData();
+				// if I have hit, lets see if I have textTable populated, if I do then I Only use textTable
+				// Also need to add some logic to see if this is likely a hit, We assume if it is in <table></table> it's probably a hit.
+				// but lets add additional checks so probablity is higher.
+				
+				if(hit)
+				{
+					if(textTable.size()>0)
+					{
+						if(isAHit(textTable)) // if it's likely a hit
+						{
+							text = textTable;							
+						}
+						else // if we have table, but turns out it's not a hit, DO NOT continue
+						{
+							hit = false;
+						}
+					}
+					//If textTable is EMPTY, AND hit is true, this means that user posted a link without export style.
+					// in this scenario I don't want to use it, because I don't want user's other comment. 
+					// Instead let's call createExportHitLink
+					else
+					{
+						//yes I'm passing textTable
+						// doesn't make sense, because it takes arraylist at index 0, assuming it's title from reddit
+						// but this is not reddit
+						CED = createExportHitLink(hitLink, textTable); // hitLink most likely preview link
+						
+						if(!CED.isFoundHit()) // if I don't find hit, either none left, or can't view because of qual 
+						{
+							hit = false;
+						}
+						//I found the hit and I can view it
+						// call createExportHit to retrieve ArrayList for export style
+						else
+						{
+							//Again textTable at second parameter doesn't matter
+							text = createExportHit(CED, textTable);
+							
+						}
+						
+					}
+				}
+				
 				// if hit = true then we have to do more stuff, if not we keep looping
 				if(hit)
 				{
@@ -1308,6 +1367,12 @@ public class main extends TimerTask
 			if(newFile.exists()&& (!test))
 			{
 				newFile.delete();			
+			}
+			
+			// Break out of method if, tried to find today and tomorrows link.
+			if(!b && ret.equals(""))
+			{
+				return ret;
 			}
 			
 
@@ -2209,7 +2274,7 @@ public class main extends TimerTask
 		myData  = read.deSeralize();
 		
 		
-		if(true)//if(!myData.contains(l)) // we don't have the hit need to send out email
+		if(!myData.contains(l)) // we don't have the hit need to send out email
 		{
 			//option to send email out			
 //			/new SendEmail(a, l);
@@ -2474,6 +2539,13 @@ public class main extends TimerTask
 		}
 
 			
+		// Break out of method if, tried to find today and tomorrows link.
+		if(!b && ret.equals(""))
+		{
+			return ret;
+		}
+		
+		
 		// if we don't find anything return empty which means error
 		
 		if(ret.equals(""))

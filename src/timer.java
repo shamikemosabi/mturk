@@ -1,3 +1,6 @@
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -22,7 +25,10 @@ public class timer extends TimerTask
 	{
 
 		
+
+		
 		/*
+		 * 
 		TimerTask task = new timer();
 		
 		Timer timer = new Timer();
@@ -52,12 +58,16 @@ public class timer extends TimerTask
 		
 		*/
 		try{
+			URL url = new URL("http://checkip.amazonaws.com/");
+			BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
+			System.out.println(br.readLine());
+			
+			
 			main task = new main();
-			//task.doRedditHWTF();
+			task.doRedditHWTF();
 			task.doForum();
-			//task.doMturkList();
-			//task.doWriteFTP();
-			//task.test();
+			task.doMturkList();
+			task.doWriteFTP();
 		}
 		catch(Exception e)
 		 {
