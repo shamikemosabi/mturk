@@ -28,6 +28,7 @@ import java.util.*;
 import java.text.*;
 
 import org.apache.commons.net.ftp.*;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -2318,6 +2319,100 @@ public class main extends TimerTask
 	}
 	
 	
+	public void test()
+		{
+				
+		Thread t1 = new Thread(new Runnable() {
+		     public void run() {
+		    	
+		    	 while(true)
+	    		 {
+		    	   try{
+
+		    			 FTP("S:\\test.aspx","mturkpl.us");			    		 
+			    		 Thread.sleep(60000);	
+		    		 }
+		    	   catch(Exception e)
+			    	 {
+			    		 System.out.println(e.getMessage());
+			    		 e.printStackTrace();
+			    	 }
+		    		 
+		    	 }
+		    	 
+		     }
+		});  
+		t1.start();
+						
+		}
+	public void FTP(String FileName, String dir) throws IOException
+	{
+		File f = new File(FileName);
+		Date d = new Date(f.lastModified());
+		// FTP files don't have seconds for some reason, take out seconds
+		Calendar calendar =  Calendar.getInstance();
+		calendar.setTime(d);
+		calendar.set(Calendar.SECOND, 0);	
+		calendar.set(Calendar.MILLISECOND, 0);
+		d = calendar.getTime();
+		
+		System.out.println("LOCAL " + d);
+		
+		Date d2=null;
+		
+					
+		FTPClient ftp = new FTPClient();
+		FTPClientConfig conf = new FTPClientConfig(); 
+		conf.setServerTimeZoneId("UTC");
+		ftp.configure(conf);
+
+		ftp.connect("f8-preview.biz.nf");
+		//ftp.login("1929831","biznfsucks11");
+		System.out.println(ftp.login("1929831","biznfsucks11"));
+		System.out.println(ftp.getReplyString());
+		ftp.enterLocalPassiveMode();
+		ftp.changeWorkingDirectory(dir);
+		
+		
+		
+		FTPFile[] array = ftp.listFiles();
+		FTPFile file = null;
+				
+		for(FTPFile i : ftp.listFiles()) 
+		{
+			if(i.getName().equals("test.aspx"))
+			{
+				Calendar cal = i.getTimestamp();
+				d2 = cal.getTime();
+				System.out.println("FTP " + d2);
+				file = i;
+			}
+		}
+		
+		System.out.println("LOCAL " + d.getTime());
+		System.out.println("SERVER " + d2.getTime());
+		
+		if(d2.getTime() != d.getTime())
+		{
+			System.out.println("Not Same");
+			
+			final InputStream is = new FileInputStream(f.getPath());
+			boolean  blah = ftp.storeFile(f.getName(), is);
+			
+			String b = ftp.getReplyString();
+			
+			file.setTimestamp(calendar);
+			System.out.println("SET SERVER FILE TO " + file.getTimestamp());
+			is.close();
+			
+		}
+	
+		ftp.disconnect();
+
+		
+	}
+	
+	/*
 	public void FTP(String FileName, String dir) throws IOException
 	{
 		FTPClient ftp = new FTPClient();
@@ -2333,6 +2428,7 @@ public class main extends TimerTask
 		is.close();
 		
 	}
+	*/
 	/*
 	 *  write to JSON file. file path is specified in variable jsonFile.
 	 *  
