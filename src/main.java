@@ -209,8 +209,8 @@ public class main extends TimerTask
 
 		    			 System.out.println(new Date() + " <<FORUM>> STARTED");	
 		    			 turkerNation();
-		    		//	 mturkGrind();
-		    		//	 TurkForum();
+		    			 //mturkGrind();
+		    			 //TurkForum();
 			    		 System.out.println(new Date() + " <<FORUM>> FINISHED");
 			    		 Thread.sleep(timer.timeInterval());	
 		    		 }
@@ -624,8 +624,8 @@ public class main extends TimerTask
 			
 			if(!todayLink.equals(""))
 			{
-				processPageTN("http://turkernation.com/showthread.php?25209-08-12-15-wicked-wednesday/page15");
-				//processPageTN("http://turkernation.com/"+todayLink+"/page1000"); //1000 so its greater so it's always the last page
+				//processPageTN("http://turkernation.com/showthread.php?25209-08-12-15-wicked-wednesday/page15");
+				processPageTN("http://turkernation.com/"+todayLink+"/page1000"); //1000 so its greater so it's always the last page
 				
 			}
 			else
@@ -688,6 +688,7 @@ public class main extends TimerTask
 				String PandA ="";
 				
 				boolean hasTable = false; 
+				boolean firstTable = true; // only get the first table
 				ArrayList<String> textTable = new ArrayList<String>();
 				
 				while(!temp.equals("</blockquote>")) // keep looping all the text the poster did store them
@@ -702,9 +703,10 @@ public class main extends TimerTask
 					if(temp.contains("</table>")) // we hit the end of table, textTable should contain all the strings within table
 					{
 						hasTable=false;
+						firstTable = false;
 					}
 					
-					if(hasTable)
+					if(hasTable && firstTable)
 					{
 						if(filterPost(temp))
 						{
@@ -757,19 +759,59 @@ public class main extends TimerTask
 				// if I have hit, lets see if I have textTable populated, if I do then I Only use textTable
 				// Also need to add some logic to see if this is likely a hit, We assume if it is in <table></table> it's probably a hit.
 				// but lets add additional checks so probablity is higher.
-								
+				
+				//different mode. one for the above
+				// the second one I want try search in mturk first, if I find I use it, if i don't find, THEN I might use textTable, depnding on random 
+				//turkernation going to use mode 2
+				int mode = 2;
 				if(hit)
 				{
 					if(textTable.size()>0)
 					{
-						if(isAHit(textTable)) // if it's likely a hit
+						if(mode ==1)
 						{
-							text = textTable;							
+							if(isAHit(textTable)) // if it's likely a hit
+							{
+								text = textTable;							
+							}
+							else // if we have table, but turns out it's not a hit, DO NOT continue
+							{
+								hit = false;
+							}
 						}
-						else // if we have table, but turns out it's not a hit, DO NOT continue
+						else if(mode==2) // even though I have textTable I'm not going to use it. 
 						{
-							hit = false;
-						}
+							CED = createExportHitLink(hitLink, new ArrayList<String>()); 
+							
+							if(!CED.isFoundHit()) // if I don't find hit, either none left, or can't view because of qual 
+							{
+								// maybe use textTable
+								Random rand = new Random();
+								int  n = rand.nextInt(10) + 1;
+								if(n>=7) // use textTable
+								{
+									if(isAHit(textTable)) // if it's likely a hit
+									{
+										text = textTable;							
+									}
+									else // if we have table, but turns out it's not a hit, DO NOT continue
+									{
+										hit = false;
+									}
+								}
+								else
+								{
+									hit = false;
+								}
+							}
+							//I found the hit and I can view it
+							// call createExportHit to retrieve ArrayList for export style
+							else
+							{
+								//Again textTable at second parameter doesn't matter
+								text = createExportHit(CED, new ArrayList<String>());
+							}
+						}	
 					}
 					//If textTable is EMPTY, AND hit is true, this means that user posted a link without export style.
 					// in this scenario I don't want to use it, because I don't want user's other comment. 
@@ -779,7 +821,7 @@ public class main extends TimerTask
 						//yes I'm passing textTable
 						// doesn't make sense, because it takes arraylist at index 0, assuming it's title from reddit
 						// but this is not reddit
-						CED = createExportHitLink(hitLink, textTable); // hitLink most likely preview link
+						CED = createExportHitLink(hitLink, new ArrayList<String>()); 
 						
 						if(!CED.isFoundHit()) // if I don't find hit, either none left, or can't view because of qual 
 						{
@@ -790,12 +832,14 @@ public class main extends TimerTask
 						else
 						{
 							//Again textTable at second parameter doesn't matter
-							text = createExportHit(CED, textTable);
+							text = createExportHit(CED, new ArrayList<String>());
 							
 						}
 						
 					}
 				}
+				
+
 				
 				// if hit = true then we have to do more stuff, if not we keep looping
 				if(hit)
@@ -1029,7 +1073,7 @@ public class main extends TimerTask
 		
 		if(!todayLink.equals(""))
 		{
-			processPageMG("http://mturkgrind.com/threads/08-11-today-is-tuesday.28431/page-52");
+			//processPageMG("http://mturkgrind.com/threads/08-11-today-is-tuesday.28431/page-52");
 			processPageMG("http://mturkgrind.com/"+todayLink+"/page-1000"); //1000 so its greater so it's always the last page
 			
 		}
@@ -1791,7 +1835,7 @@ public class main extends TimerTask
 		// So I can try to take title and query search bar and see what I get.
 		// better to get No hit, then wrong hit.. so adding title and requester
 		
-		if(!CED.isFoundHit())
+		if(!CED.isFoundHit() && a.size()>0)
 		{
 			String title =a.get(0);			
 			 StringTokenizer st = new StringTokenizer(title, "-");
@@ -2329,7 +2373,7 @@ public class main extends TimerTask
 	    		 {
 		    	   try{
 
-		    			 FTP(jsonFile,"mturkpl.us");			    		 
+		    			 FTP("C:\\inetpub\\wwwroot\\www3\\stats.aspx","mturkpl.us");			    		 
 			    		 Thread.sleep(60000);	
 		    		 }
 		    	   catch(Exception e)
@@ -2348,17 +2392,17 @@ public class main extends TimerTask
 	public void FTP(String FileName, String dir) throws IOException
 	{
 		File f = new File(FileName);
-		Date d = new Date(f.lastModified());
+		//Date d = new Date(f.lastModified());
 		// FTP files don't have seconds for some reason, take out seconds
-		Calendar calendar =  Calendar.getInstance();
-		calendar.setTime(d);
-		calendar.set(Calendar.SECOND, 0);	
-		calendar.set(Calendar.MILLISECOND, 0);
-		d = calendar.getTime();
+	//	Calendar calendar =  Calendar.getInstance();
+	//	calendar.setTime(d);
+	//	calendar.set(Calendar.SECOND, 0);	
+	//	calendar.set(Calendar.MILLISECOND, 0);
+	//	d = calendar.getTime();
 		
-		System.out.println("LOCAL " + d);
+	//	System.out.println("LOCAL " + d);
 		
-		Date d2=null;
+	//	Date d2=null;
 		
 					
 		FTPClient ftp = new FTPClient();

@@ -64,11 +64,11 @@ public class timer extends TimerTask
 			
 			
 			main task = new main();
-			//task.doRedditHWTF();
-			//task.doForum();
-			//task.doMturkList();
-			//task.doWriteFTP();
-			task.test();
+			task.doRedditHWTF();
+			task.doForum();
+			task.doMturkList();
+			task.doWriteFTP();
+			//task.test();
 		}
 		catch(Exception e)
 		 {
