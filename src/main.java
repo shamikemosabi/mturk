@@ -209,8 +209,8 @@ public class main extends TimerTask
 
 		    			 System.out.println(new Date() + " <<FORUM>> STARTED");	
 		    			 turkerNation();
-		    			 mturkGrind();
-		    			 TurkForum();
+		    		//	 mturkGrind();
+		    		//	 TurkForum();
 			    		 System.out.println(new Date() + " <<FORUM>> FINISHED");
 			    		 Thread.sleep(timer.timeInterval());	
 		    		 }
@@ -624,8 +624,8 @@ public class main extends TimerTask
 			
 			if(!todayLink.equals(""))
 			{
-				//processPageTN("http://turkernation.com/showthread.php?25195-08-11-15-Turk-ON!!!!!!!!!!/page22");
-				processPageTN("http://turkernation.com/"+todayLink+"/page1000"); //1000 so its greater so it's always the last page
+				processPageTN("http://turkernation.com/showthread.php?25209-08-12-15-wicked-wednesday/page15");
+				//processPageTN("http://turkernation.com/"+todayLink+"/page1000"); //1000 so its greater so it's always the last page
 				
 			}
 			else
@@ -2329,7 +2329,7 @@ public class main extends TimerTask
 	    		 {
 		    	   try{
 
-		    			 FTP("S:\\test.aspx","mturkpl.us");			    		 
+		    			 FTP(jsonFile,"mturkpl.us");			    		 
 			    		 Thread.sleep(60000);	
 		    		 }
 		    	   catch(Exception e)
@@ -2366,15 +2366,15 @@ public class main extends TimerTask
 		conf.setServerTimeZoneId("UTC");
 		ftp.configure(conf);
 
-		ftp.connect("f8-preview.biz.nf");
+		ftp.connect("doms.freewha.com");
 		//ftp.login("1929831","biznfsucks11");
-		System.out.println(ftp.login("1929831","biznfsucks11"));
+		System.out.println(ftp.login("www.mturkpl.us","freewebsucks11"));
 		System.out.println(ftp.getReplyString());
 		ftp.enterLocalPassiveMode();
-		ftp.changeWorkingDirectory(dir);
+	//	ftp.changeWorkingDirectory(dir);
 		
 		
-		
+		/*
 		FTPFile[] array = ftp.listFiles();
 		FTPFile file = null;
 				
@@ -2406,7 +2406,15 @@ public class main extends TimerTask
 			is.close();
 			
 		}
+	*/
+		
+		final InputStream is = new FileInputStream(f.getPath());
+		boolean  blah = ftp.storeFile(f.getName(), is);
+		
+		String b = ftp.getReplyString();
 	
+		is.close();
+		
 		ftp.disconnect();
 
 		
