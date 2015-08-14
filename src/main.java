@@ -300,6 +300,8 @@ public class main extends TimerTask
 			
 			String reward = "";
 			
+			String time = "";
+			
 			boolean newLink = false;
 			
 			
@@ -345,6 +347,13 @@ public class main extends TimerTask
 					reward = s.substring(s.indexOf("$"), s.indexOf("]"));
 					
 				}
+	
+				if(s.startsWith("<div class=\"time\" title=\"Average completion time\">")) // time
+				{
+					s = s.substring(s.indexOf("Time:") + 5);
+					time = s.substring(0, s.indexOf("<"));				
+					
+				}
 				
 				//by the time I get into this if, I should have all my data already.
 				if(s.startsWith("<button class=\"deadButt\"") || s.startsWith("<button class=\"aliveButt\""))
@@ -360,6 +369,7 @@ public class main extends TimerTask
 						requesterURL="";
 						requesterID = "";
 						reward = "";
+						time = "";
 						
 					}
 					else// shows dead button, meaning it's still alive
@@ -393,7 +403,7 @@ public class main extends TimerTask
 					System.out.println(reward);
 					*/
 					
-					newLink = checkIfLinkExist(createExportHit(title, link, requester, requesterURL, requesterID, PandA, reward), PandA, "ML",3600000, alJson);
+					newLink = checkIfLinkExist(createExportHit(title, link, requester, requesterURL, requesterID, PandA, reward, time), PandA, "ML",3600000, alJson);
 					
 					
 					link = "";
@@ -532,7 +542,7 @@ public class main extends TimerTask
 		return  a;
 		
 	}
-	public ArrayList<String> createExportHit(String title, String link, String requester, String requesterURL, String requesterID, String Panda, String reward){
+	public ArrayList<String> createExportHit(String title, String link, String requester, String requesterURL, String requesterID, String Panda, String reward, String time){
 		ArrayList<String> text = new ArrayList<String>();
 	
 			String TOURL = "https://turkopticon.ucsd.edu/api/multi-attrs.php?ids=";
@@ -568,6 +578,9 @@ public class main extends TimerTask
 			text.add(imgURL);
 			
 			temp = "<br> <b>Reward:</b> <font color=\"green\"><b>" +reward + "</b></font><br>";
+			text.add(temp);
+			
+			temp = "<br>" + time + "</br>";
 			text.add(temp);
 
 		return text;

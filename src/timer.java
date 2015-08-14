@@ -65,8 +65,8 @@ public class timer extends TimerTask
 			
 			main task = new main();
 			//task.doRedditHWTF();
-			task.doForum();
-			//task.doMturkList();
+			//task.doForum();
+			task.doMturkList();
 			//task.doWriteFTP();
 			//task.test();
 		}
@@ -133,7 +133,7 @@ public class timer extends TimerTask
 			else if(isTimeBetweenTwoTime("07:00:00","17:00:00")) //7 am - 5 pm
 			{
 				System.out.println(new Date() +" Between 7 - 5");
-				mod1 = rand.nextInt(2)+1;
+				mod1 = 1;
 				mod2 = rand.nextInt(30)+1;
 				
 				System.out.println(mod1 + " " + mod2);
