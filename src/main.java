@@ -753,94 +753,13 @@ public class main extends TimerTask
 				{
 					PandA = hitLink;
 				}
-				
-				
-				createExportData CED = new createExportData();
-				// if I have hit, lets see if I have textTable populated, if I do then I Only use textTable
-				// Also need to add some logic to see if this is likely a hit, We assume if it is in <table></table> it's probably a hit.
-				// but lets add additional checks so probablity is higher.
-				
-				//different mode. one for the above
-				// the second one I want try search in mturk first, if I find I use it, if i don't find, THEN I might use textTable, depnding on random 
-				//turkernation going to use mode 2
-				int mode = 2;
+					
 				if(hit)
 				{
-					if(textTable.size()>0)
-					{
-						if(mode ==1)
-						{
-							if(isAHit(textTable)) // if it's likely a hit
-							{
-								text = textTable;							
-							}
-							else // if we have table, but turns out it's not a hit, DO NOT continue
-							{
-								hit = false;
-							}
-						}
-						else if(mode==2) // even though I have textTable I'm not going to use it. 
-						{
-							CED = createExportHitLink(hitLink, new ArrayList<String>()); 
-							
-							if(!CED.isFoundHit()) // if I don't find hit, either none left, or can't view because of qual 
-							{
-								// maybe use textTable
-								Random rand = new Random();
-								int  n = rand.nextInt(10) + 1;
-								if(n>=7) // use textTable
-								{
-									if(isAHit(textTable)) // if it's likely a hit
-									{
-										text = textTable;							
-									}
-									else // if we have table, but turns out it's not a hit, DO NOT continue
-									{
-										hit = false;
-									}
-								}
-								else
-								{
-									hit = false;
-								}
-							}
-							//I found the hit and I can view it
-							// call createExportHit to retrieve ArrayList for export style
-							else
-							{
-								//Again textTable at second parameter doesn't matter
-								text = createExportHit(CED, new ArrayList<String>());
-							}
-						}	
-					}
-					//If textTable is EMPTY, AND hit is true, this means that user posted a link without export style.
-					// in this scenario I don't want to use it, because I don't want user's other comment. 
-					// Instead let's call createExportHitLink
-					else
-					{
-						//yes I'm passing textTable
-						// doesn't make sense, because it takes arraylist at index 0, assuming it's title from reddit
-						// but this is not reddit
-						CED = createExportHitLink(hitLink, new ArrayList<String>()); 
-						
-						if(!CED.isFoundHit()) // if I don't find hit, either none left, or can't view because of qual 
-						{
-							hit = false;
-						}
-						//I found the hit and I can view it
-						// call createExportHit to retrieve ArrayList for export style
-						else
-						{
-							//Again textTable at second parameter doesn't matter
-							text = createExportHit(CED, new ArrayList<String>());
-							
-						}
-						
-					}
+					text = filterSmartMode(3, textTable, hitLink);
+					hit = (text.size()==0)? false: true;
 				}
-				
-
-				
+		
 				// if hit = true then we have to do more stuff, if not we keep looping
 				if(hit)
 				{
@@ -884,6 +803,119 @@ public class main extends TimerTask
 		
 		
 	}
+	
+	
+	/*
+	 * method to pass mode value,
+	 * depending on mode, we create different hit style.
+	 * 
+	 * The goal is to not just blatantly take from forum. 
+	 *
+	 */
+	
+	public ArrayList<String> filterSmartMode(int mode, ArrayList<String> textTable, String hitLink) throws Exception
+	{
+		boolean hit = false; // i know I don't really need this, i'm returning ArrayList, if size = 0 then it means false
+		
+		ArrayList<String> text = new ArrayList<String>();
+		createExportData CED = new createExportData();
+		// if I have hit, lets see if I have textTable populated, if I do then I Only use textTable
+		// Also need to add some logic to see if this is likely a hit, We assume if it is in <table></table> it's probably a hit.
+		// but lets add additional checks so probablity is higher.
+		
+		//different mode. one for the above
+		// the second one I want try search in mturk first, if I find I use it, if i don't find, THEN I might use textTable, depnding on random 
+		//turkernation going to use mode 2
+		
+			if(textTable.size()>0)
+			{
+				if(mode ==1)
+				{
+					if(isAHit(textTable)) // if it's likely a hit
+					{
+						text = textTable;							
+					}
+					else // if we have table, but turns out it's not a hit, DO NOT continue
+					{
+						hit = false;
+					}
+				}
+				else if(mode==2) // even though I have textTable I'm might not use it. 
+				{
+					CED = createExportHitLink(hitLink, new ArrayList<String>()); 
+					
+					if(!CED.isFoundHit()) // if I don't find hit, either none left, or can't view because of qual 
+					{
+						// maybe use textTable
+						Random rand = new Random();
+						int  n = rand.nextInt(10) + 1;
+						if(n>=7) // use textTable
+						{
+							if(isAHit(textTable)) // if it's likely a hit
+							{
+								text = textTable;							
+							}
+							else // if we have table, but turns out it's not a hit, DO NOT continue
+							{
+								hit = false;
+							}
+						}
+						else
+						{
+							hit = false;
+						}
+					}
+					//I found the hit and I can view it
+					// call createExportHit to retrieve ArrayList for export style
+					else
+					{
+						//Again textTable at second parameter doesn't matter
+						text = createExportHit(CED, new ArrayList<String>());
+					}
+				}
+				else if(mode ==3) // I definitely won't use textTable
+				{
+					CED = createExportHitLink(hitLink, new ArrayList<String>()); 
+					if(CED.isFoundHit()) 
+					{
+						text = createExportHit(CED, new ArrayList<String>());
+					}
+					else
+					{
+						hit = false;
+					}
+				}
+			}
+			//If textTable is EMPTY, AND hit is true, this means that user posted a link without export style.
+			// in this scenario I don't want to use it, because I don't want user's other comment. 
+			// Instead let's call createExportHitLink
+			else
+			{
+				//yes I'm passing textTable
+				// doesn't make sense, because it takes arraylist at index 0, assuming it's title from reddit
+				// but this is not reddit
+				CED = createExportHitLink(hitLink, new ArrayList<String>()); 
+				
+				if(!CED.isFoundHit()) // if I don't find hit, either none left, or can't view because of qual 
+				{
+					hit = false;
+				}
+				//I found the hit and I can view it
+				// call createExportHit to retrieve ArrayList for export style
+				else
+				{
+					//Again textTable at second parameter doesn't matter
+					text = createExportHit(CED, new ArrayList<String>());
+					
+				}
+				
+			}
+			
+			return text;
+			
+	}
+	
+	
 	
 	/*
 	 * take a, which is lines of comments.
@@ -1203,48 +1235,10 @@ public class main extends TimerTask
 					PandA = hitLink;
 				}				
 				
-				createExportData CED = new createExportData();
-				// if I have hit, lets see if I have textTable populated, if I do then I Only use textTable
-				// Also need to add some logic to see if this is likely a hit, We assume if it is in <table></table> it's probably a hit.
-				// but lets add additional checks so probablity is higher.
-				
 				if(hit)
 				{
-					if(textTable.size()>0)
-					{
-						if(isAHit(textTable)) // if it's likely a hit
-						{
-							text = textTable;							
-						}
-						else // if we have table, but turns out it's not a hit, DO NOT continue
-						{
-							hit = false;
-						}
-					}
-					//If textTable is EMPTY, AND hit is true, this means that user posted a link without export style.
-					// in this scenario I don't want to use it, because I don't want user's other comment. 
-					// Instead let's call createExportHitLink
-					else
-					{
-						//yes I'm passing textTable
-						// doesn't make sense, because it takes arraylist at index 0, assuming it's title from reddit
-						// but this is not reddit
-						CED = createExportHitLink(hitLink, textTable); // hitLink most likely preview link
-						
-						if(!CED.isFoundHit()) // if I don't find hit, either none left, or can't view because of qual 
-						{
-							hit = false;
-						}
-						//I found the hit and I can view it
-						// call createExportHit to retrieve ArrayList for export style
-						else
-						{
-							//Again textTable at second parameter doesn't matter
-							text = createExportHit(CED, textTable);
-							
-						}
-						
-					}
+					text = filterSmartMode(1, textTable, hitLink);
+					hit = (text.size()==0)? false: true;
 				}
 				
 				// if hit = true then we have to do more stuff, if not we keep looping
@@ -2200,50 +2194,11 @@ public class main extends TimerTask
 					PandA = hitLink;
 				}
 				
-				createExportData CED = new createExportData();
-				// if I have hit, lets see if I have textTable populated, if I do then I Only use textTable
-				// Also need to add some logic to see if this is likely a hit, We assume if it is in <table></table> it's probably a hit.
-				// but lets add additional checks so probablity is higher.
-				
 				if(hit)
 				{
-					if(textTable.size()>0)
-					{
-						if(isAHit(textTable)) // if it's likely a hit
-						{
-							text = textTable;							
-						}
-						else // if we have table, but turns out it's not a hit, DO NOT continue
-						{
-							hit = false;
-						}
-					}
-					//If textTable is EMPTY, AND hit is true, this means that user posted a link without export style.
-					// in this scenario I don't want to use it, because I don't want user's other comment. 
-					// Instead let's call createExportHitLink
-					else
-					{
-						//yes I'm passing textTable
-						// doesn't make sense, because it takes arraylist at index 0, assuming it's title from reddit
-						// but this is not reddit
-						CED = createExportHitLink(hitLink, textTable); // hitLink most likely preview link
-						
-						if(!CED.isFoundHit()) // if I don't find hit, either none left, or can't view because of qual 
-						{
-							hit = false;
-						}
-						//I found the hit and I can view it
-						// call createExportHit to retrieve ArrayList for export style
-						else
-						{
-							//Again textTable at second parameter doesn't matter
-							text = createExportHit(CED, textTable);
-							
-						}
-						
-					}
+					text = filterSmartMode(1, textTable, hitLink);
+					hit = (text.size()==0)? false: true;
 				}
-				
 				
 				// if hit = true then we have to do more stuff, if not we keep looping
 				if(hit)
