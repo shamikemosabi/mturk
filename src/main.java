@@ -45,7 +45,7 @@ public class main extends TimerTask
 	
 	static window w;
 	
-	boolean test = true;
+	boolean test = false;
 	
 	String jsonFile = "C:\\inetpub\\wwwroot\\www3\\test.aspx";
 	ArrayList<String> alJson = new ArrayList<String>();
@@ -208,9 +208,9 @@ public class main extends TimerTask
 		    	   try{
 
 		    			 System.out.println(new Date() + " <<FORUM>> STARTED");	
-		    			 turkerNation();
-		    			 //mturkGrind();
-		    			 //TurkForum();
+		    			// turkerNation();
+		    			 mturkGrind();
+		    			 TurkForum();
 			    		 System.out.println(new Date() + " <<FORUM>> FINISHED");
 			    		 Thread.sleep(timer.timeInterval());	
 		    		 }
@@ -1450,15 +1450,27 @@ public class main extends TimerTask
 		String url ="http://www.reddit.com/r/HITsWorthTurkingFor/new/";
 		URL pageURL = new URL(url); 
 		HttpURLConnection urlConnection = (HttpURLConnection) pageURL.openConnection();
-		urlConnection.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3");
+		urlConnection.addRequestProperty("Accept-Language", "en-US,en;q=0.8");
+		urlConnection.addRequestProperty("User-Agent", "Mozilla");
+		urlConnection.addRequestProperty("Referer", "google.com");
 		urlConnection.setRequestMethod("GET");
 		urlConnection.connect();
-	
+		
+		if(urlConnection.getResponseCode() == 302){ //wtf reddit redirecting me, but to the same URL
+			String newUrl = urlConnection.getHeaderField("Location");
+			urlConnection  = (HttpURLConnection) new URL(newUrl).openConnection();
+			urlConnection.addRequestProperty("Accept-Language", "en-US,en;q=0.8");
+			urlConnection.addRequestProperty("User-Agent", "Mozilla");
+			urlConnection.addRequestProperty("Referer", "google.com");
+			urlConnection.setRequestMethod("GET");							
+			urlConnection.connect();
+		}
+		
 		
 		InputStream in = new BufferedInputStream(urlConnection.getInputStream()); 
 		PrintWriter pw = new PrintWriter(new FileWriter("blah3.html"));
 		Reader r = new InputStreamReader(in);
-		
+		System.out.println(r.read());
 		int c;
 		 while((c = r.read()) != -1) 
 	        {         	
@@ -1518,7 +1530,18 @@ public class main extends TimerTask
 				urlConnection.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3");
 				urlConnection.setRequestMethod("GET");
 				urlConnection.connect();
-								in = new BufferedInputStream(urlConnection.getInputStream()); 
+				
+				if(urlConnection.getResponseCode() == 302){ //wtf reddit redirecting me, but to the same URL
+					String newUrl = urlConnection.getHeaderField("Location");
+					urlConnection  = (HttpURLConnection) new URL(newUrl).openConnection();
+					urlConnection.addRequestProperty("Accept-Language", "en-US,en;q=0.8");
+					urlConnection.addRequestProperty("User-Agent", "Mozilla");
+					urlConnection.addRequestProperty("Referer", "google.com");
+					urlConnection.setRequestMethod("GET");							
+					urlConnection.connect();
+				}
+				
+				in = new BufferedInputStream(urlConnection.getInputStream()); 
 				pw = new PrintWriter(new FileWriter("blah2HWTF.html"));
 				r = new InputStreamReader(in);
 			
