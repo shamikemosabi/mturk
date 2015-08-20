@@ -494,15 +494,19 @@ public class main extends TimerTask
 		
 		if(!CED.getRequesterURL().equals(""))
 		{
-			temp = "<b>Requester:</b> <a href=\""+ CED.getRequesterURL() +"\" target=\"_blank\">";	
-			text.add(temp);
+			temp = "<a href=\""+ CED.getRequesterURL() +"\" target=\"_blank\">";	
+			t1 = temp;
+			//text.add(temp);
 		}
 		
 		if(!CED.getRequester().equals(""))
 		{
-			temp = "<font color=\"blue\">" + CED.getRequester() + "</font></a> "+ (CED.getRequesterID().equals("")?"":CED.getRequesterID());
-			text.add(temp);
+			temp = "<font color=\"blue\">" + CED.getRequester() + "</font>"+ (CED.getRequesterID().equals("")?"":CED.getRequesterID());
+			t2 = temp;
+			//text.add(temp);
 		}
+		//same logic as title, I can have requester URL ID with out requester and vice versa
+		text.add(((!CED.getRequester().equals("")) ? "<b>Requester:</b>": "") + t1 + t2 +((!CED.getRequesterURL().equals("")) ? "</a>":"") + "</br>" );
 		
 		if(!CED.getRequesterID().equals(""))
 		{
