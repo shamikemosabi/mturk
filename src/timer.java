@@ -4,6 +4,13 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import org.jsoup.Jsoup;
+import org.jsoup.helper.Validate;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+
 public class timer extends TimerTask
 {
 	public static boolean runHWTF = true;
@@ -22,46 +29,14 @@ public class timer extends TimerTask
 		}
 	}
 	public static void main(String[] args)
-	{
-
-		
-
-		
-		/*
-		 * 
-		TimerTask task = new timer();
-		
-		Timer timer = new Timer();
-		
-		//timer.scheduleAtFixedRate(task,new Date(), 180000); //3 min
-		
-		
-		timer.scheduleAtFixedRate(task,new Date(), test()); //1 min
-		*/
-		
-		/*
-		while(true) 
-		{
-	 
-		 try {			
-				new main();
-				Thread.sleep(timeInterval());				
-			    
-			} catch(InterruptedException ex) {
-			    Thread.currentThread().interrupt();
-			}
-		 	catch(Exception e)
-			 {
-			 	System.out.println(e.getMessage());
-			 }
-		}
-		
-		*/
+	{		
 		try{
 			URL url = new URL("http://checkip.amazonaws.com/");
 			BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
 			System.out.println(br.readLine());
+			br.close();
 			
+			test();
 			
 			main task = new main();
 			task.doRedditHWTF();
@@ -78,6 +53,30 @@ public class timer extends TimerTask
 	 
 		
 	}	
+	
+	public static void test() 
+	{
+		try{
+			Document doc = Jsoup.connect("http://turkernation.com/forumdisplay.php?157-Daily-HIT-Threads").userAgent("Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3").get();			
+			
+			Elements link  = doc.getElementsByClass("threadtitle");
+			Elements links = doc.select("a[href]");
+			
+			 for (Element b : links) {
+				 String linkHref = b.attr("href"); // "http://example.com/"
+				 String linkText = b.text(); // "example""
+				 
+				 	System.out.println(linkHref);
+
+		       }
+
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
 	
 	/*
 	 * need to randomly set time

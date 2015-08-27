@@ -45,7 +45,7 @@ public class main extends TimerTask
 	
 	static window w;
 	
-	boolean test = false;
+	boolean test = true;
 	
 	String jsonFile = "C:\\inetpub\\wwwroot\\www3\\test.aspx";
 	ArrayList<String> alJson = new ArrayList<String>();
@@ -2328,7 +2328,7 @@ public class main extends TimerTask
 			read.seralize(myData); //Write back data class
 			
 			//write to full data
-			addSeralize(readFull,hd);
+		//	addSeralize(readFull,hd);
 			
 			
 			writeToJSONPerHIT(a,l, jsonList);
