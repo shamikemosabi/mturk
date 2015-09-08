@@ -36,7 +36,7 @@ public class timer extends TimerTask
 			System.out.println(br.readLine());
 			br.close();
 			
-			test();
+		//	test();
 			
 			main task = new main();
 			task.doRedditHWTF();
@@ -57,7 +57,7 @@ public class timer extends TimerTask
 	public static void test() 
 	{
 		try{
-			Document doc = Jsoup.connect("http://turkernation.com/forumdisplay.php?157-Daily-HIT-Threads").userAgent("Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3").get();			
+			Document doc = Jsoup.connect("http://turkernation.com/forumdisplay.php?157-Daily-HIT-Threads&s=0e04b86d371223291653dd430053a207").userAgent("Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3").get();			
 			
 			Elements link  = doc.getElementsByClass("threadtitle");
 			Elements links = doc.select("a[href]");

@@ -45,7 +45,7 @@ public class main extends TimerTask
 	
 	static window w;
 	
-	boolean test = true;
+	boolean test = false;
 	
 	String jsonFile = "C:\\inetpub\\wwwroot\\www3\\test.aspx";
 	ArrayList<String> alJson = new ArrayList<String>();
@@ -208,7 +208,7 @@ public class main extends TimerTask
 		    	   try{
 
 		    			 System.out.println(new Date() + " <<FORUM>> STARTED");	
-		    			// turkerNation();
+		    			 //turkerNation();
 		    			 mturkGrind();
 		    			 TurkForum();
 			    		 System.out.println(new Date() + " <<FORUM>> FINISHED");
@@ -637,7 +637,7 @@ public class main extends TimerTask
 		try
 		{
 			System.out.println(new Date() + " <<FORUM>> Started Turker Nation");
-			String todayLink = getTodayLinkTN("http://turkernation.com/forumdisplay.php?157-Daily-HIT-Threads&s=ca61dd26c7855c91401d0d5e9201fdbf", true);
+			String todayLink = getTodayLinkTN("http://turkernation.com/forumdisplay.php?157-Daily-HIT-Threads", true);
 			
 			if(!todayLink.equals(""))
 			{
@@ -1005,7 +1005,7 @@ public class main extends TimerTask
 		
 		
 		InputStream in = new BufferedInputStream(urlConnection.getInputStream()); 
-		PrintWriter pw = new PrintWriter(new FileWriter("blah.html"));
+		PrintWriter pw = new PrintWriter(new FileWriter("blahTN.html"));
 		
 		Reader r = new InputStreamReader(in);
 	
@@ -1019,7 +1019,7 @@ public class main extends TimerTask
 			
 			//after writing into file we will read it.
 			
-			BufferedReader reader = new BufferedReader(new FileReader("blah.html"));	
+			BufferedReader reader = new BufferedReader(new FileReader("blahTN.html"));	
 			String s;
 			String ret="";
 		    DateFormat dateFormat = new SimpleDateFormat("MM/dd");
@@ -2405,12 +2405,14 @@ public class main extends TimerTask
 		conf.setServerTimeZoneId("UTC");
 		ftp.configure(conf);
 
-		ftp.connect("doms.freewha.com");
+		//ftp.connect("doms.freewha.com");
 		//ftp.login("1929831","biznfsucks11");
-		System.out.println(ftp.login("www.mturkpl.us","freewebsucks11"));
+		ftp.connect("mturkpl.us");
+		//System.out.println(ftp.login("www.mturkpl.us","freewebsucks11"));
+		System.out.println(ftp.login("a4515727","fuckyou11"));
 		System.out.println(ftp.getReplyString());
 		ftp.enterLocalPassiveMode();
-	//	ftp.changeWorkingDirectory(dir);
+		ftp.changeWorkingDirectory(dir);
 		
 		
 		/*
