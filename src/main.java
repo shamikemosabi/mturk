@@ -209,7 +209,7 @@ public class main extends TimerTask
 
 		    			 System.out.println(new Date() + " <<FORUM>> STARTED");	
 		    			 //turkerNation();
-		    			 mturkGrind();
+		    			// mturkGrind();
 		    			 TurkForum();
 			    		 System.out.println(new Date() + " <<FORUM>> FINISHED");
 			    		 Thread.sleep(timer.timeInterval());	
@@ -1460,7 +1460,7 @@ public class main extends TimerTask
 		urlConnection.setRequestMethod("GET");
 		urlConnection.connect();
 		
-		if(urlConnection.getResponseCode() == 302){ //wtf reddit redirecting me, but to the same URL
+		if(urlConnection.getResponseCode() == 301){ //wtf reddit redirecting me, but to the same URL
 			String newUrl = urlConnection.getHeaderField("Location");
 			urlConnection  = (HttpURLConnection) new URL(newUrl).openConnection();
 			urlConnection.addRequestProperty("Accept-Language", "en-US,en;q=0.8");
@@ -1535,7 +1535,7 @@ public class main extends TimerTask
 				urlConnection.setRequestMethod("GET");
 				urlConnection.connect();
 				
-				if(urlConnection.getResponseCode() == 302){ //wtf reddit redirecting me, but to the same URL
+				if(urlConnection.getResponseCode() == 301){ //wtf reddit redirecting me, but to the same URL
 					String newUrl = urlConnection.getHeaderField("Location");
 					urlConnection  = (HttpURLConnection) new URL(newUrl).openConnection();
 					urlConnection.addRequestProperty("Accept-Language", "en-US,en;q=0.8");
