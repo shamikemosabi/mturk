@@ -2405,11 +2405,11 @@ public class main extends TimerTask
 		conf.setServerTimeZoneId("UTC");
 		ftp.configure(conf);
 
-		//ftp.connect("doms.freewha.com");
+		ftp.connect("doms.freewha.com");
 		//ftp.login("1929831","biznfsucks11");
-		ftp.connect("mturkpl.us");
-		//System.out.println(ftp.login("www.mturkpl.us","freewebsucks11"));
-		System.out.println(ftp.login("a4515727","fuckyou11"));
+		//ftp.connect("mturkpl.us");
+		System.out.println(ftp.login("www.mturkpl.us","freewebsucks11"));
+		//System.out.println(ftp.login("a4515727","fuckyou11"));
 		System.out.println(ftp.getReplyString());
 		ftp.enterLocalPassiveMode();
 		ftp.changeWorkingDirectory(dir);
