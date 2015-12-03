@@ -114,8 +114,8 @@ public class main extends TimerTask
 
 		// loop reverse, because ArrayList remove will shift index
 		for(int j = remIndex.size() - 1; j >= 0; j--){			 
-			int i = (int)remIndex.get(j);
-			myData.getArray().remove(i);
+			Integer i = (Integer) remIndex.get(j);
+			myData.getArray().remove(i.intValue());
 			
 			System.out.println(new Date() + " <<FTP>> Removing hits");
 			
@@ -209,7 +209,7 @@ public class main extends TimerTask
 
 		    			 System.out.println(new Date() + " <<FORUM>> STARTED");	
 		    			 //turkerNation();
-		    			// mturkGrind();
+		    			 mturkGrind();
 		    			 TurkForum();
 			    		 System.out.println(new Date() + " <<FORUM>> FINISHED");
 			    		 Thread.sleep(timer.timeInterval());	
@@ -2384,79 +2384,46 @@ public class main extends TimerTask
 		t1.start();
 						
 		}
-	public void FTP(String FileName, String dir) throws IOException
+	public void FTP(String FileName, String dir) 
 	{
 		File f = new File(FileName);
-		//Date d = new Date(f.lastModified());
-		// FTP files don't have seconds for some reason, take out seconds
-	//	Calendar calendar =  Calendar.getInstance();
-	//	calendar.setTime(d);
-	//	calendar.set(Calendar.SECOND, 0);	
-	//	calendar.set(Calendar.MILLISECOND, 0);
-	//	d = calendar.getTime();
-		
-	//	System.out.println("LOCAL " + d);
-		
-	//	Date d2=null;
-		
 					
 		FTPClient ftp = new FTPClient();
 		FTPClientConfig conf = new FTPClientConfig(); 
 		conf.setServerTimeZoneId("UTC");
 		ftp.configure(conf);
 
-		ftp.connect("doms.freewha.com");
-		//ftp.login("1929831","biznfsucks11");
-		//ftp.connect("mturkpl.us");
-		System.out.println(ftp.login("www.mturkpl.us","freewebsucks11"));
-		//System.out.println(ftp.login("a4515727","fuckyou11"));
-		System.out.println(ftp.getReplyString());
-		ftp.enterLocalPassiveMode();
-		ftp.changeWorkingDirectory(dir);
+		 boolean success = false;
+	     int count = 0;
 		
-		
-		/*
-		FTPFile[] array = ftp.listFiles();
-		FTPFile file = null;
+	     do{
+	    	 try{
+				ftp.connect("doms.freewha.com");
+				//ftp.login("1929831","biznfsucks11");
+				//ftp.connect("mturkpl.us");
+				System.out.println(ftp.login("www.mturkpl.us","freewebsucks11"));
+				//System.out.println(ftp.login("a4515727","fuckyou11"));
+				System.out.println(ftp.getReplyString());
+				ftp.enterLocalPassiveMode();
+				ftp.changeWorkingDirectory(dir);
 				
-		for(FTPFile i : ftp.listFiles()) 
-		{
-			if(i.getName().equals("test.aspx"))
-			{
-				Calendar cal = i.getTimestamp();
-				d2 = cal.getTime();
-				System.out.println("FTP " + d2);
-				file = i;
-			}
-		}
-		
-		System.out.println("LOCAL " + d.getTime());
-		System.out.println("SERVER " + d2.getTime());
-		
-		if(d2.getTime() != d.getTime())
-		{
-			System.out.println("Not Same");
+				
+				final InputStream is = new FileInputStream(f.getPath());
+				success = ftp.storeFile(f.getName(), is);
+				
 			
-			final InputStream is = new FileInputStream(f.getPath());
-			boolean  blah = ftp.storeFile(f.getName(), is);
-			
-			String b = ftp.getReplyString();
-			
-			file.setTimestamp(calendar);
-			System.out.println("SET SERVER FILE TO " + file.getTimestamp());
-			is.close();
-			
-		}
-	*/
-		
-		final InputStream is = new FileInputStream(f.getPath());
-		boolean  blah = ftp.storeFile(f.getName(), is);
-		
-		String b = ftp.getReplyString();
-	
-		is.close();
-		
-		ftp.disconnect();
+				is.close();
+				
+				ftp.disconnect();
+				count++;
+				
+	    	 }
+	    	 catch(Exception e)
+	    	 {
+	    		 e.printStackTrace();
+	    		 success = false;
+	    	 }
+	     }while(!success && count < 10);
 
 		
 	}
