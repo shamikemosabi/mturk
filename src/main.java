@@ -2395,6 +2395,7 @@ public class main extends TimerTask
 
 		 boolean success = false;
 	     int count = 0;
+	     InputStream is = null;
 		
 	     do{
 	    	 try{
@@ -2407,21 +2408,28 @@ public class main extends TimerTask
 				ftp.enterLocalPassiveMode();
 				ftp.changeWorkingDirectory(dir);
 				
-				
-				final InputStream is = new FileInputStream(f.getPath());
+				count++;
+				is = new FileInputStream(f.getPath());
 				success = ftp.storeFile(f.getName(), is);
 				
-			
+				
 				is.close();
 				
 				ftp.disconnect();
-				count++;
+			
 				
 	    	 }
 	    	 catch(Exception e)
 	    	 {
-	    		 e.printStackTrace();
-	    		 success = false;
+	    		 try{
+		    		 e.printStackTrace();
+		    		 is.close();
+		    		 success = false;
+	    		 }
+		    	catch(Exception ex)
+		    	{
+		    			 
+		    	}
 	    	 }
 	     }while(!success && count < 10);
 
