@@ -208,7 +208,7 @@ public class main extends TimerTask
 		    	   try{
 
 		    			 System.out.println(new Date() + " <<FORUM>> STARTED");	
-		    			 //turkerNation();
+		    			 turkerNation();
 		    			 mturkGrind();
 		    			 TurkForum();
 			    		 System.out.println(new Date() + " <<FORUM>> FINISHED");
@@ -2079,8 +2079,14 @@ public class main extends TimerTask
 				// or a dead hit( a dead hit with requester ID in URL, or dead hit with absolutely nothing)
 				// with empty CEData. Either case I have an object of CEData.
 				// I still want to export the hit, DOA
-				
+								
 				CEData.setRequesterID(requestID);
+				
+				//If I found the hit, But I'm able to grab hit links from it. let's just set link as the search page.
+				if(CEData.getLink().equals(""))
+				{
+					CEData.setLink(url);
+				}
 				
 				reader.close();
 				
