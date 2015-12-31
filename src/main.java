@@ -2413,7 +2413,7 @@ public class main extends TimerTask
 				System.out.println(ftp.getReplyString());
 				ftp.enterLocalPassiveMode();
 				ftp.changeWorkingDirectory(dir);
-				
+				ftp.setRemoteVerificationEnabled(false);
 				count++;
 				is = new FileInputStream(f.getPath());
 				success = ftp.storeFile(f.getName(), is);
