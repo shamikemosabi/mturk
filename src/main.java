@@ -45,7 +45,7 @@ public class main extends TimerTask
 	
 	static window w;
 	
-	boolean test = false;
+	boolean test = true;
 	
 	String jsonFile = "C:\\inetpub\\wwwroot\\www3\\test.aspx";
 	ArrayList<String> alJson = new ArrayList<String>();
@@ -211,6 +211,7 @@ public class main extends TimerTask
 		    			 turkerNation();
 		    			 mturkGrind();
 		    			 TurkForum();
+		    			 mturkCrowd(); 
 			    		 System.out.println(new Date() + " <<FORUM>> FINISHED");
 			    		 Thread.sleep(timer.timeInterval());	
 		    		 }
@@ -227,6 +228,8 @@ public class main extends TimerTask
 		t1.start();
 		
 	}
+	
+	
 	
 	
 	
@@ -1112,6 +1115,298 @@ public class main extends TimerTask
 			return ret;
 
 			
+	}
+	
+	public void processPageMC(String u) throws Exception
+	{
+		String url = u;
+		//String url = "http://mturkforum.com/showthread.php?6244-Can-t-Find-Good-HITs-2-10/page100";
+		URL pageURL = new URL(url); 
+		HttpURLConnection urlConnection = (HttpURLConnection) pageURL.openConnection();
+		urlConnection.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3");
+		urlConnection.setRequestMethod("GET");
+		urlConnection.connect();
+		
+		
+		InputStream in = new BufferedInputStream(urlConnection.getInputStream()); 
+		PrintWriter pw = new PrintWriter(new FileWriter("blahMC2.html"));
+		
+		Reader r = new InputStreamReader(in);
+	
+		int c;
+		 while((c = r.read()) != -1) 
+	        {         	
+	           pw.print(String.valueOf((char)c)); 
+	        } 
+	        r.close();
+			pw.close();
+			
+			
+			
+		boolean newLink = false;	
+		//after writing into file we will read it.
+		
+			
+		BufferedReader reader = new BufferedReader(new FileReader("blahMC2.html"));	
+		String s;
+		while((s = reader.readLine()) != null)
+		{
+			String temp = s.toLowerCase().trim(); //let's trim it first
+
+			if(temp.startsWith("<blockquote class="))
+			{
+				boolean hit = false;
+				ArrayList<String> text = new ArrayList<String>();
+				String hitLink = "";
+				String PandA ="";
+				boolean hasTable = false;
+				ArrayList<String> textTable = new ArrayList<String>();
+				
+				while(!temp.equals("</blockquote>")) // keep looping all the text the poster did store them
+				{
+					temp =reader.readLine().trim();
+					
+					if(temp.contains("<table class=\""))
+					{						
+						hasTable=true;
+					}
+					if(temp.contains("</table>")) // we hit the end of table, textTable should contain all the strings within table
+					{
+						hasTable=false;
+												
+						//mturk grind forum have </table> on the same line, I need to extract what's before </table>
+						String t = temp.substring(0, temp.lastIndexOf("</table>")+ 8);
+						textTable.add(t);
+					}
+					
+					if(hasTable)
+					{
+						if(filterPost(temp))
+						{
+							textTable.add(temp);
+						}
+					}
+					
+					if(temp.contains("<a href=\"https://www.mturk.com/mturk/preview") || temp.contains("<a href=\"https://www.mturk.com/mturk/accept") || temp.contains("<a href=\"https://www.mturk.com/mturk/searchbar") ) //we found a mturk link posible hit!
+					{
+						hit = true;	
+						//gotta clean up the string
+						
+						String temp2 = "";
+						temp2 = temp.replace("&amp;", "&");
+										
+						temp2 = temp2.substring(temp.indexOf("<a href=\"https:")); // lets trim the crap before <a href
+						temp2 = temp2.substring(temp2.indexOf("https:"), temp2.indexOf("\"", 50)); // 50 is to ensure we pass all the " and the next " should be the end quotation
+						hitLink = temp2;
+						
+						//could potentially be previewandaccept
+						if(temp.contains("<a href=\"https://www.mturk.com/mturk/preview"))
+						{
+							if(temp2.toLowerCase().contains("previewandaccept")) // it's a PandA link
+							{
+								PandA = temp2;
+							}
+							else // it's just a regular preview... link. Let's converted it to previewand accept
+							{
+								PandA = temp2.replaceAll("preview", "previewandaccept");
+							}
+						}						
+						
+					}
+					if(filterPost(temp))
+					{
+						text.add(temp);
+					}
+				}
+				
+				//coming out, if my PandA is still empty, then that means there was no preview link, It's either an "accept" link or a "searchbar" link.
+				// let's just assign that hitlink to PandA.
+				if(PandA.equals(""))
+				{
+					PandA = hitLink;
+				}				
+				
+				if(hit)
+				{
+					text = filterSmartMode(1, textTable, hitLink);
+					hit = (text.size()==0)? false: true;
+				}
+				
+				// if hit = true then we have to do more stuff, if not we keep looping
+				if(hit)
+				{
+					// we gotta match the link with our records to see if we've sent it before
+						newLink = checkIfLinkExist(text, PandA, "MTC", 3600000, alJson);
+				}
+				
+				//reset hit and text
+				hit = false;
+				text.clear();
+			}
+			
+			
+		}
+		
+		if(newLink && window.getInstance().PlaySound())
+		{
+			
+			sound newSound = new sound();
+			try{
+				newSound.playSound("traffic.wav");
+			}
+			catch(Exception e)
+			{
+				// problem playing sound
+				window.getInstance().addText("Error playing sound");
+				e.printStackTrace();
+			}
+		}
+		
+		reader.close();
+		
+		//delete file
+		File newFile = new File("blahMC2.html");
+		if(newFile.exists()&& (!test))
+		{
+			newFile.delete();
+
+		}
+
+	}
+	
+	public void mturkCrowd() throws Exception
+	{
+		try{
+		System.out.println(new Date() + " <<FORUM>> Started Mturk Crowd");	
+		String todayLink = getTodayLinkMC("http://www.mturkcrowd.com/forums/daily-work-threads.4/", true);
+		
+		if(!todayLink.equals(""))
+		{
+			processPageMC("http://mturkcrowd.com/"+todayLink+"/page-1000"); //1000 so its greater so it's always the last page
+			
+		}
+		else
+		{
+			//System.out.println("error grabbing today's thread");
+			window.getInstance().addText("error grabbing MC thread");
+		}
+		
+		window.getInstance().setLblTime();
+		System.out.println(new Date() + " <<FORUM>> Finished Mturk Crowd");
+		}
+		catch(Exception e)
+		{
+			System.out.println(e.getMessage());
+		}
+		
+		
+	}
+	public String getTodayLinkMC(String u, boolean b) throws Exception
+	{
+		String url = u;
+		//String url = "http://mturkforum.com/showthread.php?6244-Can-t-Find-Good-HITs-2-10/page100";
+		URL pageURL = new URL(url); 
+		HttpURLConnection urlConnection = (HttpURLConnection) pageURL.openConnection();
+		urlConnection.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3");
+		urlConnection.setRequestMethod("GET");
+		urlConnection.connect();
+		
+		
+		InputStream in = new BufferedInputStream(urlConnection.getInputStream()); 
+		PrintWriter pw = new PrintWriter(new FileWriter("blahMC.html"));
+		
+		Reader r = new InputStreamReader(in);
+	
+		int c;
+		 while((c = r.read()) != -1) 
+	        {         	
+	        	//System.out.print(String.valueOf((char)c));
+	           pw.print(String.valueOf((char)c)); 
+	        } 
+	        r.close();
+			pw.close();
+
+			
+			
+			//after writing into file we will read it.
+			
+			BufferedReader reader = new BufferedReader(new FileReader("blahMC.html"));	
+			String s;
+			String ret="";
+		    DateFormat dateFormat = new SimpleDateFormat("MM/dd");
+		    DateFormat dateFormat2 = new SimpleDateFormat("M/dd");
+		    DateFormat dateFormat3 = new SimpleDateFormat("M/d");
+		    
+		    Calendar d ;
+		    if(b)
+		    {
+		    	   d = Calendar.getInstance();
+		    }
+		    else // if false then search for yesterdays date
+		    {
+		    	d = Calendar.getInstance();
+		    	d.add(Calendar.DATE, -1);	    	 
+		    }
+
+		    
+			while((s = reader.readLine()) != null)
+			{
+				
+				//mturk grind seems very conventional. All thread starts with the below:
+				if((s.trim().startsWith("data-previewUrl=\"threads"))  && 
+						( s.toLowerCase().contains(dateFormat.format(d.getTime()))
+						|| s.toLowerCase().contains(dateFormat2.format(d.getTime()))
+						|| s.toLowerCase().contains(dateFormat3.format(d.getTime())) )
+						)
+				{
+					
+					
+					String date = "";
+					
+				    if(dateFormat.format(d.getTime()).equals(date) || s.toLowerCase().contains(dateFormat.format(d.getTime()))
+				    		||s.toLowerCase().contains(dateFormat2.format(d.getTime()))
+				    		||s.toLowerCase().contains(dateFormat3.format(d.getTime()))
+				    		) //compare if it's the same
+				    {
+				    	//It's today's date. we need to grab the url in <href=...
+				    	
+				    	s = s.trim();
+				  
+				    	 ret  = s.substring(s.indexOf("threads"), s.indexOf("/preview")) ;
+				    	ret =  ret.replace("href=\"", "");
+				    	break;
+				    }
+				    
+					
+				}
+				
+				
+			}
+			reader.close();
+			
+			File newFile = new File("blahMC.html");
+			if(newFile.exists()&& (!test))
+			{
+				newFile.delete();			
+			}
+			
+			// Break out of method if, tried to find today and tomorrows link.
+			if(!b && ret.equals(""))
+			{
+				return ret;
+			}
+			
+
+				
+			// if we don't find anything return empty which means error
+			
+			if(ret.equals(""))
+			{
+				ret = getTodayLinkMC(u, false);
+			}
+			
+			return ret;
+		
 	}
 	
 	public void mturkGrind() throws Exception

@@ -43,6 +43,7 @@ public class timer extends TimerTask
 			task.doForum();
 			task.doMturkList();
 			task.doWriteFTP();
+				
 			//task.test();
 		}
 		catch(Exception e)
