@@ -45,7 +45,7 @@ public class main extends TimerTask
 	
 	static window w;
 	
-	boolean test = true;
+	boolean test = false;
 	
 	String jsonFile = "C:\\inetpub\\wwwroot\\www3\\test.aspx";
 	ArrayList<String> alJson = new ArrayList<String>();

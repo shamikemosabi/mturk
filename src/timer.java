@@ -130,9 +130,9 @@ public class timer extends TimerTask
 				
 				
 			}
-			else if(isTimeBetweenTwoTime("07:00:00","17:00:00")) //7 am - 5 pm
+			else if(isTimeBetweenTwoTime("07:00:00","24:00:00")) //7 am - 5 pm
 			{
-				System.out.println(new Date() +" Between 7 - 5");
+				System.out.println(new Date() +" Between 7 - 12");
 				mod1 = 1;
 				mod2 = rand.nextInt(30)+1;
 				
@@ -142,6 +142,18 @@ public class timer extends TimerTask
 																
 				
 			}	
+			else if(isTimeBetweenTwoTime("24:00:00","03:00:00")) //12 am - 3 am
+			{
+				System.out.println(new Date() +" Between 12 - 3");
+				mod1 = rand.nextInt(3)+1;
+				mod2 = rand.nextInt(30)+1;
+				
+				System.out.println(mod1 + " " + mod2);
+				
+				min =  (min * mod1) + (mod2*1000);
+					
+			}
+			/*
 			else if(isTimeBetweenTwoTime("17:00:00","22:00:00")) //5 pm - 10 pm
 			{
 				System.out.println(new Date() +" Between 5 - 10");
@@ -176,6 +188,7 @@ public class timer extends TimerTask
 				min =  (min * mod1) + (mod2*1000);
 					
 			}
+			*/
 	
 			
 			
