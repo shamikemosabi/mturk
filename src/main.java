@@ -25,6 +25,15 @@ import java.io.*;
 import java.net.*;
 import java.nio.charset.Charset;
 import java.util.*;
+
+import javax.mail.Authenticator;
+import javax.mail.Message;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+
 import java.text.*;
 
 import org.apache.commons.net.ftp.*;
@@ -32,8 +41,6 @@ import org.apache.commons.net.ftp.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.UUID;
 
 
 public class main extends TimerTask 
@@ -53,6 +60,7 @@ public class main extends TimerTask
 	// specifically for HWTF hits
 	ArrayList<String> alJsonReddit = new ArrayList<String>();
 	
+	boolean VPN = false;
 
 	
 	public main() throws Exception
@@ -232,6 +240,64 @@ public class main extends TimerTask
 	
 	
 	
+	public boolean checkExceed(String s) throws Exception
+	 {
+		if(!s.contains("DOC") || VPN)
+		{
+			return true;
+
+		}
+		
+		VPN = true;
+		
+		 String host = "smtp.gmail.com";
+		    String from = "docogo1@gmail.com";
+		    String pass = "vjvviogjtthyttxa";
+		    Properties props = System.getProperties();
+		  		    
+		    props.put("mail.smtp.starttls.enable", "true"); // added this line
+		    props.put("mail.smtp.host", host);
+		    props.put("mail.smtp.user", from);
+		    props.put("mail.smtp.password", pass);
+		    props.put("mail.smtp.port", "587");
+		    props.put("mail.smtp.auth", "true");	
+		    
+		    
+		    //String[] to = {"shamikemosabi@gmail.com"}; // added this line
+		    String[] to = {"6462841208@tmomail.net"}; // added this line
+		    
+		   
+		    Session session = Session.getDefaultInstance(props, new GMailAuthenticator(from, pass));
+		    MimeMessage message = new MimeMessage(session);
+		    message.setFrom(new InternetAddress(from));
+		    
+		    
+		  
+			    InternetAddress[] toAddress = new InternetAddress[to.length];
+			    
+			    for( int i=0; i < to.length; i++ ) { // changed from a while loop
+			        toAddress[i] = new InternetAddress(to[i]);
+			    }
+			    
+			    for( int i=0; i < toAddress.length; i++) { // changed from a while loop
+			        message.addRecipient(Message.RecipientType.TO, toAddress[i]);
+			    }
+		   
+		   
+		    
+		    message.setSubject("VPN exceeded");
+		   //message.setContent(body, "text/html");
+		    message.setContent("VPN exceeded", "text/plain");
+		    Transport transport = session.getTransport("smtp");
+		    transport.connect(host, from, pass);
+		    transport.sendMessage(message, message.getAllRecipients());
+		    transport.close();
+		    
+		    return true;
+	     
+	 }
+	
+	
 	
 	public void doRedditHWTF()
 	{
@@ -245,6 +311,15 @@ public class main extends TimerTask
 		    	 while(true)
 	    		 {
 		    		 try{
+		    			 
+		    				URL url = new URL("http://checkip.amazonaws.com/");
+		    				BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
+		    				String temp  = br.readLine();
+		    				System.out.println(temp);
+		    				
+		    				checkExceed(temp);
+		    					    				
+		    				br.close();
 		    			 
 		    			 System.out.println(new Date() + " <<REDDIT>> STARTED");		
 			    		 RedditHWTF();
@@ -3036,5 +3111,20 @@ public class main extends TimerTask
 		
 		}
 	
+}
+
+class GMailAuthenticator extends Authenticator {
+     String user;
+     String pw;
+     public GMailAuthenticator (String username, String password)
+     {
+        super();
+        this.user = username;
+        this.pw = password;
+     }
+    public PasswordAuthentication getPasswordAuthentication()
+    {
+       return new PasswordAuthentication(user, pw);
+    }
 }
 
