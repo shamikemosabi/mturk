@@ -51,7 +51,7 @@ public class main extends TimerTask
 	data myData ;
 	readData read;
 	
-	readData readFull;
+	readData readLive; // I guess I'm using this as "live hits"
 	
 	static window w;
 	
@@ -74,7 +74,7 @@ public class main extends TimerTask
 			
 		String d = (test)? "dataTEST.ser": "data.ser";
 		read = new readData(d); //object used to seralize and deseralize
-		readFull = new readData("dataFull.ser");
+		readLive = new readData("dataLIVE.ser");
 
 		//createExportHitLink("https://www.mturk.com/mturk/preview?groupId=3K8YRYAXUO2L318WRK1I6OE99TADG3");
 		
@@ -2707,7 +2707,7 @@ public class main extends TimerTask
 			read.seralize(myData); //Write back data class
 			
 			//write to full data
-		//	addSeralize(readFull,hd);
+			addSeralize(readLive,hd);
 			
 			
 			writeToJSONPerHIT(a,l, jsonList);
@@ -3133,6 +3133,76 @@ public class main extends TimerTask
 		{			
 			e.printStackTrace();
 		}
+	}
+	
+	/**
+	 * Takes a mturk link.
+	 * 
+	 * Link can be 
+	 * - preview link
+	 *  .. search for id alertBox. if exist then hit is dead.
+	 *  
+	 * - previewandaccept
+	 *  .. need to string tran out the andaccept, then check for id alertBox like above.  
+	 * 
+	 * - searchbar
+	 *  .. check to see if there are any class = 'error_title' with text Your search did not match any HITs.
+	 *  
+	 *  
+	 * @return true if hit is alive.
+	 */
+	public boolean hitAlive(String link)
+	{
+		ArrayList
+		
+		return true;
+	}
+	
+	/**
+	 * runs every 5? 10? seconds?
+	 * 
+	 * go thru array myData  = read.deSeralize();
+	 * 
+	 * - Take all the ones that are not dead, and put them in another array...
+	 *   ... Maybe I can skip this part and just load directly to a LIVE array everytime I add hits.
+	 * 
+	 * 
+	 * - import those into fire db
+	 * 
+	 * Needs to do this fast.
+	 * 
+	 */
+	public void doLiveHitUpdate()
+	{
+		
+		Thread t1 = new Thread(new Runnable() {
+		     public void run() {
+		    	
+		    	 while(true)
+	    		 {
+		    		 try{		    			 
+		    			 System.out.println(new Date() + " <<LIVE HIT>> STARTED");				    		 
+			    		 
+			    		 System.out.println(new Date() + " <<LIVE HIT>> FINISHED");	 
+			    		 
+			    		 
+			    		 
+			    		 Thread.sleep(60000);
+			    		 		    					    		
+		    		 }
+		    		 catch(Exception e)
+			    	 {
+			    		 System.out.println(e.getMessage());
+			    		 e.printStackTrace();
+			    	 }		    		 		    		
+		    		 
+		    	 }
+		    	
+		     }
+		});  
+		t1.start();
+		
+		
 	}
 	
 	

@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "amber-fire-5449",
+  "private_key_id": "e4fb19db6ab0c2fcd498c03629238cb41fdfc1b2",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDH6Y9fifTH/FDL\nwr4uIxhLHLuyITtpKikxeS5bS4ZVjLGN1ACN1uQv7Y+9M00Wd1/dbNTUhQy5ABux\nL3rF4UXCA9X99YsYBzFSnZ5nDJwn6FDh+Xb0K5QJjMyU7gNqEY2dvIWbYl7LX3UF\n38qreCKP2VR2ZlkcdyNxDzkkwdIWAIl3IThyq0tlohYo8SO5kcGDZNxkx+SU3p9u\nmfVtQ6BjUsMsVd8zd1DOOwAJyKCd4BwA5SsieN+T/9wH73OBs7jx3nwW3VLiN/vr\nMYfk2GE0xnbQyk91XeKG5kCnNd8q8eCYHPwI/aLaAUazXa/Ymi47dhYgwyCiF0+S\n8BbI2qy/AgMBAAECggEAW2hR5C9iO2cFUoXTC6mEXCPhNsu3LJjYiQSNy7S20bsp\nHF6JelF9uOR4ytwALXub29T9Y8cKUDTadKPvETe1+8ZhPGPfm7b+OHZVjWzYoe65\nvPmiCHc8kzlL+fTynrcz96HRvYC3M2qMSYlQVCL0Oq32zsRxjnBzRijdyg7Njr0V\nNXIqprUj/VhAQFrWOuNmOt/NCzwwiX7KvX+Hj88HnCFXmtDz5rf6V8Qq0yk11meZ\nZkJKjqsOlIIPYXBCC5s9naLTwDt+ejHZ2S2R9+hpqxU6kTkJSyPe2ESKkII6uPvb\n3JbzCRVXgGW1KzFXrxIQMbue+MLp9VzX7N6pWXZiQQKBgQDl+E3DvtVZVYG3jF5r\nYyl4WVNmwD1vbagiYQD0c+fPvv+wqPp1xcuJgEP/Y42JEsUq3q6ml9X6N4jOL9hK\nelR5kGhrdkY+TzqijcXrFJgKecOSExglBItld3YglGlJJ/ocp9cpolRT338BGXjF\n0u0HGAKSWiNbNQs/5PsPcTDPTwKBgQDeikvKvYIZM/Qr5SUxkLVEEgLEKUns9o68\nXxiB/w9yBtE84pcAdGMIw2jtWQ2MlgLNEPVuGXHUzvy8c1ZU7Ik3rzunLivkxSbD\n55U9zXIqT6bwgmkre0B4r2K0pQO/CrhM9vaqXkB2sE+dkcYifOwEx7wolZ9SIIdt\nsHa6FA5vkQKBgEMm44ZSNjh02IEBcxzGgviKlOj/H7FnAt6vFrlLExi9vCoY3bIA\nRPPsyW5M4qpxGbPv/G3XDnuXNdKHdBAjcoFg4qzmh5JwTj3jSjTf+Zmtfqcr/jPp\nBM9nN85BqBDdpJIzjIeyyA8JxytKBdM2SVJ192JHAeYDMjrBIXKb6dXPAoGAIu11\nw9ZGiwoacqE+Wy8pJAvnnz4TujtgX7RVNmH/3JexU2sE5C9gM8nnuAjYFY6d1e2p\nd6RKt2ndRP6dOCr/xlucczrN7NP8p5a7V73dA0MJIop1Uzu+/LIaPdwAYIWgM4Q3\nZrnwSDCX7lUo0dTlfkKTB5OkM9GjL9YYbFAli+ECgYEAiM2Yj8sIeknAZeFuQrKQ\nDdrKYtyrmDMOJdm669sWftFUBrYuDWuntX7rn9T5WgKpLu99Db8lAPcPc3mdbK6r\nNgeRN7KoxlXg3d+eazC7B8rnFVl8gNKts/y6vOugiAGfTRiRAQVgC47dqfLSsX6l\nBSZ4BzgzXDrIWKhqr300UpI=\n-----END PRIVATE KEY-----\n",
+  "client_email": "amber-fire-5449@appspot.gserviceaccount.com",
+  "client_id": "109661549901993227067",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://accounts.google.com/o/oauth2/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/amber-fire-5449%40appspot.gserviceaccount.com"
+}

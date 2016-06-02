@@ -43,15 +43,18 @@ public class timer extends TimerTask
 			System.out.println(br.readLine());
 			br.close();
 			
-			//test();
+			test2();
+			
+			
 			
 			main task = new main();
 			//task.initFireBase();
 			//task.doFireBase();
 			task.doRedditHWTF();
-			task.doForum();
-			task.doMturkList();
-			task.doWriteFTP();
+			task.doLiveHitUpdate();
+			//task.doForum();
+			//task.doMturkList();
+			//task.doWriteFTP();
 				
 			//task.test();
 		}
@@ -63,6 +66,50 @@ public class timer extends TimerTask
 	 
 		
 	}	
+	
+	public static void test2() 
+	{
+		try{
+			
+			ArrayList<String> a = new ArrayList<String> ();
+			a.add("https://www.mturk.com/mturk/preview?groupId=34OVCINT28Q6QKXDD6EL73CZQ4URAO");			
+			a.add("https://www.mturk.com/mturk/preview?groupId=3X9FJ610BWZ8KUEOA0GKMU8YCRPW1T");
+			a.add("https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&searchWords=feafd+fefe&minReward=0.00&x=0&y=0");
+			
+			for(int i=0; i<a.size() ;i++)
+			{
+				Document doc = Jsoup.connect(a.get(i))
+						.userAgent("Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3").get();			
+				
+				Element e = doc.getElementById("alertBox");
+				System.out.println(e);
+				Elements link  = doc.getElementsByClass("error_title");
+				System.out.println(link);
+				/*
+				Elements links = doc.select("a[href]");
+				
+				 for (Element b : links) {
+					 String linkHref = b.attr("href"); // "http://example.com/"
+					 String linkText = b.text(); // "example""
+					 
+					 	System.out.println(linkHref);
+
+			       }
+			       */
+				
+				System.out.println(new Date());
+			}
+			
+		
+
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	
 	
 	public static void test() 
 	{				
@@ -118,6 +165,8 @@ public class timer extends TimerTask
 			e.printStackTrace();
 		}
 	}
+	
+	
 	
 	
 	
