@@ -1,4 +1,5 @@
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -9,6 +10,12 @@ import org.jsoup.helper.Validate;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
+import com.google.firebase.*;
+import com.google.firebase.database.*;
+
+
+
 
 
 public class timer extends TimerTask
@@ -36,9 +43,11 @@ public class timer extends TimerTask
 			System.out.println(br.readLine());
 			br.close();
 			
-		//	test();
+			//test();
 			
 			main task = new main();
+			//task.initFireBase();
+			//task.doFireBase();
 			task.doRedditHWTF();
 			task.doForum();
 			task.doMturkList();
@@ -56,27 +65,60 @@ public class timer extends TimerTask
 	}	
 	
 	public static void test() 
-	{
+	{				
 		try{
-			Document doc = Jsoup.connect("http://turkernation.com/forumdisplay.php?157-Daily-HIT-Threads&s=0e04b86d371223291653dd430053a207").userAgent("Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3").get();			
-			
-			Elements link  = doc.getElementsByClass("threadtitle");
-			Elements links = doc.select("a[href]");
-			
-			 for (Element b : links) {
-				 String linkHref = b.attr("href"); // "http://example.com/"
-				 String linkText = b.text(); // "example""
-				 
-				 	System.out.println(linkHref);
+			FirebaseOptions options = new FirebaseOptions.Builder()
+					  .setServiceAccount(new FileInputStream(System.getProperty("user.dir") + "\\4fb19db6ab0.json"))
+					  .setDatabaseUrl("https://amber-fire-5449.firebaseio.com/")
+					  .build();
 
-		       }
+			FirebaseApp.initializeApp(options);
+			
 
+			DatabaseReference ref = FirebaseDatabase
+				    .getInstance()
+				    .getReference("u/admin");
+			
+				ref.addListenerForSingleValueEvent(new ValueEventListener() {				    
+					@Override
+				    public void onDataChange(DataSnapshot dataSnapshot) {
+						Object post = dataSnapshot.getValue();
+				        System.out.println(post);
+				    }
+					@Override
+				    public void onCancelled(DatabaseError err) {
+						String s = err.getMessage();
+						System.err.println(s);
+
+				    }
+				});
+				
+				
+			//	FirebaseDatabase database =	FirebaseDatabase.getInstance();
+
+				
+				
+		   /* 
+		    dataRef.addListenerForSingleValueEvent(new ValueEventListener() {
+		         @Override
+		         public void onDataChange(DataSnapshot snapshot) {
+		             System.out.println("data");
+		         }
+
+		         @Override
+		         public void onCancelled() {
+		             System.err.println("Listener was cancelled");
+		         }
+		    });
+		    */
+		    System.out.println("hi");
 		}
 		catch(Exception e)
 		{
 			e.printStackTrace();
 		}
 	}
+	
 	
 	
 	/*
@@ -273,6 +315,15 @@ public class timer extends TimerTask
             return valid;
 
     }
+	
+	public static class Post {
+		public String author;
+	    public String title;
+	    public Post(String author, String title) {
+	    	this.author = author;
+	    	this.title = title;
+	    }
+	}
 	
 	
 }

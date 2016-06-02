@@ -42,6 +42,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.google.firebase.*;
+import com.google.firebase.database.*;
+
 
 public class main extends TimerTask 
 {
@@ -3086,6 +3089,51 @@ public class main extends TimerTask
 	
 	}
 	
+	
+	public void initFireBase()
+	{
+		try{
+		FirebaseOptions options = new FirebaseOptions.Builder()
+				  .setServiceAccount(new FileInputStream(System.getProperty("user.dir") + "\\4fb19db6ab0.json"))
+				  .setDatabaseUrl("https://amber-fire-5449.firebaseio.com/")
+				  .build();
+
+			FirebaseApp.initializeApp(options);
+		}
+		catch(Exception e)
+		{			
+			e.printStackTrace();
+		}
+	}
+	
+	public void doFireBase()
+	{
+		try{
+			
+			DatabaseReference ref = FirebaseDatabase
+				    .getInstance()
+				    .getReference("u/admin");
+			
+				ref.addListenerForSingleValueEvent(new ValueEventListener() {				    
+					@Override
+				    public void onDataChange(DataSnapshot dataSnapshot) {
+						Object post = dataSnapshot.getValue();
+				        System.out.println(post);
+				    }
+					@Override
+				    public void onCancelled(DatabaseError err) {
+						String s = err.getMessage();
+						System.err.println(s);
+
+				    }
+				});			
+		}
+		
+		catch(Exception e)
+		{			
+			e.printStackTrace();
+		}
+	}
 	
 	
 	public static void main(String[] args)
