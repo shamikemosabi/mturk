@@ -60,7 +60,9 @@ public class main extends TimerTask
 	
 	static window w;
 	
-	boolean test = true;
+	boolean test = false;
+	
+	int timeToCheckExceed = 0;
 	
 	String jsonFile = "C:\\inetpub\\wwwroot\\www3\\test.aspx";
 	String jsonFileLive = "C:\\inetpub\\wwwroot\\www3\\testLive.aspx";
@@ -227,7 +229,7 @@ public class main extends TimerTask
 		    			 System.out.println(new Date() + " <<FORUM>> STARTED");	
 		    			 turkerNation();
 		    			 mturkGrind();
-		    			TurkForum();
+		    			 TurkForum();
 		    			 mturkCrowd(); 
 			    		 System.out.println(new Date() + " <<FORUM>> FINISHED");
 			    		 Thread.sleep(timer.timeInterval());	
@@ -728,8 +730,8 @@ public class main extends TimerTask
 			if(!todayLink.equals(""))
 			{
 				//processPageTN("http://turkernation.com/showthread.php?25209-08-12-15-wicked-wednesday/page15");
-			//	processPageTNsoup("http://turkernation.com/"+todayLink+"/page1000"); //1000 so its greater so it's always the last page
-				processPageTNsoup("http://turkernation.com/showthread.php?27139-06-05-16-Cry-Havoc-And-Let-Slip-The-PandAs-Of-Mturk-Sunday/page17");
+				processPageTNsoup("http://turkernation.com/"+todayLink+"/page1000"); //1000 so its greater so it's always the last page
+			//	processPageTNsoup("http://turkernation.com/showthread.php?27139-06-05-16-Cry-Havoc-And-Let-Slip-The-PandAs-Of-Mturk-Sunday/page17");
 			}
 			else
 			{
@@ -1268,8 +1270,6 @@ public class main extends TimerTask
 			
 	}
 	
-	
-	
 	public String getTodayLinkTNsoup(String u, boolean b) throws Exception
 	{
 		
@@ -1329,7 +1329,7 @@ public class main extends TimerTask
 
 				if(ret.equals(""))
 				{
-					ret = getTodayLinkTN(u, false);
+					ret = getTodayLinkTNsoup(u, false);
 				}
 	
 
@@ -1526,7 +1526,7 @@ public class main extends TimerTask
 		
 	}
 	public String getTodayLinkMC(String u, boolean b) throws Exception
-	{
+	{ 
 		String url = u;
 		//String url = "http://mturkforum.com/showthread.php?6244-Can-t-Find-Good-HITs-2-10/page100";
 		URL pageURL = new URL(url); 
@@ -1785,8 +1785,9 @@ public class main extends TimerTask
 				}
 				
 				//reset hit and text
-				hit = false;
-				text.clear();
+				// wait.. doesn't these 2 get reset 
+			//	hit = false;
+				//text.clear();
 			}
 			
 			
@@ -2773,8 +2774,9 @@ public class main extends TimerTask
 				}
 				
 				//reset hit and text
-				hit = false;
-				text.clear();
+				// wait.. doesn't these 2 get reset 
+			//	hit = false;
+				//text.clear();
 			}
 			
 			
@@ -3305,6 +3307,9 @@ public class main extends TimerTask
 	 *  
 	 *  
 	 * @return true if hit is alive.
+	 * 
+	 * @param link - mturk link
+	 * @parm time - this is used to pass to checkExceed to increment time. 
 	 */
 	public boolean hitAlive(String link) throws Exception
 	{
@@ -3362,8 +3367,9 @@ public class main extends TimerTask
 		Elements e  = doc.getElementsByClass("error_title");
 		if(e.text().contains("exceeded the maximum"))
 		{
-			System.out.println("Exceeded maximum allowed pagem, let's wait...");
-			Thread.sleep(5000);
+			System.out.println("Exceeded maximum allowed pagem, Waiting " + 5000 + this.timeToCheckExceed + " miliseconds");			
+			Thread.sleep(5000 + this.timeToCheckExceed);
+			this.timeToCheckExceed += 5000;
 			
 		}
 	}
@@ -3391,8 +3397,7 @@ public class main extends TimerTask
 			// load all not dead hits
 			// only do this the first time.
 			myData  = read.deSeralize();
-			
-			
+					
 			for(int i=0; i < myData.getArray().size() ; i ++)
 			{
 				hitData data = myData.getArray().get(i);
@@ -3403,6 +3408,8 @@ public class main extends TimerTask
 					liveData.getArray().add(data);
 				}
 			}
+			this.timeToCheckExceed=0;
+			
 		}
 	catch(Exception e)
 	{
@@ -3449,7 +3456,9 @@ public class main extends TimerTask
 		    						}
 		    					}
 		    					
+		    				
 		    					 alive = alive || hitAlive(liveData.getArray().get(j).getLink());
+		    					 System.out.println("Checking hit alive " + liveData.getArray().get(j).getLink());
 		    					 
 		    					if(!alive) //if not alive then we remove it.
 		    					{		    		
@@ -3458,6 +3467,8 @@ public class main extends TimerTask
 		    						liveData.getArray().remove(j);
 		    					}
 		    				}
+		    				
+		    				timeToCheckExceed = 0;
 		    				
 		    				System.out.println(new Date() + " <<LIVE HIT>> number of live hits : " + liveData.getArray().size());
 		    				//At this point I've removed all dead hits, seralize back to file
