@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -9,6 +10,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.helper.Validate;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
 
 import com.google.firebase.*;
@@ -43,18 +45,16 @@ public class timer extends TimerTask
 			System.out.println(br.readLine());
 			br.close();
 			
-			test2();
-			
-			
-			
 			main task = new main();
+					
 			//task.initFireBase();
 			//task.doFireBase();
 			task.doRedditHWTF();
+			task.doForum();
+			task.doMturkList();
+			
 			task.doLiveHitUpdate();
-			//task.doForum();
-			//task.doMturkList();
-			//task.doWriteFTP();
+			task.doWriteFTP(); 
 				
 			//task.test();
 		}
@@ -66,6 +66,7 @@ public class timer extends TimerTask
 	 
 		
 	}	
+	
 	
 	public static void test2() 
 	{

@@ -3,7 +3,7 @@ import java.io.*;
 public class readData
 {
 	  String fileName = "";
-	
+	  boolean lock = false;
 	 
 	 /*
 	  * we now can specify different files.
@@ -32,10 +32,25 @@ public class readData
 	      file.close();
 	      buffer.close();
 	      
+	      // set lock to false after writing to file.
+	      lock = false;
+	      
 	      
 	}
 	public data deSeralize() throws Exception	
 	{
+		//I now have concurrent deSeralize/seralize, I need a way to "queue" it.
+		// if lock then hold off until it's unlock.
+		
+		/*while(lock) // if lock 
+		{
+			//System.out.println("LOCKED "+ src);
+			//Thread.sleep(2000);
+			
+		}*/
+		
+		// we are clear to deseralize, first thing is to lock so other transaction gets stuck
+		lock = true;
 		data l ;
 		try{
 	    InputStream file = new FileInputStream(fileName);

@@ -1,4 +1,5 @@
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 	/*
 	 * data type, holds link and date of hit
@@ -9,19 +10,23 @@ import java.util.Date;
 		Date d ;
 		String src;
 		int timeExpire; //milliseconds when expired
+		ArrayList<String>  post;
+		
 		public hitData()
 		{
 			link="";
 			d = new Date();
 			src ="";
 			timeExpire=0;
+			post = new ArrayList<String>();
 		}
-		public hitData(String s, Date dtm, String sr, int t)
+		public hitData(String s, Date dtm, String sr, int t, ArrayList<String>  p)
 		{
 			link=s;
 			d = dtm;
 			src = sr;
 			timeExpire = t;
+			post= p;
 		}
 		
 		public void setLink(String s)
@@ -40,6 +45,10 @@ import java.util.Date;
 		{
 			timeExpire= i;
 		}
+		public void setPost(ArrayList<String> p)
+		{
+			this.post = p;
+		}
 		
 		public String getLink()
 		{
@@ -56,5 +65,9 @@ import java.util.Date;
 		public int getTimeExpire()
 		{
 			return timeExpire;
+		}
+		public ArrayList<String> getPost()
+		{
+			return this.post;
 		}
 	}

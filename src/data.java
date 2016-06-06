@@ -45,6 +45,17 @@ public class data implements Serializable
 		return false;
 	}
 	
+	public String getHashString()
+	{
+		String hashString="";
+		for(int i=0; i< array.size(); i++)
+		{
+			hashString += array.get(i).getLink();
+		}
+		
+		return hashString;
+	}
+	
 	
 	
 }

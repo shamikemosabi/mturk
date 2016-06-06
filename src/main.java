@@ -37,10 +37,13 @@ import javax.mail.internet.MimeMessage;
 import java.text.*;
 
 import org.apache.commons.net.ftp.*;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import com.google.firebase.*;
 import com.google.firebase.database.*;
@@ -51,13 +54,16 @@ public class main extends TimerTask
 	data myData ;
 	readData read;
 	
+	data liveData = new data();
+	
 	readData readLive; // I guess I'm using this as "live hits"
 	
 	static window w;
 	
-	boolean test = false;
+	boolean test = true;
 	
 	String jsonFile = "C:\\inetpub\\wwwroot\\www3\\test.aspx";
+	String jsonFileLive = "C:\\inetpub\\wwwroot\\www3\\testLive.aspx";
 	ArrayList<String> alJson = new ArrayList<String>();
 	
 	// specifically for HWTF hits
@@ -179,7 +185,7 @@ public class main extends TimerTask
 		    				if(alJson.size()>0)
 		    				{
 		    					System.out.println(new Date() + " <<FTP>> New hits writing to JSON");
-		    					writeToJSON(alJson);
+		    					writeToJSON(alJson, jsonFile );
 		    					alJson.clear();
 		    					System.out.println(new Date() + " <<FTP>> Cleared alJSON");
 		    				}
@@ -221,7 +227,7 @@ public class main extends TimerTask
 		    			 System.out.println(new Date() + " <<FORUM>> STARTED");	
 		    			 turkerNation();
 		    			 mturkGrind();
-		    			 TurkForum();
+		    			TurkForum();
 		    			 mturkCrowd(); 
 			    		 System.out.println(new Date() + " <<FORUM>> FINISHED");
 			    		 Thread.sleep(timer.timeInterval());	
@@ -484,7 +490,7 @@ public class main extends TimerTask
 					System.out.println(reward);
 					*/
 					
-					newLink = checkIfLinkExist(createExportHit(title, link, requester, requesterURL, requesterID, PandA, reward, time), PandA, "ML",3600000, alJson);
+					newLink = checkIfLinkExist(createExportHit(title, link, requester, requesterURL, requesterID, PandA, reward, time), PandA, "ML",10800000, alJson);
 					
 					
 					link = "";
@@ -710,21 +716,20 @@ public class main extends TimerTask
 		      is.close();
 		    }
 	  }
-
-		  
+	  
 		  
 	public void turkerNation() throws Exception
 	{
 		try
 		{
 			System.out.println(new Date() + " <<FORUM>> Started Turker Nation");
-			String todayLink = getTodayLinkTN("http://turkernation.com/forumdisplay.php?157-Daily-HIT-Threads", true);
+			String todayLink = getTodayLinkTNsoup("http://turkernation.com/forumdisplay.php?157-Daily-HIT-Threads", true);
 			
 			if(!todayLink.equals(""))
 			{
 				//processPageTN("http://turkernation.com/showthread.php?25209-08-12-15-wicked-wednesday/page15");
-				processPageTN("http://turkernation.com/"+todayLink+"/page1000"); //1000 so its greater so it's always the last page
-				
+			//	processPageTNsoup("http://turkernation.com/"+todayLink+"/page1000"); //1000 so its greater so it's always the last page
+				processPageTNsoup("http://turkernation.com/showthread.php?27139-06-05-16-Cry-Havoc-And-Let-Slip-The-PandAs-Of-Mturk-Sunday/page17");
 			}
 			else
 			{
@@ -739,6 +744,74 @@ public class main extends TimerTask
 		{
 			System.out.println(e.getMessage());
 		}
+		
+	}
+	
+	public void processPageTNsoup(String u) throws Exception
+	{
+		
+		Document doc = Jsoup.connect(u).userAgent("Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3").get();
+		
+		
+		Elements links = doc.select("a[href]");
+		
+		 for (Element b : links)
+		 {
+	
+				boolean hit = false;
+				ArrayList<String> text = new ArrayList<String>();
+				String hitLink = "";
+				String PandA ="";
+			 String temp = b.toString();
+			 
+			
+			 if(temp.contains("<a href=\"https://www.mturk.com/mturk/preview") || temp.contains("<a href=\"https://www.mturk.com/mturk/accept") || temp.contains("<a href=\"https://www.mturk.com/mturk/searchbar") ) //we found a mturk link posible hit!
+			 {
+					hit = true;	
+					//gotta clean up the string
+					temp = b.attr("abs:href"); 
+					
+					String temp2 = "";
+					temp2 = temp.replace("&amp;", "&");
+								
+					hitLink = temp2;
+					
+					//could potentially be previewandaccept
+					if(temp.contains("<a href=\"https://www.mturk.com/mturk/preview"))
+					{
+						if(temp2.toLowerCase().contains("previewandaccept")) // it's a PandA link
+						{
+							PandA = temp2;
+						}
+						else // it's just a regular preview... link. Let's converted it to previewand accept
+						{
+							PandA = temp2.replaceAll("preview", "previewandaccept");
+						}
+					}					
+			 }
+			 
+			 
+				//coming out, if my PandA is still empty, then that means there was no preview link, It's either an "accept" link or a "searchbar" link.
+				// let's just assign that hitlink to PandA.
+				if(hit && PandA.equals(""))
+				{
+					PandA = hitLink;
+				}
+				if(hit)
+				{
+					text = filterSmartMode(3, new ArrayList<String>(), hitLink);
+					hit = (text.size()==0)? false: true;
+				}
+				if(hit)
+				{
+					
+					// we gotta match the link with our records to see if we've sent it before
+				     checkIfLinkExist(text, PandA, "TN",10800000, alJson); 
+				}
+			 
+							 
+	       }
+		
 		
 	}
 	public void processPageTN(String u) throws Exception 
@@ -863,7 +936,7 @@ public class main extends TimerTask
 				{
 					
 					// we gotta match the link with our records to see if we've sent it before
-						newLink = checkIfLinkExist(text, PandA, "TN",3600000, alJson);
+						newLink = checkIfLinkExist(text, PandA, "TN",10800000, alJson); 
 				}
 				
 				//reset hit and text
@@ -1195,6 +1268,77 @@ public class main extends TimerTask
 			
 	}
 	
+	
+	
+	public String getTodayLinkTNsoup(String u, boolean b) throws Exception
+	{
+		
+		
+
+			Document doc = Jsoup.connect(u).userAgent("Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3").get();			
+			
+			Elements link  = doc.getElementsByClass("threadtitle");
+
+			
+			String ret="";
+			DateFormat dateFormat = new SimpleDateFormat("MM/dd");
+			DateFormat dateFormat2 = new SimpleDateFormat("M/dd");
+		    DateFormat dateFormat3 = new SimpleDateFormat("M/d");
+		    Calendar d ;
+		    if(b)
+		    {
+		    	   d = Calendar.getInstance();
+		    }
+		    else // if false then search for yesterdays date
+		    {
+		    	d = Calendar.getInstance();
+		    	d.add(Calendar.DATE, -1);	    	 
+		    }    
+		    
+		    
+		    
+			    
+			 for (Element e : link) {
+				 String linkText = e.text(); // "example""
+			
+				 
+				 
+				 if( linkText.toLowerCase().contains(dateFormat.format(d.getTime()))
+				    		||linkText.toLowerCase().contains(dateFormat2.format(d.getTime()))
+				    		||linkText.toLowerCase().contains(dateFormat3.format(d.getTime()))
+				    		) //compare if it's the same
+				 {
+					Elements eleme =e.children();
+					String s = eleme.get(0).toString();
+					
+					
+					
+			    	ret  = s.substring(s.indexOf("href="), s.indexOf("&amp")) ;
+				    ret =  ret.replace("href=\"", "");
+			    	break;
+				 }
+				 
+		       }
+			 
+			
+			 
+				if(!b && ret.equals(""))
+				{
+					return ret;
+				}
+
+				if(ret.equals(""))
+				{
+					ret = getTodayLinkTN(u, false);
+				}
+	
+
+	
+				return ret;
+
+			
+	}
+	
 	public void processPageMC(String u) throws Exception
 	{
 		String url = u;
@@ -1314,12 +1458,13 @@ public class main extends TimerTask
 				if(hit)
 				{
 					// we gotta match the link with our records to see if we've sent it before
-						newLink = checkIfLinkExist(text, PandA, "MTC", 3600000, alJson);
+						newLink = checkIfLinkExist(text, PandA, "MTC", 10800000, alJson);
 				}
 				
 				//reset hit and text
-				hit = false;
-				text.clear();
+				// wait.. doesn't these 2 get reset 
+			//	hit = false;
+				//text.clear();
 			}
 			
 			
@@ -1361,6 +1506,7 @@ public class main extends TimerTask
 		if(!todayLink.equals(""))
 		{
 			processPageMC("http://mturkcrowd.com/"+todayLink+"/page-1000"); //1000 so its greater so it's always the last page
+			
 			
 		}
 		else
@@ -1635,7 +1781,7 @@ public class main extends TimerTask
 				if(hit)
 				{
 					// we gotta match the link with our records to see if we've sent it before
-						newLink = checkIfLinkExist(text, PandA, "MTG", 3600000, alJson);
+						newLink = checkIfLinkExist(text, PandA, "MTG", 10800000, alJson);
 				}
 				
 				//reset hit and text
@@ -2004,7 +2150,7 @@ public class main extends TimerTask
 									}									
 								}
 								
-								newLink = checkIfLinkExist(createExportHit(CED, text), PandA, "HWTF", 3600000, alJson);												    	
+								newLink = checkIfLinkExist(createExportHit(CED, text), PandA, "HWTF", 10800000, alJson);												    	
 					    		 
 								System.out.println(new Date() + " <<REDDIT>> "+ PandA);
 								
@@ -2623,7 +2769,7 @@ public class main extends TimerTask
 				if(hit)
 				{
 					// we gotta match the link with our records to see if we've sent it before
-						newLink = checkIfLinkExist(text, PandA, "MTF", 3600000, alJson);
+						newLink = checkIfLinkExist(text, PandA, "MTF", 10800000, alJson);
 				}
 				
 				//reset hit and text
@@ -2701,14 +2847,20 @@ public class main extends TimerTask
 			w.addLinkToPanel(a,l);
 			
 			// add the link to our list
-			hitData hd = new hitData(l, new Date(), source, time);
+		
+			hitData hd = new hitData(l, new Date(), source, time, a);
 			myData.getArray().add(hd);
 			
 			read.seralize(myData); //Write back data class
 			
 			//write to full data
-			addSeralize(readLive,hd);
+			// pass liveData, what if in my dolivehitupdate I already deSeralize to array, its now working on the array. But I find a new hit. I just write this new hit.
+			// but then in my dolivehitupdate, it will just overwrite the data. Need to use the same data object liveData
+			//Don't need this anymore. NO more searlize for live HIT. It will all be in liveData in memory.
+			//if program closes, we loose it, but when we restart we start fresh from myData.
+			//addSeralize(readLive,hd, liveData, source);
 			
+			liveData.getArray().add(hd);
 			
 			writeToJSONPerHIT(a,l, jsonList);
 					
@@ -2723,11 +2875,14 @@ public class main extends TimerTask
 	}
 	
 	// searlize  hd into rd unconditionally.
-	public void addSeralize(readData rd, hitData hd) throws Exception
+	public void addSeralize(readData rd, hitData hd , data d ,String src) throws Exception
 	{
 		try{
-			data d = rd.deSeralize();
-			d.getArray().add(hd);
+			 d = rd.deSeralize();
+			 if(!d.contains(hd.getLink()))
+			 {
+				 d.getArray().add(hd);
+			 }
 			rd.seralize(d);	
 		}
 		catch(Exception e)
@@ -2856,7 +3011,7 @@ public class main extends TimerTask
 	 */
 	
 	
-	public void writeToJSON(ArrayList<String> jsonList)
+	public void writeToJSON(ArrayList<String> jsonList, String file)
 	{
 		String start = "{\"records\":[";
 		//String end = "]}";
@@ -2876,14 +3031,14 @@ public class main extends TimerTask
 		// write to file
 		try
 		{
-			PrintWriter pw = new PrintWriter(new FileWriter(jsonFile));
+			PrintWriter pw = new PrintWriter(new FileWriter(file));
 			pw.print(finalString);
 			pw.close();
 			
 			System.out.println(new Date() + " <<FTP>> Starting FTP...");
 			if(!test)
 			{
-				FTP(jsonFile,"public_html");
+				FTP(file,"public_html");
 			}
 			System.out.println(new Date() + " <<FTP>> Finished FTP...");
 		}
@@ -3151,11 +3306,66 @@ public class main extends TimerTask
 	 *  
 	 * @return true if hit is alive.
 	 */
-	public boolean hitAlive(String link)
+	public boolean hitAlive(String link) throws Exception
 	{
-		ArrayList
 		
-		return true;
+		Document doc = null;
+		boolean alive = false;
+		
+		if (link.contains("mturk/previewandaccept"))
+		{
+			link = link.replaceAll("previewandaccept", "preview");
+		}		
+		
+		if(link.contains("/mturk/searchbar"))
+		{
+			doc = Jsoup.connect(link)
+					   .userAgent("Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3").get();
+			
+			Elements e  = doc.getElementsByClass("error_title");
+			
+			if(e.isEmpty()) //we have a hit
+			{
+				alive = true;
+			}
+			
+			checkExceed(doc);
+			
+			
+			
+		}
+		else if(link.contains("mturk/preview"))
+		{
+			
+			doc = Jsoup.connect(link)
+					   .userAgent("Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3").get();
+			
+			Element e = doc.getElementById("alertboxHeader");
+		//	System.out.println(new Date() + " <<LIVE HIT>> e is " + e);
+		//	System.out.println(new Date() + " <<LIVE HIT>> "+ link);
+			
+			//sometimes e is null?
+			if(e == null || (!e.text().toLowerCase().contains("there are no hits")))
+			{
+				alive = true;
+			}
+			
+			checkExceed(doc);
+		}
+
+		
+		return alive;
+	}
+	
+	public void checkExceed(Document doc) throws Exception
+	{
+		Elements e  = doc.getElementsByClass("error_title");
+		if(e.text().contains("exceeded the maximum"))
+		{
+			System.out.println("Exceeded maximum allowed pagem, let's wait...");
+			Thread.sleep(5000);
+			
+		}
 	}
 	
 	/**
@@ -3164,7 +3374,10 @@ public class main extends TimerTask
 	 * go thru array myData  = read.deSeralize();
 	 * 
 	 * - Take all the ones that are not dead, and put them in another array...
-	 *   ... Maybe I can skip this part and just load directly to a LIVE array everytime I add hits.
+	 *   ... Maybe I can skip this part and just load directly to a LIVE array everytime I add hits. 
+	 *   ... readLIVE will now hold array that have these hits. Gets added in checkIfLinkExist
+	 * 
+	 * - remove all the dead hits, reSeralize readLive
 	 * 
 	 * 
 	 * - import those into fire db
@@ -3174,25 +3387,104 @@ public class main extends TimerTask
 	 */
 	public void doLiveHitUpdate()
 	{
+		try{
+			// load all not dead hits
+			// only do this the first time.
+			myData  = read.deSeralize();
+			
+			
+			for(int i=0; i < myData.getArray().size() ; i ++)
+			{
+				hitData data = myData.getArray().get(i);
+				boolean alive = hitAlive(data.getLink());
+				
+				if(alive && (!liveData.contains(data.getLink())))
+				{
+					liveData.getArray().add(data);
+				}
+			}
+		}
+	catch(Exception e)
+	{
+		e.printStackTrace();
 		
+	}
+	
 		Thread t1 = new Thread(new Runnable() {
 		     public void run() {
-		    	
+		    	 String oldHash= "";
 		    	 while(true)
-	    		 {
+	    		 {	    		 
 		    		 try{		    			 
 		    			 System.out.println(new Date() + " <<LIVE HIT>> STARTED");				    		 
-			    		 
+		    			 //liveData = readLive.deSeralize(); don't seralize any more. liveData is now in memory don't save it (prevent overwritting)
+		    				
+		    				//loop backwards, as I'm removing index will change
+		    				for(int j = liveData.getArray().size() - 1; j >= 0; j--){			 
+		    						
+		    					
+		    					boolean alive = false;
+		    					
+		    					//if it doesn't have any text, lets create it. WHYYY
+		    					if(liveData.getArray().get(j).getPost().size()==0)
+		    					{
+		    						ArrayList<String> text = new ArrayList<String>();
+		    						
+		    						 //The very least add the link itself as the post
+		    						// For case Qualification does not match, CED.isFoundHit will be false, in this secnario i still dont set POST
+		    						// but it's still consider a live hit
+		    						
+		    						
+		    						text.add(("<a href =' " + liveData.getArray().get(j).getLink() + " ' target='_blank'>" + liveData.getArray().get(j).getLink() + "</a>").replaceAll("previewandaccept", "preview"));
+		    					
+		    						liveData.getArray().get(j).setPost(text);
+		    						
+		    						createExportData CED = createExportHitLink(liveData.getArray().get(j).getLink(), new ArrayList<String>()); 
+		    						if(CED.isFoundHit()) 
+		    						{
+		    							text = createExportHit(CED, new ArrayList<String>());
+		    							alive = true;
+		    							
+		    							liveData.getArray().get(j).setPost(text);
+		    						}
+		    					}
+		    					
+		    					 alive = alive || hitAlive(liveData.getArray().get(j).getLink());
+		    					 
+		    					if(!alive) //if not alive then we remove it.
+		    					{		    		
+		    						
+		    						System.out.println(new Date() + " <<LIVE HIT>> Removing hit " + liveData.getArray().get(j).getLink());
+		    						liveData.getArray().remove(j);
+		    					}
+		    				}
+		    				
+		    				System.out.println(new Date() + " <<LIVE HIT>> number of live hits : " + liveData.getArray().size());
+		    				//At this point I've removed all dead hits, seralize back to file
+		    				//readLive.seralize(liveData);	
 			    		 System.out.println(new Date() + " <<LIVE HIT>> FINISHED");	 
+			    
+			    		 //check if they are different, if they are different then that means there is a difference so we pass to firebase db
+			    		 String newHash = liveData.getHashString();
+			    		 if(!newHash.equals(oldHash))
+			    		 {
+			    			 System.out.println("Is different need to upload");
+			    			 ArrayList<String> jsonArrayLive = new ArrayList<String>();
+			    			 for(int i = 0; i < liveData.getArray().size(); i ++)
+			    			 {
+			    				 writeToJSONPerHIT(liveData.getArray().get(i).getPost(), liveData.getArray().get(i).getLink(), jsonArrayLive);
+			    			 }
+			    			 			    			 
+			    			 writeToJSON(jsonArrayLive,jsonFileLive);
+			    		 }
+			    		 oldHash = newHash;
 			    		 
-			    		 
-			    		 
-			    		 Thread.sleep(60000);
+			    		 Thread.sleep(8000);
 			    		 		    					    		
 		    		 }
 		    		 catch(Exception e)
 			    	 {
-			    		 System.out.println(e.getMessage());
+			    		 System.out.println("error " + e.getMessage());
 			    		 e.printStackTrace();
 			    	 }		    		 		    		
 		    		 
@@ -3201,7 +3493,6 @@ public class main extends TimerTask
 		     }
 		});  
 		t1.start();
-		
 		
 	}
 	
