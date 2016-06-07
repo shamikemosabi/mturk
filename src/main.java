@@ -2862,7 +2862,11 @@ public class main extends TimerTask
 			//if program closes, we loose it, but when we restart we start fresh from myData.
 			//addSeralize(readLive,hd, liveData, source);
 			
-			liveData.getArray().add(hd);
+			if(!liveData.contains(l))
+			{
+				liveData.getArray().add(hd);
+			}
+
 			
 			writeToJSONPerHIT(a,l, jsonList);
 					
@@ -3367,7 +3371,7 @@ public class main extends TimerTask
 		Elements e  = doc.getElementsByClass("error_title");
 		if(e.text().contains("exceeded the maximum"))
 		{
-			System.out.println("Exceeded maximum allowed pagem, Waiting " + 5000 + this.timeToCheckExceed + " miliseconds");			
+			System.out.println("Exceeded maximum allowed pagem, Waiting " + (5000 + this.timeToCheckExceed) + " miliseconds");			
 			Thread.sleep(5000 + this.timeToCheckExceed);
 			this.timeToCheckExceed += 5000;
 			
