@@ -45,6 +45,9 @@ public class timer extends TimerTask
 			System.out.println(br.readLine());
 			br.close();
 			
+			
+			test2();	
+			
 			main task = new main();
 					
 			//task.initFireBase();
@@ -73,20 +76,20 @@ public class timer extends TimerTask
 		try{
 			
 			ArrayList<String> a = new ArrayList<String> ();
-			a.add("https://www.mturk.com/mturk/preview?groupId=34OVCINT28Q6QKXDD6EL73CZQ4URAO");			
-			a.add("https://www.mturk.com/mturk/preview?groupId=3X9FJ610BWZ8KUEOA0GKMU8YCRPW1T");
-			a.add("https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&searchWords=feafd+fefe&minReward=0.00&x=0&y=0");
+					
+			a.add("https://www.mturk.com/mturk/preview?groupId=3I6C7P7ISC51HU41ZVUHBP2WHUMZ6F");
+//			a.add("https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&searchWords=feafd+fefe&minReward=0.00&x=0&y=0");
 			
 			for(int i=0; i<a.size() ;i++)
 			{
 				Document doc = Jsoup.connect(a.get(i))
 						.userAgent("Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3").get();			
-				
+				/*
 				Element e = doc.getElementById("alertBox");
 				System.out.println(e);
 				Elements link  = doc.getElementsByClass("error_title");
 				System.out.println(link);
-				/*
+				
 				Elements links = doc.select("a[href]");
 				
 				 for (Element b : links) {
@@ -97,8 +100,47 @@ public class timer extends TimerTask
 
 			       }
 			       */
+				Element e = doc.getElementById("alertboxHeader");				 // qualification do not meet && There are no more available Hits
+				String temp = e.text().toLowerCase();
+				createExportData CED = new createExportData();
 				
-				System.out.println(new Date());
+				if(temp.contains("your qualifications do not meet") || temp.contains("there are no hits"))
+				{
+					CED.setFoundHit(false);			
+				}
+				else // we can view hit
+				{
+					Elements es = doc.select("input[name=prevRequester]");			// requester name
+					System.out.println();
+					CED.setRequester(es.get(0).val());
+
+					es = doc.select("input[name=requesterId]");						// requester name
+					System.out.println();
+					CED.setRequesterID(es.get(0).val());
+					
+					es = doc.select("input[name=prevReward]");						// reward
+					System.out.println(es.get(0).val().replace("USD", "$ "));	
+					CED.setReward(es.get(0).val().replace("USD", "$ "));
+					
+					es = doc.select("td.capsulelink_bold");							// title
+					System.out.println();			
+					CED.setTitle(es.text());
+					
+					es = doc.select("td.capsule_field_text");						
+					System.out.println();							// time
+					CED.setTime(es.get(3).text());
+					System.out.println(es.get(4).text());							//qual			
+					CED.setQual(es.get(4).text());
+					
+				}
+				
+				 											
+				
+				
+				
+						
+					
+			
 			}
 			
 		

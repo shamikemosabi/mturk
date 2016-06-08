@@ -2214,6 +2214,80 @@ public class main extends TimerTask
 		
 	}
 	
+	public createExportData createExportHitLinkSOUP(String u , ArrayList<String> a) throws Exception
+	{	
+		Document doc = Jsoup.connect(u)
+				   .userAgent("Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3").get();
+		
+		if(u.startsWith("https://www.mturk.com/mturk/searchbar"))
+		{
+			return getSearchBarHitInfo(u, new createExportData());
+		}		
+		// have to do preview links too. If no qual I can still see the hit and grab info.
+		else if(u.contains("preview"))
+		{
+			return getPreviewHitInfoSOUP(u,a,doc);
+			
+		}
+		return new createExportData();
+	}
+	
+	public createExportData getPreviewHitInfoSOUP(String u, ArrayList<String> a, Document doc) throws Exception
+	{
+		createExportData CED = new createExportData();
+		//link has to be regular preview link, NOT Panda
+		if(u.contains("previewandaccept"))
+		{
+			CED.setLink(u.replaceAll("previewandaccept", "preview"));
+		}
+		else // just regular link
+		{
+			CED.setLink(u);
+		}				
+		
+		
+		Element e = doc.getElementById("alertboxHeader");				 // qualification do not meet && There are no more available Hits
+		String temp = e.text().toLowerCase();
+		
+		if(temp.contains("your qualifications do not meet") || temp.contains("there are no hits"))
+		{
+			CED.setFoundHit(false);			
+		}
+		else // we can view hit
+		{
+			Elements es = doc.select("input[name=prevRequester]");			// requester name
+			CED.setRequester(es.get(0).val());
+
+			es = doc.select("input[name=requesterId]");						// requester name
+			CED.setRequesterID(es.get(0).val());
+			
+			es = doc.select("input[name=prevReward]");						// reward
+			CED.setReward(es.get(0).val().replace("USD", "$ "));
+			
+			es = doc.select("td.capsulelink_bold");							// title		
+			CED.setTitle(es.text());
+			
+			es = doc.select("td.capsule_field_text");						
+			CED.setTime(es.get(3).text());									// time		
+			CED.setQual(es.get(4).text());									// qual
+			
+		}
+			
+		
+		
+		
+		
+		
+		
+				
+		
+		
+		
+		return CED;
+		
+	}
+	
+	
 	public createExportData createExportHitLink(String u , ArrayList<String> a) throws Exception
 	{	
 		
@@ -3324,58 +3398,60 @@ public class main extends TimerTask
 		if (link.contains("mturk/previewandaccept"))
 		{
 			link = link.replaceAll("previewandaccept", "preview");
-		}		
+		}
 		
-		if(link.contains("/mturk/searchbar"))
+		doc = Jsoup.connect(link)
+				   .userAgent("Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3").get();
+		
+		// Keep looping if exceeded max
+		do
 		{
-			doc = Jsoup.connect(link)
-					   .userAgent("Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3").get();
-			
-			Elements e  = doc.getElementsByClass("error_title");
-			
-			if(e.isEmpty()) //we have a hit
-			{
-				alive = true;
+			if(link.contains("/mturk/searchbar"))
+			{	
+				Elements e  = doc.getElementsByClass("error_title");
+				
+				if(e.isEmpty()) //we have a hit
+				{
+					alive = true;
+				}										
 			}
-			
-			checkExceed(doc);
-			
-			
-			
-		}
-		else if(link.contains("mturk/preview"))
-		{
-			
-			doc = Jsoup.connect(link)
-					   .userAgent("Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3").get();
-			
-			Element e = doc.getElementById("alertboxHeader");
-		//	System.out.println(new Date() + " <<LIVE HIT>> e is " + e);
-		//	System.out.println(new Date() + " <<LIVE HIT>> "+ link);
-			
-			//sometimes e is null?
-			if(e == null || (!e.text().toLowerCase().contains("there are no hits")))
-			{
-				alive = true;
+			else if(link.contains("mturk/preview"))
+			{			
+				Element e = doc.getElementById("alertboxHeader");
+				
+				//sometimes e is null?
+				if(e == null || (!e.text().toLowerCase().contains("there are no hits")))
+				{
+					alive = true;
+				}
 			}
-			
-			checkExceed(doc);
-		}
-
+		}while(checkExceed(doc));
 		
 		return alive;
 	}
 	
-	public void checkExceed(Document doc) throws Exception
+	/**
+	 * check to see if page hit exceed maximum allowed page.
+	 * If it does then we return true, which will keep looping.
+	 * 
+	 * @param doc 
+	 * @return true if exceed max, meaning we have to keep looping false otherwise
+	 * @throws Exception
+	 */
+	public boolean checkExceed(Document doc) throws Exception
 	{
 		Elements e  = doc.getElementsByClass("error_title");
+		boolean ret = false;
 		if(e.text().contains("exceeded the maximum"))
 		{
-			System.out.println("Exceeded maximum allowed pagem, Waiting " + (5000 + this.timeToCheckExceed) + " miliseconds");			
+			System.out.println("Exceeded maximum allowed page, Waiting " + (5000 + this.timeToCheckExceed) + " miliseconds");			
 			Thread.sleep(5000 + this.timeToCheckExceed);
 			this.timeToCheckExceed += 5000;
 			
+			ret = true;			
 		}
+		
+		return ret;
 	}
 	
 	/**
