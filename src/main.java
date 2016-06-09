@@ -251,7 +251,7 @@ public class main extends TimerTask
 	
 	
 	
-	public boolean checkExceed(String s) throws Exception
+	public boolean checkExceedVPN(String s) throws Exception
 	 {
 		if(!s.contains("DOC") || VPN)
 		{
@@ -328,7 +328,7 @@ public class main extends TimerTask
 		    				String temp  = br.readLine();
 		    				System.out.println(temp);
 		    				
-		    				checkExceed(temp);
+		    				checkExceedVPN(temp);
 		    					    				
 		    				br.close();
 		    			 
@@ -570,7 +570,7 @@ public class main extends TimerTask
 		
 		if(!CED.getTitle().equals(""))
 		{
-			temp = "<font color=\"blue\">" + CED.getTitle() +" </font>";
+			temp = "<font color=\"blue\"> " + CED.getTitle() +" </font>";
 			t2 = temp;
 			//text.add(temp);
 		}					
@@ -580,6 +580,9 @@ public class main extends TimerTask
 		text.add(((!CED.getTitle().equals("")) ? "<b>Title:</b>": "") + t1 + t2 +((!CED.getLink().equals("")) ? "</a>":"") + "</br>" );
 
 		
+		//reset it
+		t1="";
+		t2="";
 		
 		if(!CED.getRequesterURL().equals(""))
 		{
@@ -590,7 +593,7 @@ public class main extends TimerTask
 		
 		if(!CED.getRequester().equals(""))
 		{
-			temp = "<font color=\"blue\">" + CED.getRequester() + "</font>"+ (CED.getRequesterID().equals("")?"":CED.getRequesterID());
+			temp = "<font color=\"blue\"> " + CED.getRequester() + "</font>"+ (CED.getRequesterID().equals("")?"": "["+CED.getRequesterID()+"]");
 			t2 = temp;
 			//text.add(temp);
 		}
@@ -609,6 +612,13 @@ public class main extends TimerTask
 			
 		}
 		
+		if(!CED.getDesc().equals(""))
+		{
+			temp="</br> <b> Description: </b>" + CED.getDesc()  ;
+			text.add(temp);
+		}
+			
+			
 		if(!CED.getTime().equals(""))
 		{
 			
@@ -618,10 +628,16 @@ public class main extends TimerTask
 		
 		if(!CED.getReward().equals(""))
 		{
-			temp = "<br> <b>Reward:</b> <font color=\"green\"><b>" + CED.getReward() + "</b></font><br>";
+			temp = "<br> <b>Reward:</b> <font color=\"green\"><b>" + CED.getReward() + "</b></font>";
 			text.add(temp);
 			
 		}
+		if(!CED.getQual().equals(""))
+		{
+			temp="</br> <b> Qualifications: </b>" + CED.getQual()  ;
+			text.add(temp);
+		}
+			
 		
 		if(!CED.foundHit)
 		{
@@ -630,8 +646,12 @@ public class main extends TimerTask
 			a.add("</br>");
 			a.add("</br>");
 		}
+		else // if I did find a hit, just use text
+		{
+			
+			a = text;
+		}
 		
-		a.addAll(text);
 		return  a;
 		
 	}
@@ -692,7 +712,7 @@ public class main extends TimerTask
 		    String imgURL = "http://data.istrack.in/turkopticon.php?data="+ jsonReqAttrs.get("comm")+"," + jsonReqAttrs.get("pay")+ "," + jsonReqAttrs.get("fair")+","+jsonReqAttrs.get("fast"); 
 		    
 			
-		     imgURL = "<img src=\" " + imgURL + "\" > </img> <br>Number of Reviews: " + jsonReq.get("reviews") +"";
+		     imgURL = "<img src=\" " + imgURL + "\" > </img> <br><b>Number of Reviews: </b>" + jsonReq.get("reviews") +"";
 		    		     
 		    return imgURL;    	    
 		    
@@ -732,6 +752,8 @@ public class main extends TimerTask
 				//processPageTN("http://turkernation.com/showthread.php?25209-08-12-15-wicked-wednesday/page15");
 				processPageTNsoup("http://turkernation.com/"+todayLink+"/page1000"); //1000 so its greater so it's always the last page
 			//	processPageTNsoup("http://turkernation.com/showthread.php?27139-06-05-16-Cry-Havoc-And-Let-Slip-The-PandAs-Of-Mturk-Sunday/page17");
+				
+				//processPageTNsoup("http://turkernation.com/showthread.php?27169-Tasty-HITs-Thursday/" + "page1000");
 			}
 			else
 			{
@@ -1006,7 +1028,13 @@ public class main extends TimerTask
 				{
 					if(isAHit(textTable)) // if it's likely a hit
 					{
-						text = textTable;							
+						//text = textTable;
+						// lets still try to create Export hit
+						CED = createExportHitLinkSOUP(hitLink, textTable); 
+						
+						// if CED did not found hit, then use textTable, otherwise use create export hit
+						text = createExportHit(CED, textTable);
+
 					}
 					else // if we have table, but turns out it's not a hit, DO NOT continue
 					{
@@ -1015,7 +1043,7 @@ public class main extends TimerTask
 				}
 				else if(mode==2) // even though I have textTable I'm might not use it. 
 				{
-					CED = createExportHitLink(hitLink, new ArrayList<String>()); 
+					CED = createExportHitLinkSOUP(hitLink, new ArrayList<String>()); 
 					
 					if(!CED.isFoundHit()) // if I don't find hit, either none left, or can't view because of qual 
 					{
@@ -1048,7 +1076,7 @@ public class main extends TimerTask
 				}
 				else if(mode ==3) // I definitely won't use textTable
 				{
-					CED = createExportHitLink(hitLink, new ArrayList<String>()); 
+					CED = createExportHitLinkSOUP(hitLink, new ArrayList<String>()); 
 					if(CED.isFoundHit()) 
 					{
 						text = createExportHit(CED, new ArrayList<String>());
@@ -1067,7 +1095,7 @@ public class main extends TimerTask
 				//yes I'm passing textTable
 				// doesn't make sense, because it takes arraylist at index 0, assuming it's title from reddit
 				// but this is not reddit
-				CED = createExportHitLink(hitLink, new ArrayList<String>()); 
+				CED = createExportHitLinkSOUP(hitLink, new ArrayList<String>()); 
 				
 				if(!CED.isFoundHit()) // if I don't find hit, either none left, or can't view because of qual 
 				{
@@ -2123,7 +2151,7 @@ public class main extends TimerTask
 								// which createExportHit method takes and create an ArrayList.
 					    		 
 					    		 //let's take text, need title to do potential search bar hit
-								createExportData CED = createExportHitLink(test, text);
+								createExportData CED = createExportHitLinkSOUP(test, text);
 								// if I have link then I should Panda it. 
 								
 								if(!CED.getLink().equals(""))
@@ -2215,21 +2243,164 @@ public class main extends TimerTask
 	}
 	
 	public createExportData createExportHitLinkSOUP(String u , ArrayList<String> a) throws Exception
-	{	
-		Document doc = Jsoup.connect(u)
-				   .userAgent("Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3").get();
-		
-		if(u.startsWith("https://www.mturk.com/mturk/searchbar"))
-		{
-			return getSearchBarHitInfo(u, new createExportData());
-		}		
-		// have to do preview links too. If no qual I can still see the hit and grab info.
-		else if(u.contains("preview"))
-		{
-			return getPreviewHitInfoSOUP(u,a,doc);
+	{			
+		Document doc;
+		createExportData CED = new createExportData();
+		do
+		{	
+			doc = Jsoup.connect(u)
+					   .userAgent("Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3").get();
 			
+			if(u.startsWith("https://www.mturk.com/mturk/searchbar"))
+			{
+				CED =  getSearchBarHitInfoSOUP(u, new createExportData(), doc);
+			}		
+			// have to do preview links too. If no qual I can still see the hit and grab info.
+			else if(u.contains("preview"))
+			{
+				CED =  getPreviewHitInfoSOUP(u,a,doc);
+				
+			}
+		}while(checkExceed(doc));
+		
+		
+		return CED;
+	}
+	
+	
+	/*
+	 * Search result may contain more then 1. There is no way of knowing which one the link is for, so Always assume the first one.
+	 * 
+	 * read search result, take first record and grab info like link, requester, etc...
+	 */
+	public createExportData getSearchBarHitInfoSOUP(String u, createExportData CEData, Document doc) throws Exception
+	{
+		
+		String requestID = "";
+		// if my URL contains requesterID I can use it to find TO rating			
+		if(u.toLowerCase().contains("requesterid"))
+		{
+			String temp = u.substring(u.toLowerCase().indexOf("requesterid")+12);
+			//Oyie.. ID could be 13 chars??
+			// and apprently 15...
+			
+			if(temp.length()<=16) // assume requesterid is last parameter on URL , so can just grab everything
+			{
+				requestID  = temp;
+			}
+			else // requesterid is NOT the last parameter on URL... 
+			{					
+				requestID = temp.substring(0, temp.indexOf("&"));
+			}
+		
+			//System.out.println("REquest ID " + requestID);
 		}
-		return new createExportData();
+		
+		
+		String s ="";
+		Element e = doc.getElementById("alertboxHeader");
+		
+		Elements es = doc.getElementsByClass("error_title");  //Your search did not match any HITs.
+		s = es.text();
+		
+		if(s.contains("Your search did not match any HITs."))
+		{
+			CEData.setFoundHit(false);
+		}
+		
+		else
+		{
+			
+			es = doc.getElementsByClass("capsulelink");
+			if(es.size()>0)				
+			{
+				CEData.setFoundHit(true);
+				s =  es.get(0).text();
+				CEData.setTitle(s);												// TITLE
+			//	System.out.println("Title is " + es.get(0).text());  
+			}
+			
+			if(es.size()>0)	
+			{
+				s = es.get(1).childNodes().get(1).attr("href");
+				if(!s.equals("")) // I may have hits that I cant' view the link to //no qual
+				{
+					s = "https://www.mturk.com" + s ;
+					CEData.setLink(s); 											//PREVIEW LINK	
+				
+					//System.out.println("full link is : " + s);
+				}
+					
+			}
+			
+			
+			es = doc.getElementsByClass("requesterIdentity");
+			if(es.size()>0)				
+			{
+				s =  es.get(0).text();
+				CEData.setRequester(s);
+				//System.out.println("Requester is : " + s);						// REQUESTER NAME
+			}
+			
+			
+			e = doc.getElementById("duration_to_complete.tooltip--0");
+			if(e!=null)
+			{
+				e = e.parent();
+				es = e.siblingElements();
+				s = es.text();
+				CEData.setTime(s);
+				//System.out.println("time is : " + s);										// time
+			}
+			
+			e = doc.getElementById("reward.tooltip--0");
+			if(e!=null)
+			{
+				e = e.parent();
+				es = e.siblingElements();
+				s = es.text();
+				CEData.setReward(s);
+				//System.out.println("Reward is : " + s);										// REWARD
+			}
+			e = doc.getElementById("description.tooltip--0");
+			if(e!=null)
+			{
+				e = e.parent();
+				es = e.siblingElements();
+				s = es.text();
+				CEData.setDesc(s);
+				//System.out.println("Description is : " + s);										// DESC
+			}
+	
+			e = doc.getElementById("qualificationsRequired.tooltip--0");
+			if(e!=null)
+			{
+				e = e.parent().parent();
+				es = e.siblingElements();
+				s="";
+				for(Element ele : es)
+				{
+					s +=ele.text()+";";
+				}
+	
+				s = s.replace("Masters", "<span style=\"color: red\"><b>Masters </b></span>");
+				
+				CEData.setQual(s);
+			//	System.out.println("QUal is : " + s);										// QUAL
+			}
+			
+			
+			CEData.setRequesterID(requestID);
+			//If I found the hit, But I'm able to grab hit links from it. let's just set link as the search page.
+			if(CEData.getLink().equals(""))
+			{
+				CEData.setLink(u);
+			}
+		}
+		
+		
+		
+		return CEData;
 	}
 	
 	public createExportData getPreviewHitInfoSOUP(String u, ArrayList<String> a, Document doc) throws Exception
@@ -2244,43 +2415,80 @@ public class main extends TimerTask
 		{
 			CED.setLink(u);
 		}				
-		
+		String temp="";
 		
 		Element e = doc.getElementById("alertboxHeader");				 // qualification do not meet && There are no more available Hits
-		String temp = e.text().toLowerCase();
-		
-		if(temp.contains("your qualifications do not meet") || temp.contains("there are no hits"))
-		{
-			CED.setFoundHit(false);			
-		}
-		else // we can view hit
-		{
-			Elements es = doc.select("input[name=prevRequester]");			// requester name
-			CED.setRequester(es.get(0).val());
 
-			es = doc.select("input[name=requesterId]");						// requester name
-			CED.setRequesterID(es.get(0).val());
-			
-			es = doc.select("input[name=prevReward]");						// reward
-			CED.setReward(es.get(0).val().replace("USD", "$ "));
-			
-			es = doc.select("td.capsulelink_bold");							// title		
-			CED.setTitle(es.text());
-			
-			es = doc.select("td.capsule_field_text");						
-			CED.setTime(es.get(3).text());									// time		
-			CED.setQual(es.get(4).text());									// qual
-			
-		}
-			
-		
-		
-		
-		
-		
-		
+		// if there are no alertboxHeader then this probably means Exceed max allowed page. don't bother doing anything
+		if(e!=null)
+		{
+			temp = e.text().toLowerCase();
+			if(temp.contains("your qualifications do not meet") || temp.contains("there are no hits"))
+			{
+				CED.setFoundHit(false);			
+			}
+			else // we can view hit
+			{			
+				CED.setFoundHit(true);
+				Elements es = doc.select("input[name=prevRequester]");			// requester name
+				CED.setRequester(es.get(0).val());
+	
+				es = doc.select("input[name=requesterId]");						// requester name
+				CED.setRequesterID(es.get(0).val());
 				
+				es = doc.select("input[name=prevReward]");						// reward
+				CED.setReward(es.get(0).val().replace("USD", "$ "));
+				
+				es = doc.select("td.capsulelink_bold");							// title		
+				CED.setTitle(es.text());
+				
+				es = doc.select("td.capsule_field_text");						
+				CED.setTime(es.get(3).text());									// time		
+				
+				es.get(4).text().replace("Masters", "<span style=\"color: red\"><b>Masters </b></span>");
+				CED.setQual(es.get(4).text());									// qual
+				
+				
+				
+				
+			}
+		}
+
 		
+		// ONLY FOR REDDIT HITS (a.size()>0)
+		//Here either CED found hit or not. If it didn't then let's try and search
+		// reddit hit title usually starts like US - THIS IS MY TITLE - REQUESTER - etc...
+		// So I can try to take title and query search bar and see what I get.
+		// better to get No hit, then wrong hit.. so adding title and requester
+		
+		if(!CED.isFoundHit() && a.size()>0)
+		{
+			String title =a.get(0);			
+			 StringTokenizer st = new StringTokenizer(title, "-");
+			 int count =0;
+			 String title2="";
+			 while(st.hasMoreTokens())
+			 {
+				 temp =st.nextToken();
+				 if(count==1||count==2)  // 0 is ICA/US, 1 is Title, 2 is REquester, the rest I don't care
+				 {
+					 title2+=temp;
+				 }
+				 count++;
+			 }
+			title2= title2.replaceAll("\\s","+");
+			
+			String url = "https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&searchWords=" + title2 + "&minReward=0.00&x=0&y=0";
+			
+			do{
+				doc = Jsoup.connect(url)
+						   .userAgent("Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3").get();
+				
+				CED = getSearchBarHitInfoSOUP(url, CED, doc);
+				
+			}while(checkExceed(doc));
+
+		}
 		
 		
 		return CED;
@@ -2288,6 +2496,13 @@ public class main extends TimerTask
 	}
 	
 	
+	/**
+	 * @deprecated
+	 * @param u
+	 * @param a
+	 * @return
+	 * @throws Exception
+	 */
 	public createExportData createExportHitLink(String u , ArrayList<String> a) throws Exception
 	{	
 		
@@ -2304,6 +2519,13 @@ public class main extends TimerTask
 		return new createExportData();
 	}
 	
+	/**
+	 * @deprecated
+	 * @param u
+	 * @param a
+	 * @return
+	 * @throws Exception
+	 */
 	public createExportData getPreviewHitInfo(String u, ArrayList<String> a) throws Exception
 	{
 		createExportData CED = new createExportData();
@@ -2491,10 +2713,20 @@ public class main extends TimerTask
 		return CED;
 		
 	}
+	
+	
+	
 	/*
 	 * Search result may contain more then 1. There is no way of knowing which one the link is for, so Always assume the first one.
 	 * 
 	 * read search result, take first record and grab info like link, requester, etc...
+	 */
+	/**
+	 * @deprecated
+	 * @param u
+	 * @param CEData
+	 * @return
+	 * @throws Exception
 	 */
 	public createExportData getSearchBarHitInfo(String u, createExportData CEData) throws Exception
 	{
@@ -3398,14 +3630,14 @@ public class main extends TimerTask
 		if (link.contains("mturk/previewandaccept"))
 		{
 			link = link.replaceAll("previewandaccept", "preview");
-		}
-		
-		doc = Jsoup.connect(link)
-				   .userAgent("Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3").get();
+		}		
 		
 		// Keep looping if exceeded max
 		do
-		{
+		{			
+			doc = Jsoup.connect(link)
+					   .userAgent("Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3").get();
+			
 			if(link.contains("/mturk/searchbar"))
 			{	
 				Elements e  = doc.getElementsByClass("error_title");
@@ -3526,10 +3758,12 @@ public class main extends TimerTask
 		    					
 		    						liveData.getArray().get(j).setPost(text);
 		    						
-		    						createExportData CED = createExportHitLink(liveData.getArray().get(j).getLink(), new ArrayList<String>()); 
-		    						if(CED.isFoundHit()) 
+		    	
+		    						
+		    						text = filterSmartMode(3, new ArrayList<String>(), liveData.getArray().get(j).getLink());
+
+		    						if(text.size()>0) 
 		    						{
-		    							text = createExportHit(CED, new ArrayList<String>());
 		    							alive = true;
 		    							
 		    							liveData.getArray().get(j).setPost(text);

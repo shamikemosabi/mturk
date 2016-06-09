@@ -34,7 +34,7 @@ public class createExportData
 		 requesterURL = "";
 		 requesterID = "";
 		 PandA  = "";
-		 foundHit = true; // initally set to true, if no hit found then set to false
+		 foundHit = false;
 	}
 
 

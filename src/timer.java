@@ -46,7 +46,7 @@ public class timer extends TimerTask
 			br.close();
 			
 			
-			test2();	
+			//test2();	
 			
 			main task = new main();
 					
@@ -77,29 +77,18 @@ public class timer extends TimerTask
 			
 			ArrayList<String> a = new ArrayList<String> ();
 					
-			a.add("https://www.mturk.com/mturk/preview?groupId=3I6C7P7ISC51HU41ZVUHBP2WHUMZ6F");
-//			a.add("https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&searchWords=feafd+fefe&minReward=0.00&x=0&y=0");
+			a.add("https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&searchWords=Text+and+Image+Classification&minReward=0.00&requiresMasterQual=on&x=0&y=0");
+			a.add("https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&searchWords=David+Akers&minReward=0.00&x=0&y=0");
+			a.add("https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&requesterId=A2F2QDJJQD3MSM");
+			
+			
 			
 			for(int i=0; i<a.size() ;i++)
 			{
 				Document doc = Jsoup.connect(a.get(i))
 						.userAgent("Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3").get();			
 				/*
-				Element e = doc.getElementById("alertBox");
-				System.out.println(e);
-				Elements link  = doc.getElementsByClass("error_title");
-				System.out.println(link);
-				
-				Elements links = doc.select("a[href]");
-				
-				 for (Element b : links) {
-					 String linkHref = b.attr("href"); // "http://example.com/"
-					 String linkText = b.text(); // "example""
-					 
-					 	System.out.println(linkHref);
-
-			       }
-			       */
+			     
 				Element e = doc.getElementById("alertboxHeader");				 // qualification do not meet && There are no more available Hits
 				String temp = e.text().toLowerCase();
 				createExportData CED = new createExportData();
@@ -133,13 +122,96 @@ public class timer extends TimerTask
 					CED.setQual(es.get(4).text());
 					
 				}
+				  */
 				
-				 											
+				createExportData CEData = new createExportData();
 				
 				
+				String s ="";
+				Element e = doc.getElementById("alertboxHeader");
+				
+				Elements es = doc.getElementsByClass("error_title");  //Your search did not match any HITs.
+				System.out.println(es.text());
+				
+				
+				es = doc.getElementsByClass("capsulelink");
+				if(es.size()>0)				
+				{
+					s =  es.get(0).text();
+					CEData.setTitle(s);												// TITLE
+					System.out.println("Title is " + es.get(0).text());  
+				}
+				
+				if(es.size()>0)	
+				{
+					s = es.get(1).childNodes().get(1).attr("href");
+					if(!s.equals("")) // I may have hits that I cant' view the link to //no qual
+					{
+						s = "https://www.mturk.com" + s ;
+						CEData.setLink(s); 											//PREVIEW LINK	
+					
+						System.out.println("full link is : " + s);
+					}
+						
+				}
+				
+				
+				es = doc.getElementsByClass("requesterIdentity");
+				if(es.size()>0)				
+				{
+					s =  es.get(0).text();
+					CEData.setRequester(s);
+					System.out.println("Requester is : " + s);						// REQUESTER NAME
+				}
+				
+				
+				e = doc.getElementById("duration_to_complete.tooltip--0");
+				if(e!=null)
+				{
+					e = e.parent();
+					es = e.siblingElements();
+					s = es.text();
+					CEData.setTime(s);
+					System.out.println("time is : " + s);										// time
+				}
+				
+				e = doc.getElementById("reward.tooltip--0");
+				if(e!=null)
+				{
+					e = e.parent();
+					es = e.siblingElements();
+					s = es.text();
+					CEData.setReward(s);
+					System.out.println("Reward is : " + s);										// REWARD
+				}
+				e = doc.getElementById("description.tooltip--0");
+				if(e!=null)
+				{
+					e = e.parent();
+					es = e.siblingElements();
+					s = es.text();
+					CEData.setDesc(s);
+					System.out.println("Description is : " + s);										// DESC
+				}
+
+				e = doc.getElementById("qualificationsRequired.tooltip--0");
+				if(e!=null)
+				{
+					e = e.parent().parent();
+					es = e.siblingElements();
+					s="";
+					for(Element ele : es)
+					{
+						s +=ele.text()+";";
+					}
+
+					s = s.replace("Masters", "<span style=\"color: red\"><b>Masters </b></span>");
+					
+					CEData.setQual(s);
+					System.out.println("QUal is : " + s);										// QUAL
+				}
 				
 						
-					
 			
 			}
 			
