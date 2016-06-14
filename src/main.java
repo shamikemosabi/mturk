@@ -3771,8 +3771,7 @@ public class main extends TimerTask
 		    					}
 		    					
 		    				
-		    					 alive = alive || hitAlive(liveData.getArray().get(j).getLink());
-		    					 System.out.println("Checking hit alive " + liveData.getArray().get(j).getLink());
+		    					 alive = alive || hitAlive(liveData.getArray().get(j).getLink());		    					 
 		    					 
 		    					if(!alive) //if not alive then we remove it.
 		    					{		    		
@@ -3783,8 +3782,7 @@ public class main extends TimerTask
 		    				}
 		    				
 		    				timeToCheckExceed = 0;
-		    				
-		    				System.out.println(new Date() + " <<LIVE HIT>> number of live hits : " + liveData.getArray().size());
+		    						    				
 		    				//At this point I've removed all dead hits, seralize back to file
 		    				//readLive.seralize(liveData);	
 			    		 System.out.println(new Date() + " <<LIVE HIT>> FINISHED");	 
@@ -3801,6 +3799,7 @@ public class main extends TimerTask
 			    			 }
 			    			 			    			 
 			    			 writeToJSON(jsonArrayLive,jsonFileLive);
+			    			 System.out.println(new Date() + " <<LIVE HIT>> number of live hits : " + liveData.getArray().size());
 			    		 }
 			    		 oldHash = newHash;
 			    		 
