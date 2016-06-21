@@ -226,8 +226,7 @@ public class main extends TimerTask
 	    		 {
 		    	   try{
 
-		    			 System.out.println(new Date() + " <<FORUM>> STARTED");	
-		    			 turkerNation();
+		    			 System.out.println(new Date() + " <<FORUM>> STARTED");			    			
 		    			 mturkGrind();
 		    			 TurkForum();
 		    			 mturkCrowd(); 
@@ -247,6 +246,38 @@ public class main extends TimerTask
 		t1.start();
 		
 	}
+	
+	
+	public void doTurkerNation()
+	{
+		/*
+		 * reddit scraps take too long, have to thread it.
+		 */
+		
+		Thread t1 = new Thread(new Runnable() {
+		     public void run() {
+		    	
+		    	 while(true)
+	    		 {
+		    	   try{		    			    		
+		    			 turkerNation();
+			    	
+			    		 Thread.sleep(timer.timeIntervalTN());	
+		    		 }
+		    	   catch(Exception e)
+			    	 {
+			    		 System.out.println(e.getMessage());
+			    		 e.printStackTrace();
+			    	 }
+		    		 
+		    	 }
+		    	 
+		     }
+		});  
+		t1.start();
+		
+	}
+	
 	
 	
 	
@@ -2181,7 +2212,7 @@ public class main extends TimerTask
 								
 								newLink = checkIfLinkExist(createExportHit(CED, text), PandA, "HWTF", 10800000, alJson);												    	
 					    		 
-								System.out.println(new Date() + " <<REDDIT>> "+ PandA);
+								//System.out.println(new Date() + " <<REDDIT>> "+ PandA);
 								
 					    		 llbreak = true; //break out
 					    		 break;
