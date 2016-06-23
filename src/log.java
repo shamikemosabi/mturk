@@ -12,7 +12,7 @@ public class log
 	private Logger log = Logger.getLogger("log");
 	private FileHandler f = null;
 	
-	boolean bDebugMode = true;
+	boolean bDebugMode = false;
 	
 	
 	public log() throws Exception

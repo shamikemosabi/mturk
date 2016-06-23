@@ -12,6 +12,12 @@ import java.util.Date;
 		int timeExpire; //milliseconds when expired
 		ArrayList<String>  post;
 		
+		String title;
+		String requester;
+		String time;
+		String reward;
+		String qual;
+		
 		public hitData()
 		{
 			link="";
@@ -27,6 +33,19 @@ import java.util.Date;
 			src = sr;
 			timeExpire = t;
 			post= p;
+		}
+		
+		/**
+		 * ]
+		 * @param CED - There rewards, requester, title etc... data that I need
+		 */
+		public void mergeCED(createExportData CED)
+		{
+			this.title = CED.getTitle();
+			this.requester = CED.getRequester();
+			this.time = CED.getTime();
+			this.reward = CED.getReward();
+			this.qual = CED.getQual();			
 		}
 		
 		public void setLink(String s)
@@ -69,5 +88,35 @@ import java.util.Date;
 		public ArrayList<String> getPost()
 		{
 			return this.post;
+		}
+		public String getTitle() {
+			return title;
+		}
+		public void setTitle(String title) {
+			this.title = title;
+		}
+		public String getRequester() {
+			return requester;
+		}
+		public void setRequester(String requester) {
+			this.requester = requester;
+		}
+		public String getTime() {
+			return time;
+		}
+		public void setTime(String time) {
+			this.time = time;
+		}
+		public String getReward() {
+			return reward;
+		}
+		public void setReward(String reward) {
+			this.reward = reward;
+		}
+		public String getQual() {
+			return qual;
+		}
+		public void setQual(String qual) {
+			this.qual = qual;
 		}
 	}

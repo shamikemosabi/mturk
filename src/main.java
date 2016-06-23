@@ -60,7 +60,7 @@ public class main extends TimerTask
 	
 	static window w;
 	
-	boolean test = false;
+	boolean test = true;
 	
 	int timeToCheckExceed = 0;
 	
@@ -498,7 +498,15 @@ public class main extends TimerTask
 					System.out.println(reward);
 					*/
 					
-					newLink = checkIfLinkExist(createExportHit(title, link, requester, requesterURL, requesterID, PandA, reward, time), PandA, "ML",10800000, alJson);
+					
+					CEDTEXT cedtext = filterSmartMode(3, new ArrayList<String>(), PandA);
+					hit = (cedtext==null)? false: true;
+					
+					if(hit)
+					{
+						 checkIfLinkExist(cedtext.getTextTable(), PandA, "ML",10800000, alJson, cedtext.getCED()); 			
+						//newLink = checkIfLinkExist(createExportHit(title, link, requester, requesterURL, requesterID, PandA, reward, time), PandA, "ML",10800000, alJson, new createExportData());
+					}
 					
 					
 					link = "";
@@ -789,7 +797,8 @@ public class main extends TimerTask
 		 {
 	
 				boolean hit = false;
-				ArrayList<String> text = new ArrayList<String>();
+				ArrayList text = new ArrayList();
+				CEDTEXT cedtext = null;
 				String hitLink = "";
 				String PandA ="";
 			 String temp = b.toString();
@@ -829,14 +838,14 @@ public class main extends TimerTask
 				}
 				if(hit)
 				{
-					text = filterSmartMode(3, new ArrayList<String>(), hitLink);
-					hit = (text.size()==0)? false: true;
+					cedtext = filterSmartMode(3, new ArrayList<String>(), hitLink);
+					hit = (cedtext==null)? false: true;
 				}
 				if(hit)
 				{
 					
 					// we gotta match the link with our records to see if we've sent it before
-				     checkIfLinkExist(text, PandA, "TN",10800000, alJson); 
+				     checkIfLinkExist(cedtext.getTextTable(), PandA, "TN",10800000, alJson, cedtext.getCED()); 
 				}
 			 
 							 
@@ -885,6 +894,7 @@ public class main extends TimerTask
 			{
 				boolean hit = false;
 				ArrayList<String> text = new ArrayList<String>();
+				CEDTEXT cedtext= null;
 				String hitLink = "";
 				String PandA ="";
 				
@@ -957,8 +967,9 @@ public class main extends TimerTask
 					
 				if(hit)
 				{
-					text = filterSmartMode(3, textTable, hitLink);
-					hit = (text.size()==0)? false: true;
+					cedtext = filterSmartMode(3, textTable, hitLink);
+					hit = (cedtext==null)? false: true;			
+					
 				}
 		
 				// if hit = true then we have to do more stuff, if not we keep looping
@@ -966,7 +977,7 @@ public class main extends TimerTask
 				{
 					
 					// we gotta match the link with our records to see if we've sent it before
-						newLink = checkIfLinkExist(text, PandA, "TN",10800000, alJson); 
+						newLink = checkIfLinkExist(cedtext.getTextTable(), PandA, "TN",10800000, alJson,cedtext.getCED()); 
 				}
 				
 				//reset hit and text
@@ -1014,11 +1025,13 @@ public class main extends TimerTask
 	 *
 	 */
 	
-	public ArrayList<String> filterSmartMode(int mode, ArrayList<String> textTable, String hitLink) throws Exception
+	public CEDTEXT filterSmartMode(int mode, ArrayList<String> textTable, String hitLink) throws Exception
 	{
 		boolean hit = false; // i know I don't really need this, i'm returning ArrayList, if size = 0 then it means false
 		
-		ArrayList<String> text = new ArrayList<String>();
+		//changing this to arraylist that holds object, index 1 will be text arrayList, index 2 will be CED ( I need CED now, holds value like reward, qual, etc...)
+
+		CEDTEXT cedtext = null;
 		createExportData CED = new createExportData();
 		// if I have hit, lets see if I have textTable populated, if I do then I Only use textTable
 		// Also need to add some logic to see if this is likely a hit, We assume if it is in <table></table> it's probably a hit.
@@ -1039,7 +1052,7 @@ public class main extends TimerTask
 						CED = createExportHitLinkSOUP(hitLink, textTable); 
 						
 						// if CED did not found hit, then use textTable, otherwise use create export hit
-						text = createExportHit(CED, textTable);
+						cedtext = new CEDTEXT(createExportHit(CED, textTable),CED);
 
 					}
 					else // if we have table, but turns out it's not a hit, DO NOT continue
@@ -1047,7 +1060,8 @@ public class main extends TimerTask
 						hit = false;
 					}
 				}
-				else if(mode==2) // even though I have textTable I'm might not use it. 
+				// DEPRCATING MODE 2
+				/*else if(mode==2) // even though I have textTable I'm might not use it. 
 				{
 					CED = createExportHitLinkSOUP(hitLink, new ArrayList<String>()); 
 					
@@ -1079,13 +1093,13 @@ public class main extends TimerTask
 						//Again textTable at second parameter doesn't matter
 						text = createExportHit(CED, new ArrayList<String>());
 					}
-				}
+				}*/
 				else if(mode ==3) // I definitely won't use textTable
 				{
 					CED = createExportHitLinkSOUP(hitLink, new ArrayList<String>()); 
 					if(CED.isFoundHit()) 
-					{
-						text = createExportHit(CED, new ArrayList<String>());
+					{						
+						cedtext = new CEDTEXT(createExportHit(CED, new ArrayList<String>()),CED);
 					}
 					else
 					{
@@ -1112,13 +1126,14 @@ public class main extends TimerTask
 				else
 				{
 					//Again textTable at second parameter doesn't matter
-					text = createExportHit(CED, new ArrayList<String>());
+					
+					cedtext = new CEDTEXT(createExportHit(CED, new ArrayList<String>()),CED);
 					
 				}
 				
 			}
 			
-			return text;
+			return cedtext;
 			
 	}
 	
@@ -1413,6 +1428,7 @@ public class main extends TimerTask
 			{
 				boolean hit = false;
 				ArrayList<String> text = new ArrayList<String>();
+				CEDTEXT cedtext = null;
 				String hitLink = "";
 				String PandA ="";
 				boolean hasTable = false;
@@ -1484,15 +1500,15 @@ public class main extends TimerTask
 				
 				if(hit)
 				{
-					text = filterSmartMode(1, textTable, hitLink);
-					hit = (text.size()==0)? false: true;
+					cedtext = filterSmartMode(1, textTable, hitLink);
+					hit = (cedtext==null)? false: true;
 				}
 				
 				// if hit = true then we have to do more stuff, if not we keep looping
 				if(hit)
 				{
 					// we gotta match the link with our records to see if we've sent it before
-						newLink = checkIfLinkExist(text, PandA, "MTC", 10800000, alJson);
+						newLink = checkIfLinkExist(cedtext.getTextTable(), PandA, "MTC", 10800000, alJson,cedtext.getCED());
 				}
 				
 				//reset hit and text
@@ -1736,6 +1752,7 @@ public class main extends TimerTask
 			{
 				boolean hit = false;
 				ArrayList<String> text = new ArrayList<String>();
+				CEDTEXT cedtext = null;
 				String hitLink = "";
 				String PandA ="";
 				boolean hasTable = false;
@@ -1807,15 +1824,15 @@ public class main extends TimerTask
 				
 				if(hit)
 				{
-					text = filterSmartMode(1, textTable, hitLink);
-					hit = (text.size()==0)? false: true;
+					cedtext = filterSmartMode(1, textTable, hitLink);
+					hit = (cedtext==null)? false: true;
 				}
 				
 				// if hit = true then we have to do more stuff, if not we keep looping
 				if(hit)
 				{
 					// we gotta match the link with our records to see if we've sent it before
-						newLink = checkIfLinkExist(text, PandA, "MTG", 10800000, alJson);
+						newLink = checkIfLinkExist(cedtext.getTextTable(), PandA, "MTG", 10800000, alJson,cedtext.getCED());
 				}
 				
 				//reset hit and text
@@ -2185,7 +2202,7 @@ public class main extends TimerTask
 									}									
 								}
 								
-								newLink = checkIfLinkExist(createExportHit(CED, text), PandA, "HWTF", 10800000, alJson);												    	
+								newLink = checkIfLinkExist(createExportHit(CED, text), PandA, "HWTF", 10800000, alJson, CED);												    	
 					    		 
 								//System.out.println(new Date() + " <<REDDIT>> "+ PandA);
 								
@@ -3006,6 +3023,7 @@ public class main extends TimerTask
 			{
 				boolean hit = false;
 				ArrayList<String> text = new ArrayList<String>();
+				CEDTEXT cedtext=null;
 				String hitLink = "";
 				String PandA = "";
 				
@@ -3074,15 +3092,15 @@ public class main extends TimerTask
 				
 				if(hit)
 				{
-					text = filterSmartMode(1, textTable, hitLink);
-					hit = (text.size()==0)? false: true;
+					cedtext = filterSmartMode(1, textTable, hitLink);
+					hit = (cedtext==null)? false: true;
 				}
 				
 				// if hit = true then we have to do more stuff, if not we keep looping
 				if(hit)
 				{
 					// we gotta match the link with our records to see if we've sent it before
-						newLink = checkIfLinkExist(text, PandA, "MTF", 10800000, alJson);
+						newLink = checkIfLinkExist(cedtext.getTextTable(), PandA, "MTF", 10800000, alJson, cedtext.getCED());
 				}
 				
 				//reset hit and text
@@ -3142,7 +3160,7 @@ public class main extends TimerTask
 	// This method will check to see if our link already exist in our record
 	// if it already does then we don't do anything.
 	// specify which json array list to add hits
-	public boolean checkIfLinkExist(ArrayList<String> a, String l, String source, int time , ArrayList<String> jsonList) throws Exception
+	public boolean checkIfLinkExist(ArrayList<String> a, String l, String source, int time , ArrayList<String> jsonList, createExportData CED) throws Exception
 	{		
 		 
 		boolean newLink = false;
@@ -3163,6 +3181,8 @@ public class main extends TimerTask
 			// add the link to our list
 		
 			hitData hd = new hitData(l, new Date(), source, time, a);
+			hd.mergeCED(CED);
+			
 			myData.getArray().add(hd);
 			
 			read.seralize(myData); //Write back data class
@@ -3374,10 +3394,6 @@ public class main extends TimerTask
 		
 	}
 	
-	/*
-	 * write to array list. Each index contains 1 hit, String that has {"Post":..."link":...}
-	 * 
-	 */
 	public void writeToJSONPerHIT(ArrayList<String> a, String l, ArrayList<String> jsonList)
 	{
 		//String start = "{\"records\":[";
@@ -3396,7 +3412,86 @@ public class main extends TimerTask
 		str+="\",";		
 		// add link
 		str+= "\"link\":\"" + l.replaceAll("\"", "'").replaceAll("\\s+", " ");		
+		
 		str+="\"}";
+		
+		//System.out.println(str);
+		jsonList.add(str);
+	}
+	
+	
+	
+	/*
+	 * write to array list. Each index contains 1 hit, String that has {"Post":..."link":...}
+	 * 
+	 */
+	public void writeToJSONPerHITLive(hitData a, String l, ArrayList<String> jsonList )
+	{
+		//String start = "{\"records\":[";
+		//String end = "]}";
+		
+		ArrayList<String> a1 = a.getPost();
+		
+		String str = "";
+				
+		str += "{\"Post\":\"";
+	
+		//each a.get(i) is one line of post
+		for(int i=0; i< a1.size(); i++)
+		{
+			str += a1.get(i).replaceAll("\"", "'").replaceAll("\\s+", " ");
+		}		
+		str+="\",";		
+		// add link
+		str+= "\"link\":\"" + l.replaceAll("\"", "'").replaceAll("\\s+", " ");		
+		str+="\",";	
+		
+		
+		
+		
+		if(a.getRequester().equals("")){
+			str+= "\"requester\":\"" + "\" ,";
+		}
+		else
+		{
+			str+= "\"requester\":\"" + a.getRequester().replaceAll("\"", "'").replaceAll("\\s+", " ") + "\",";	
+		}
+		
+		if(a.getTitle().equals("")){
+			str+= "\"title\":\"" + "\" ,";
+		}
+		else
+		{
+			str+= "\"title\":\"" + a.getTitle().replaceAll("\"", "'").replaceAll("\\s+", " ") + "\",";	
+		}
+		
+		if(a.getTime().equals("")){
+			str+= "\"time\":\"" + "\" ,";
+		}
+		else
+		{
+			str+= "\"time\":\"" + a.getTime().replaceAll("\"", "'").replaceAll("\\s+", " ") + "\",";	
+		}
+		
+		if(a.getReward().equals("")){
+			str+= "\"reward\":\"" + "\" ,";
+		}
+		else
+		{
+			str+= "\"reward\":\"" + a.getReward().replaceAll("\"", "'").replaceAll("\\s+", " ") + "\",";	
+		}
+		
+		if(a.getQual().equals("")){
+			str+= "\"qual\":\"" + "\" ";
+		}
+		else
+		{
+			str+= "\"qual\":\"" + a.getQual().replaceAll("\"", "'").replaceAll("\\s+", " ") + "\"";	
+		}
+		
+		
+
+		str+="}";
 		
 		//System.out.println(str);
 		jsonList.add(str);
@@ -3754,6 +3849,7 @@ public class main extends TimerTask
 		    					if(liveData.getArray().get(j).getPost().size()==0)
 		    					{
 		    						ArrayList<String> text = new ArrayList<String>();
+		    						CEDTEXT cedtext = null;
 		    						
 		    						 //The very least add the link itself as the post
 		    						// For case Qualification does not match, CED.isFoundHit will be false, in this secnario i still dont set POST
@@ -3766,9 +3862,9 @@ public class main extends TimerTask
 		    						
 		    	
 		    						
-		    						text = filterSmartMode(3, new ArrayList<String>(), liveData.getArray().get(j).getLink());
+		    						cedtext = filterSmartMode(3, new ArrayList<String>(), liveData.getArray().get(j).getLink());
 
-		    						if(text.size()>0) 
+		    						if(cedtext!=null) 
 		    						{
 		    							alive = true;
 		    							
@@ -3800,8 +3896,8 @@ public class main extends TimerTask
 			    			 logger.info("Is different need to upload");
 			    			 ArrayList<String> jsonArrayLive = new ArrayList<String>();
 			    			 for(int i = 0; i < liveData.getArray().size(); i ++)
-			    			 {
-			    				 writeToJSONPerHIT(liveData.getArray().get(i).getPost(), liveData.getArray().get(i).getLink(), jsonArrayLive);
+			    			 {			    							    		
+			    				 writeToJSONPerHITLive(liveData.getArray().get(i), liveData.getArray().get(i).getLink(), jsonArrayLive);
 			    			 }
 			    			 			    			 
 			    			 writeToJSON(jsonArrayLive,jsonFileLive);
@@ -3848,6 +3944,26 @@ public class main extends TimerTask
 		}
 		
 		
+		}
+	
+		
+		public class CEDTEXT{
+		  public final ArrayList<String> a;
+		  public final createExportData CED;
+
+		  public CEDTEXT(ArrayList<String> a, createExportData CED) {
+		    this.a = a;
+		    this.CED = CED;
+		  }
+		  
+		  public ArrayList<String> getTextTable()
+		  {
+			  return this.a;
+		  }
+		  public createExportData getCED()
+		  {
+			  return this.CED;
+		  }
 		}
 	
 }
