@@ -72,7 +72,7 @@ public class main extends TimerTask
 	ArrayList<String> alJsonReddit = new ArrayList<String>();
 	
 	boolean VPN = false;
-
+	log logger = null;
 	
 	public main() throws Exception
 	{
@@ -83,32 +83,7 @@ public class main extends TimerTask
 		String d = (test)? "dataTEST.ser": "data.ser";
 		read = new readData(d); //object used to seralize and deseralize
 		readLive = new readData("dataLIVE.ser");
-
-		//createExportHitLink("https://www.mturk.com/mturk/preview?groupId=3K8YRYAXUO2L318WRK1I6OE99TADG3");
-		
-	//	createExportHitLink("https://www.mturk.com/mturk/preview?groupId=32JRJ3GOYGBCMRXUD1MS45U6YA61UT");	
-		//System.exit(0);
-		/*
-				mturkList();
-		mturkList();
-		turkerNation();
-		//mturkGrind();
-		TurkForum();
-
-	
-		if(alJson.size()>0)
-		{
-			System.out.println(new Date() + " New hits writing to JSON");
-			writeToJSON(alJson);
-			alJson.clear();
-		}
-		
-		cleanHit();		
-
-	
-		*/
-	
-		
+		logger = new log();
 	}	
 	
 	/**
@@ -120,7 +95,7 @@ public class main extends TimerTask
 		Date currDate = new Date();
 		ArrayList remIndex = new ArrayList();
 		
-		System.out.println(new Date() + " <<FTP>> cleaning hits");
+		logger.info("<<FTP>> cleaning hits");
 		for(int i=0; i< myData.getArray().size(); i++)
 		{
 			hitData hd = myData.getArray().get(i);
@@ -136,7 +111,7 @@ public class main extends TimerTask
 			Integer i = (Integer) remIndex.get(j);
 			myData.getArray().remove(i.intValue());
 			
-			System.out.println(new Date() + " <<FTP>> Removing hits");
+			logger.info("<<FTP>> Removing hits");
 			
 		}
 	
@@ -152,16 +127,16 @@ public class main extends TimerTask
 	    		 {
 		    	 	try{
 		     
-		    			System.out.println(new Date() + " <<MTURK LIST>> STARTED");
+		    	 		logger.info("<<MTURK LIST>> STARTED");
 		    				
 		    			mturkList();
 		    			
-		    			System.out.println(new Date() + " <<MTURK LIST>> FINISHED");	
+		    			logger.info("<<MTURK LIST>> FINISHED");	
 		    			Thread.sleep(timer.timeInterval(5,10)); //FTP every minute		    				
 		    		 }
 		    	 	 catch(Exception e)
 			    	 {
-			    		 System.out.println(e.getMessage());
+		    	 		logger.info(e.getMessage());
 			    		 e.printStackTrace();
 			    	 }		    		 
 		    	 }
@@ -182,24 +157,24 @@ public class main extends TimerTask
 		    	 while(true)
 	    		 {		    	 
 		    		 try{
-		    		 		System.out.println(new Date() + " <<FTP>> DOWRITEFTP STARTED");
+		    			 logger.info("<<FTP>> DOWRITEFTP STARTED");
 		    		 				
 		    				if(alJson.size()>0)
 		    				{
-		    					System.out.println(new Date() + " <<FTP>> New hits writing to JSON");
+		    					logger.info("<<FTP>> New hits writing to JSON");
 		    					writeToJSON(alJson, jsonFile );
 		    					alJson.clear();
-		    					System.out.println(new Date() + " <<FTP>> Cleared alJSON");
+		    					logger.info("<<FTP>> Cleared alJSON");
 		    				}
 		    				
 		    				cleanHit();
-		    				System.out.println(new Date() + " <<FTP>> DOWRITEFTP FINISHED");	
+		    				logger.info("<<FTP>> DOWRITEFTP FINISHED");	
 		    				Thread.sleep(60000); //FTP every minute	
 	    				
 		    		 }
 		    		 catch(Exception e)
 			    	 {
-			    		 System.out.println(e.getMessage());
+		    			 logger.info(e.getMessage());
 			    		 e.printStackTrace();
 			    	 }
 		    		 
@@ -226,16 +201,16 @@ public class main extends TimerTask
 	    		 {
 		    	   try{
 
-		    			 System.out.println(new Date() + " <<FORUM>> STARTED");			    			
+		    		   	logger.info("<<FORUM>> STARTED");			    			
 		    			 mturkGrind();
 		    			 TurkForum();
 		    			 mturkCrowd(); 
-			    		 System.out.println(new Date() + " <<FORUM>> FINISHED");
+		    			 logger.info("<<FORUM>> FINISHED");
 			    		 Thread.sleep(timer.timeInterval());	
 		    		 }
 		    	   catch(Exception e)
 			    	 {
-			    		 System.out.println(e.getMessage());
+		    		   logger.info(e.getMessage());
 			    		 e.printStackTrace();
 			    	 }
 		    		 
@@ -266,7 +241,7 @@ public class main extends TimerTask
 		    		 }
 		    	   catch(Exception e)
 			    	 {
-			    		 System.out.println(e.getMessage());
+		    		   logger.info(e.getMessage());
 			    		 e.printStackTrace();
 			    	 }
 		    		 
@@ -357,21 +332,21 @@ public class main extends TimerTask
 		    				URL url = new URL("http://checkip.amazonaws.com/");
 		    				BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
 		    				String temp  = br.readLine();
-		    				System.out.println(temp);
+		    				logger.info(temp);
 		    				
 		    				checkExceedVPN(temp);
 		    					    				
 		    				br.close();
 		    			 
-		    			 System.out.println(new Date() + " <<REDDIT>> STARTED");		
+		    			 logger.info("<<REDDIT>> STARTED");		
 			    		 RedditHWTF();
-			    		 System.out.println(new Date() + " <<REDDIT>> FINISHED");	 
+			    		 logger.info("<<REDDIT>> FINISHED");	 
 			    		 Thread.sleep(60000);
 			    		 		    					    		
 		    		 }
 		    		 catch(Exception e)
 			    	 {
-			    		 System.out.println(e.getMessage());
+		    			 logger.info(e.getMessage());
 			    		 e.printStackTrace();
 			    	 }		    		 		    		
 		    		 
@@ -386,7 +361,7 @@ public class main extends TimerTask
 	public void mturkList() throws Exception
 	{
 		try{
-			System.out.println(new Date() + " <<MTURK LIST>> Started Mturk List");
+			logger.info("<<MTURK LIST>> Started Mturk List");
 				
 			String url ="http://www.mturklist.com/";
 			URL pageURL = new URL(url); 
@@ -555,11 +530,11 @@ public class main extends TimerTask
 				
 			}
 				
-			System.out.println(new Date() + " <<MTURK LIST>> Finished Mturk List");
+			logger.info("<<MTURK LIST>> Finished Mturk List");
 		}
 		catch(Exception e)
 		{
-			System.out.println(e.getMessage());
+			logger.info(e.getMessage());
 		}
 	}
 	
@@ -582,7 +557,7 @@ public class main extends TimerTask
 			}
 			catch(Exception e) // might error if there is no TO JSON data for this requester
 			{
-				System.out.println(e.getMessage());
+				logger.info(e.getMessage());
 				
 				imgURL = "";
 			}
@@ -697,7 +672,7 @@ public class main extends TimerTask
 			}
 			catch(Exception e) // might error if there is no TO JSON data for this requester
 			{
-				System.out.println(e.getMessage());
+				logger.info(e.getMessage());
 				
 				imgURL = "";
 			}
@@ -775,7 +750,7 @@ public class main extends TimerTask
 	{
 		try
 		{
-			System.out.println(new Date() + " <<FORUM>> Started Turker Nation");
+			logger.info("<<FORUM>> Started Turker Nation");
 			String todayLink = getTodayLinkTNsoup("http://turkernation.com/forumdisplay.php?157-Daily-HIT-Threads", true);
 			
 			if(!todayLink.equals(""))
@@ -793,11 +768,11 @@ public class main extends TimerTask
 			}
 			
 			window.getInstance().setLblTime();
-			System.out.println(new Date() + " <<FORUM>> Finished Turker Nation");
+			logger.info("<<FORUM>> Finished Turker Nation");
 		}
 		catch(Exception e)
 		{
-			System.out.println(e.getMessage());
+			logger.info(e.getMessage());
 		}
 		
 	}
@@ -1559,7 +1534,7 @@ public class main extends TimerTask
 	public void mturkCrowd() throws Exception
 	{
 		try{
-		System.out.println(new Date() + " <<FORUM>> Started Mturk Crowd");	
+			logger.info("<<FORUM>> Started Mturk Crowd");	
 		String todayLink = getTodayLinkMC("http://www.mturkcrowd.com/forums/daily-work-threads.4/", true);
 		
 		if(!todayLink.equals(""))
@@ -1575,11 +1550,11 @@ public class main extends TimerTask
 		}
 		
 		window.getInstance().setLblTime();
-		System.out.println(new Date() + " <<FORUM>> Finished Mturk Crowd");
+		logger.info("<<FORUM>> Finished Mturk Crowd");
 		}
 		catch(Exception e)
 		{
-			System.out.println(e.getMessage());
+			logger.info(e.getMessage());
 		}
 		
 		
@@ -1695,7 +1670,7 @@ public class main extends TimerTask
 	public void mturkGrind() throws Exception
 	{
 		try{
-		System.out.println(new Date() + " <<FORUM>> Started Mturk Grind");
+			logger.info("<<FORUM>> Started Mturk Grind");
 		String todayLink = getTodayLinkMG("http://www.mturkgrind.com/forums/awesome-hits.4/", true);
 		
 		if(!todayLink.equals(""))
@@ -1711,11 +1686,11 @@ public class main extends TimerTask
 		}
 		
 		window.getInstance().setLblTime();
-		System.out.println(new Date() + " <<FORUM>> Finished Mturk Grind");
+		logger.info("<<FORUM>> Finished Mturk Grind");
 		}
 		catch(Exception e)
 		{
-			System.out.println(e.getMessage());
+			logger.info(e.getMessage());
 		}
 	}
 	
@@ -2026,7 +2001,7 @@ public class main extends TimerTask
 	
 	public void RedditHWTF() throws Exception
 	{
-		System.out.println(new Date() + " <<REDDIT>> Started Reddit HWTF");
+		logger.info("<<REDDIT>> Started Reddit HWTF");
 		timer.runHWTF = false;
 		try{
 		ArrayList<String> list =  new ArrayList<String>();
@@ -2264,11 +2239,11 @@ public class main extends TimerTask
 		}
 		catch(Exception e)
 		{
-			System.out.println(e.getMessage());
+			logger.info(e.getMessage());
 			e.printStackTrace();
 		}
 	//	timer.runHWTF = true;
-		System.out.println(new Date() + " <<REDDIT>> Finished Reddit HWTF");
+		logger.info("<<REDDIT>> Finished Reddit HWTF");
 			
 		
 	}
@@ -2960,7 +2935,7 @@ public class main extends TimerTask
 	public void TurkForum() throws Exception
 	{		
 		try{
-		System.out.println(new Date() + " <<FORUM>> Started Mturk Forum");
+			logger.info("<<FORUM>> Started Mturk Forum");
 		String todayLink = getTodayLink("http://mturkforum.com/forumdisplay.php?30-Great-HITS", true);
 		todayLink = window.getInstance().getURL().equals("") ? todayLink : window.getInstance().getURL();
 	//	todayLink =  "showthread.php?13640-Can-t-Find-FUN-HIT-s-01-30-Super-Funbowl-Friday!!";
@@ -2977,12 +2952,12 @@ public class main extends TimerTask
 		}
 		
 		window.getInstance().setLblTime();
-		System.out.println(new Date() + " <<FORUM>> Finished Mturk Forum");
+		logger.info("<<FORUM>> Finished Mturk Forum");
 		
 		}
 		catch (Exception e)
 		{
-			System.out.println(e.getMessage());
+			logger.info(e.getMessage());
 		}
 	}
 	
@@ -3210,7 +3185,7 @@ public class main extends TimerTask
 			newLink = true;
 			
 			
-			System.out.println(new Date() + " FOUND NEW HIT FROM " + source);
+			logger.info("FOUND NEW HIT FROM " + source);
 		}
 		
 		return newLink;
@@ -3250,7 +3225,7 @@ public class main extends TimerTask
 		    		 }
 		    	   catch(Exception e)
 			    	 {
-			    		 System.out.println(e.getMessage());
+		    		   logger.info(e.getMessage());
 			    		 e.printStackTrace();
 			    	 }
 		    		 
@@ -3378,22 +3353,22 @@ public class main extends TimerTask
 			pw.print(finalString);
 			pw.close();
 			
-			System.out.println(new Date() + " <<FTP>> Starting FTP...");
+			logger.info("<<FTP>> Starting FTP...");
 			if(!test)
 			{
 				FTP(file,"public_html");
 			}
-			System.out.println(new Date() + " <<FTP>> Finished FTP...");
+			logger.info("<<FTP>> Finished FTP...");
 		}
 		catch(IOException e)
 		{
 			e.printStackTrace();
-			System.out.println(new Date() + "error FTP");
+			logger.info("error FTP");
 		}
 		catch(Exception e)
 		{
 			e.printStackTrace();
-			System.out.println(new Date() + "error writing to JSON file");
+			logger.info("error writing to JSON file");
 		}
 		
 		
@@ -3707,7 +3682,7 @@ public class main extends TimerTask
 		boolean ret = false;
 		if(e.text().contains("exceeded the maximum"))
 		{
-			System.out.println("Exceeded maximum allowed page, Waiting " + (5000 + this.timeToCheckExceed) + " miliseconds");			
+			logger.info("Exceeded maximum allowed page, Waiting " + (5000 + this.timeToCheckExceed) + " miliseconds");			
 			Thread.sleep(5000 + this.timeToCheckExceed);
 			this.timeToCheckExceed += 5000;
 			
@@ -3766,7 +3741,7 @@ public class main extends TimerTask
 		    	 while(true)
 	    		 {	    		 
 		    		 try{		    			 
-		    			 System.out.println(new Date() + " <<LIVE HIT>> STARTED");				    		 
+		    			 logger.info(" <<LIVE HIT>> STARTED");				    		 
 		    			 //liveData = readLive.deSeralize(); don't seralize any more. liveData is now in memory don't save it (prevent overwritting)
 		    				
 		    				//loop backwards, as I'm removing index will change
@@ -3807,7 +3782,7 @@ public class main extends TimerTask
 		    					if(!alive) //if not alive then we remove it.
 		    					{		    		
 		    						
-		    						System.out.println(new Date() + " <<LIVE HIT>> Removing hit " + liveData.getArray().get(j).getLink());
+		    						logger.info("<<LIVE HIT>> Removing hit " + liveData.getArray().get(j).getLink());
 		    						liveData.getArray().remove(j);
 		    					}
 		    				}
@@ -3816,13 +3791,13 @@ public class main extends TimerTask
 		    						    				
 		    				//At this point I've removed all dead hits, seralize back to file
 		    				//readLive.seralize(liveData);	
-			    		 System.out.println(new Date() + " <<LIVE HIT>> FINISHED");	 
+		    				logger.info("<<LIVE HIT>> FINISHED");	 
 			    
 			    		 //check if they are different, if they are different then that means there is a difference so we pass to firebase db
 			    		 String newHash = liveData.getHashString();
 			    		 if(!newHash.equals(oldHash))
 			    		 {
-			    			 System.out.println("Is different need to upload");
+			    			 logger.info("Is different need to upload");
 			    			 ArrayList<String> jsonArrayLive = new ArrayList<String>();
 			    			 for(int i = 0; i < liveData.getArray().size(); i ++)
 			    			 {
@@ -3830,7 +3805,7 @@ public class main extends TimerTask
 			    			 }
 			    			 			    			 
 			    			 writeToJSON(jsonArrayLive,jsonFileLive);
-			    			 System.out.println(new Date() + " <<LIVE HIT>> number of live hits : " + liveData.getArray().size());
+			    			 logger.info("<<LIVE HIT>> number of live hits : " + liveData.getArray().size());
 			    		 }
 			    		 oldHash = newHash;
 			    		 
@@ -3839,7 +3814,7 @@ public class main extends TimerTask
 		    		 }
 		    		 catch(Exception e)
 			    	 {
-			    		 System.out.println("error " + e.getMessage());
+		    			 logger.info("error " + e.getMessage());
 			    		 e.printStackTrace();
 			    	 }		    		 		    		
 		    		 
