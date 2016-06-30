@@ -1051,6 +1051,13 @@ public class main extends TimerTask
 						// lets still try to create Export hit
 						CED = createExportHitLinkSOUP(hitLink, textTable); 
 						
+						// if we don't find the hit, we will use textTable. We now need to create CED base on textTable manually (because hit is dead)
+						if(!CED.isFoundHit())
+						{
+					//		CED = createCEDForTextTable(textTable);
+						}
+						
+						
 						// if CED did not found hit, then use textTable, otherwise use create export hit
 						cedtext = new CEDTEXT(createExportHit(CED, textTable),CED);
 
@@ -1138,6 +1145,20 @@ public class main extends TimerTask
 	}
 	
 	
+	
+	public createExportData createCEDForTextTable(ArrayList<String> a)
+	{
+		
+		createExportData CED = new createExportData ();
+		for(int i=0; i < a.size(); i++)
+		{
+			String temp = a.get(i).trim();
+			
+			
+			
+		}
+		return CED;
+	}
 	
 	/*
 	 * take a, which is lines of comments.
@@ -3200,7 +3221,7 @@ public class main extends TimerTask
 			}
 
 			
-			writeToJSONPerHIT(a,l, jsonList);
+			writeToJSONPerHIT(a,l, jsonList, CED);
 					
 			newLink = true;
 			
@@ -3394,7 +3415,7 @@ public class main extends TimerTask
 		
 	}
 	
-	public void writeToJSONPerHIT(ArrayList<String> a, String l, ArrayList<String> jsonList)
+	public void writeToJSONPerHIT(ArrayList<String> a, String l, ArrayList<String> jsonList , createExportData CED)
 	{
 		//String start = "{\"records\":[";
 		//String end = "]}";
@@ -3412,10 +3433,53 @@ public class main extends TimerTask
 		str+="\",";		
 		// add link
 		str+= "\"link\":\"" + l.replaceAll("\"", "'").replaceAll("\\s+", " ");		
+		str+="\",";	
 		
-		str+="\"}";
 		
-		//System.out.println(str);
+		
+		if(CED.getRequester().equals("")){
+			str+= "\"requester\":\"" + "\" ,";
+		}
+		else
+		{
+			str+= "\"requester\":\"" +CED.getRequester().replaceAll("\"", "'").replaceAll("\\s+", " ") + "\",";	
+		}
+		
+		if(CED.getTitle().equals("")){
+			str+= "\"title\":\"" + "\" ,";
+		}
+		else
+		{
+			str+= "\"title\":\"" + CED.getTitle().replaceAll("\"", "'").replaceAll("\\s+", " ") + "\",";	
+		}
+		
+		if(CED.getTime().equals("")){
+			str+= "\"time\":\"" + "\" ,";
+		}
+		else
+		{
+			str+= "\"time\":\"" + CED.getTime().replaceAll("\"", "'").replaceAll("\\s+", " ") + "\",";	
+		}
+		
+		if(CED.getReward().equals("")){
+			str+= "\"reward\":\"" + "\" ,";
+		}
+		else
+		{
+			str+= "\"reward\":\"" + CED.getReward().replaceAll("\"", "'").replaceAll("\\s+", " ") + "\",";	
+		}
+		
+		if(CED.getQual().equals("")){
+			str+= "\"qual\":\"" + "\" ";
+		}
+		else
+		{
+			str+= "\"qual\":\"" + CED.getQual().replaceAll("\"", "'").replaceAll("\\s+", " ") + "\"";	
+		}
+		
+				
+		str+="}";
+		
 		jsonList.add(str);
 	}
 	
