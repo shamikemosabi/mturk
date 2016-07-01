@@ -60,7 +60,7 @@ public class main extends TimerTask
 	
 	static window w;
 	
-	boolean test = true;
+	boolean test = false;
 	
 	int timeToCheckExceed = 0;
 	
@@ -655,10 +655,7 @@ public class main extends TimerTask
 		
 		if(!CED.foundHit)
 		{
-			a.add("</br>");
-			a.add("</br>");
-			a.add("</br>");
-			a.add("</br>");
+			
 		}
 		else // if I did find a hit, just use text
 		{
