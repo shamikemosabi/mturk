@@ -45,8 +45,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import com.google.firebase.*;
-import com.google.firebase.database.*;
+//import com.google.firebase.*;
+//import com.google.firebase.database.*;
 
 
 public class main extends TimerTask 
@@ -3717,7 +3717,7 @@ public class main extends TimerTask
 		 
 	
 	}
-	
+	/*
 	
 	public void initFireBase()
 	{
@@ -3734,7 +3734,7 @@ public class main extends TimerTask
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void doFireBase()
 	{
 		try{
@@ -3763,7 +3763,7 @@ public class main extends TimerTask
 			e.printStackTrace();
 		}
 	}
-	
+	*/
 	/**
 	 * Takes a mturk link.
 	 * 

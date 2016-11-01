@@ -13,8 +13,8 @@ import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
 
-import com.google.firebase.*;
-import com.google.firebase.database.*;
+//import com.google.firebase.*;
+//import com.google.firebase.database.*;
 
 
 
@@ -53,9 +53,9 @@ public class timer extends TimerTask
 			//task.initFireBase();
 			//task.doFireBase();
 			task.doRedditHWTF();
-			task.doTurkerNation();
+			//task.doTurkerNation();
 			task.doForum();
-			task.doMturkList();
+			//task.doMturkList();
 			
 			task.doLiveHitUpdate();
 			task.doWriteFTP(); 
@@ -225,7 +225,7 @@ public class timer extends TimerTask
 		}
 	}
 	
-	
+	/*
 	
 	public static void test() 
 	{				
@@ -261,7 +261,7 @@ public class timer extends TimerTask
 
 				
 				
-		   /* 
+		   
 		    dataRef.addListenerForSingleValueEvent(new ValueEventListener() {
 		         @Override
 		         public void onDataChange(DataSnapshot snapshot) {
@@ -273,7 +273,7 @@ public class timer extends TimerTask
 		             System.err.println("Listener was cancelled");
 		         }
 		    });
-		    */
+		    
 		    System.out.println("hi");
 		}
 		catch(Exception e)
@@ -281,7 +281,7 @@ public class timer extends TimerTask
 			e.printStackTrace();
 		}
 	}
-	
+	*/
 	
 	
 	
