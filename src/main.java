@@ -201,10 +201,11 @@ public class main extends TimerTask
 	    		 {
 		    	   try{
 
-		    		   	logger.info("<<FORUM>> STARTED");			    			
+		    		   	logger.info("<<FORUM>> STARTED");	
+		    		   	 turkerHub();
 		    			 mturkGrind();
 		    			 TurkForum();
-		    			 mturkCrowd(); 
+		    			 mturkCrowd(); 		    			 
 		    			 logger.info("<<FORUM>> FINISHED");
 			    		 Thread.sleep(timer.timeInterval());	
 		    		 }
@@ -220,6 +221,329 @@ public class main extends TimerTask
 		});  
 		t1.start();
 		
+	}
+	
+	public void turkerHub() throws Exception
+	{
+		try
+		{
+			logger.info("<<FORUM>> Started Turker Hub");
+			String todayLink = getTodayLinkTHsoup("https://turkerhub.com/forums/daily-threads.2/", true);
+			
+			if(!todayLink.equals(""))
+			{
+				processPageTH("http://turkerhub.com/"+todayLink+"/page-1000"); //1000 so its greater so it's always the last page
+				//lets not use soup. with soup I don't have the actual tables posted by forum users
+//				processPageTHsoup("http://turkerhub.com/"+todayLink+"/page-1000"); //1000 so its greater so it's always the last page		
+			}
+			else
+			{
+				//System.out.println("error grabbing today's thread");
+				window.getInstance().addText("error grabbing TH thread");
+			}
+			
+			window.getInstance().setLblTime();
+			logger.info("<<FORUM>> Finished Turker Hub");
+		}
+		catch(Exception e)
+		{
+			logger.info(e.getMessage());
+		}
+		
+	}
+	
+	public void processPageTH(String u) throws Exception
+	{
+		String url = u;
+		//
+		
+		URL pageURL = new URL(url); 
+		HttpURLConnection urlConnection = (HttpURLConnection) pageURL.openConnection();
+		urlConnection.addRequestProperty("Accept-Language", "en-US,en;q=0.8");
+		urlConnection.addRequestProperty("User-Agent", "Mozilla");
+		urlConnection.addRequestProperty("Referer", "google.com");
+		urlConnection.setRequestMethod("GET");
+		urlConnection.connect();
+		
+		if(urlConnection.getResponseCode() == 301){ //wtf reddit redirecting me, but to the same URL
+			String newUrl = urlConnection.getHeaderField("Location");
+			urlConnection  = (HttpURLConnection) new URL(newUrl).openConnection();
+			urlConnection.addRequestProperty("Accept-Language", "en-US,en;q=0.8");
+			urlConnection.addRequestProperty("User-Agent", "Mozilla");
+			urlConnection.addRequestProperty("Referer", "google.com");
+			urlConnection.setRequestMethod("GET");							
+			urlConnection.connect();
+		}
+		
+		
+		InputStream in = new BufferedInputStream(urlConnection.getInputStream()); 
+		PrintWriter pw = new PrintWriter(new FileWriter("blahTH2.html"));
+		
+		Reader r = new InputStreamReader(in);
+	
+		int c;
+		 while((c = r.read()) != -1) 
+	        {         	
+	           pw.print(String.valueOf((char)c)); 
+	        } 
+	        r.close();
+			pw.close();
+			
+			
+			
+		boolean newLink = false;	
+		//after writing into file we will read it.
+		
+			
+		BufferedReader reader = new BufferedReader(new FileReader("blahTH2.html"));	
+		String s;
+		while((s = reader.readLine()) != null)
+		{
+			String temp = s.toLowerCase().trim(); //let's trim it first
+
+			if(temp.startsWith("<blockquote class="))
+			{
+				boolean hit = false;
+				ArrayList<String> text = new ArrayList<String>();
+				CEDTEXT cedtext = null;
+				String hitLink = "";
+				String PandA ="";
+				boolean hasTable = false;
+				ArrayList<String> textTable = new ArrayList<String>();
+				
+				while(!temp.equals("</blockquote>")) // keep looping all the text the poster did store them
+				{
+					temp =reader.readLine().trim();
+					
+					if(temp.contains("<table class=\""))
+					{						
+						hasTable=true;
+					}
+					if(temp.contains("</table>")) // we hit the end of table, textTable should contain all the strings within table
+					{
+						hasTable=false;
+												
+						//mturk grind forum have </table> on the same line, I need to extract what's before </table>
+						String t = temp.substring(0, temp.lastIndexOf("</table>")+ 8);
+						textTable.add(t);
+					}
+					
+					if(hasTable)
+					{
+						if(filterPost(temp))
+						{
+							textTable.add(temp);
+						}
+					}
+					
+					if(temp.contains("<a href=\"https://www.mturk.com/mturk/preview") || temp.contains("<a href=\"https://www.mturk.com/mturk/accept") || temp.contains("<a href=\"https://www.mturk.com/mturk/searchbar") ) //we found a mturk link posible hit!
+					{
+						hit = true;	
+						//gotta clean up the string
+						
+						String temp2 = "";
+						temp2 = temp.replace("&amp;", "&");
+										
+						temp2 = temp2.substring(temp.indexOf("<a href=\"https:")); // lets trim the crap before <a href
+						temp2 = temp2.substring(temp2.indexOf("https:"), temp2.indexOf("\"", 50)); // 50 is to ensure we pass all the " and the next " should be the end quotation
+						hitLink = temp2;
+						
+						//could potentially be previewandaccept
+						if(temp.contains("<a href=\"https://www.mturk.com/mturk/preview"))
+						{
+							if(temp2.toLowerCase().contains("previewandaccept")) // it's a PandA link
+							{
+								PandA = temp2;
+							}
+							else // it's just a regular preview... link. Let's converted it to previewand accept
+							{
+								PandA = temp2.replaceAll("preview", "previewandaccept");
+							}
+						}						
+						
+					}
+					if(filterPost(temp))
+					{
+						text.add(temp);
+					}
+				}
+				
+				//coming out, if my PandA is still empty, then that means there was no preview link, It's either an "accept" link or a "searchbar" link.
+				// let's just assign that hitlink to PandA.
+				if(PandA.equals(""))
+				{
+					PandA = hitLink;
+				}				
+				
+				if(hit)
+				{
+					cedtext = filterSmartMode(1, textTable, hitLink);
+					hit = (cedtext==null)? false: true;
+				}
+				
+				// if hit = true then we have to do more stuff, if not we keep looping
+				if(hit)
+				{
+					// we gotta match the link with our records to see if we've sent it before
+						newLink = checkIfLinkExist(cedtext.getTextTable(), PandA, "TH", 10800000, alJson,cedtext.getCED());
+				}
+				
+				//reset hit and text	
+				// wait.. doesn't these 2 get reset 
+			//	hit = false;
+				//text.clear();
+			}
+			
+			
+		}
+		
+		if(newLink && window.getInstance().PlaySound())
+		{
+			
+			sound newSound = new sound();
+			try{
+				newSound.playSound("traffic.wav");
+			}
+			catch(Exception e)
+			{
+				// problem playing sound
+				window.getInstance().addText("Error playing sound");
+				e.printStackTrace();
+			}
+		}
+		
+		reader.close();
+		
+		//delete file
+		File newFile = new File("blahTH2.html");
+		if(newFile.exists()&& (!test))
+		{
+			newFile.delete();
+
+		}
+
+	}
+	
+	public void processPageTHsoup(String u) throws Exception
+	{
+		
+		Document doc = Jsoup.connect(u).userAgent("Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3").get();
+				
+		Elements links = doc.select("a[href]");
+		
+		 for (Element b : links)
+		 {
+	
+				boolean hit = false;
+				ArrayList text = new ArrayList();
+				CEDTEXT cedtext = null;
+				String hitLink = "";
+				String PandA ="";
+				String temp = b.toString();
+			 
+			
+			 if(temp.contains("<a href=\"https://www.mturk.com/mturk/preview") || temp.contains("<a href=\"https://www.mturk.com/mturk/accept") || temp.contains("<a href=\"https://www.mturk.com/mturk/searchbar") ) //we found a mturk link posible hit!
+			 {
+					hit = true;	
+					//gotta clean up the string
+					temp = b.attr("abs:href"); 
+					
+					String temp2 = "";
+					temp2 = temp.replace("&amp;", "&");
+								
+					hitLink = temp2;
+					
+					//could potentially be previewandaccept
+					if(temp.contains("<a href=\"https://www.mturk.com/mturk/preview"))
+					{
+						if(temp2.toLowerCase().contains("previewandaccept")) // it's a PandA link
+						{
+							PandA = temp2;
+						}
+						else // it's just a regular preview... link. Let's converted it to previewand accept
+						{
+							PandA = temp2.replaceAll("preview", "previewandaccept");
+						}
+					}					
+			 }
+			 
+			 
+				//coming out, if my PandA is still empty, then that means there was no preview link, It's either an "accept" link or a "searchbar" link.
+				// let's just assign that hitlink to PandA.
+				if(hit && PandA.equals(""))
+				{
+					PandA = hitLink;
+				}
+				if(hit)
+				{
+					cedtext = filterSmartMode(1, new ArrayList<String>(), hitLink);
+					hit = (cedtext==null)? false: true;
+				}
+				if(hit)
+				{
+					
+					// we gotta match the link with our records to see if we've sent it before
+				     checkIfLinkExist(cedtext.getTextTable(), PandA, "TH",10800000, alJson, cedtext.getCED()); 
+				}
+			 
+							 
+	       }
+		
+		
+	}
+	
+	public String getTodayLinkTHsoup(String u, boolean b) throws Exception
+	{
+				
+			Document doc = Jsoup.connect(u).userAgent("Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3").get();					
+			Elements link  = doc.getElementsByClass("PreviewTooltip");
+			
+			String ret="";
+			DateFormat dateFormat = new SimpleDateFormat("MM/dd");
+			DateFormat dateFormat2 = new SimpleDateFormat("M/dd");
+		    DateFormat dateFormat3 = new SimpleDateFormat("M/d");
+		    Calendar d ;
+		    if(b)
+		    {
+		    	   d = Calendar.getInstance();
+		    }
+		    else // if false then search for yesterdays date
+		    {
+		    	d = Calendar.getInstance();
+		    	d.add(Calendar.DATE, -1);	    	 
+		    }    
+		    
+		    		    			   
+			 for (Element e : link) {
+				 String linkText = e.text(); //e.attr("data-previewUrl"); // 
+				 
+			
+				 
+				 
+				 if( linkText.toLowerCase().contains(dateFormat.format(d.getTime()))
+				    		||linkText.toLowerCase().contains(dateFormat2.format(d.getTime()))
+				    		||linkText.toLowerCase().contains(dateFormat3.format(d.getTime()))
+				    		) //compare if it's the same
+				 {			
+					String s = e.attr("data-previewUrl"); //get preview link														
+			    	ret = s.replaceAll("/preview", "");
+			    	break;
+				 }
+				 
+		       }
+			 
+
+				if(!b && ret.equals(""))
+				{
+					return ret;
+				}
+
+				if(ret.equals(""))
+				{
+					ret = getTodayLinkTNsoup(u, false);
+				}
+	
+				return ret;
 	}
 	
 	

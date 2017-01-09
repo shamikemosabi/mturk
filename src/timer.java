@@ -52,8 +52,11 @@ public class timer extends TimerTask
 					
 			//task.initFireBase();
 			//task.doFireBase();
+			
 			task.doRedditHWTF();
+			
 			//task.doTurkerNation();
+			
 			task.doForum();
 			//task.doMturkList();
 			

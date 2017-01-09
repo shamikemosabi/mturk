@@ -1,4 +1,4 @@
 Manifest-Version: 1.0
-Class-path: activation.jar mail.jar commons-net-1.4.1.jar java-json.jar
+Class-path: activation.jar mail.jar commons-net-3.3.jar java-json.jar firebase-server-sdk-3.0.0.jar google-api-client-1.22.0.jar google-api-client-gson-1.21.0.jar google-http-client-1.22.0.jar google-http-client-gson-1.21.0.jar google-http-client-jackson2-1.22.0.jar google-oauth-client-1.22.0.jar gson-2.6.2.jar guava-jdk5-17.0.jar java-json.jar json-20160212.jar jsoup-1.8.3.jar
 Main-Class: timer
 Sealed: true
