@@ -100,6 +100,7 @@ public class main extends TimerTask
 		{
 			hitData hd = myData.getArray().get(i);
 			Date hitDate = hd.getDate();
+			//I can replace 3600000 with hitDate.getTimeExpire()
 			if(currDate.getTime() - hitDate.getTime() >= 3600000) // 60 mins
 			{				
 				remIndex.add(i);				
@@ -163,13 +164,13 @@ public class main extends TimerTask
 		    				{
 		    					logger.info("<<FTP>> New hits writing to JSON");
 		    					writeToJSON(alJson, jsonFile );
-		    					alJson.clear();
+		    					//alJson.clear();
 		    					logger.info("<<FTP>> Cleared alJSON");
 		    				}
 		    				
 		    				cleanHit();
 		    				logger.info("<<FTP>> DOWRITEFTP FINISHED");	
-		    				Thread.sleep(60000); //FTP every minute	
+		    				Thread.sleep(5000); //FTP 10 secs!
 	    				
 		    		 }
 		    		 catch(Exception e)
@@ -188,11 +189,13 @@ public class main extends TimerTask
 
 	}
 	
+	// Threaded each forum
+	/*
 	public void doForum()
 	{
-		/*
-		 * reddit scraps take too long, have to thread it.
-		 */
+		
+		 //reddit scraps take too long, have to thread it.
+		 
 		
 		Thread t1 = new Thread(new Runnable() {
 		     public void run() {
@@ -222,12 +225,122 @@ public class main extends TimerTask
 		t1.start();
 		
 	}
+*/
+	
+	public void doTurkerHub()
+	{
+		/*
+		 * reddit scraps take too long, have to thread it.
+		 */		
+		Thread t1 = new Thread(new Runnable() {
+		     public void run() {
+		    	
+		    	 while(true)
+	    		 {
+		    	   try{		    		   
+		    		   	 turkerHub();		    			
+			    		 Thread.sleep(timer.timeIntervalLimit());	
+		    		 }
+		    	   catch(Exception e)
+			    	 {
+		    		   logger.info(e.getMessage());
+			    		 e.printStackTrace();
+			    	 }
+		    		 
+		    	 }
+		    	 
+		     }
+		});  
+		t1.start();		
+	}
+	
+	public void doMturkGrind()
+	{
+		/*
+		 * reddit scraps take too long, have to thread it.
+		 */		
+		Thread t1 = new Thread(new Runnable() {
+		     public void run() {
+		    	
+		    	 while(true)
+	    		 {
+		    	   try{	
+		    		   	 mturkGrind();
+			    		 Thread.sleep(timer.timeInterval());	
+		    		 }
+		    	   catch(Exception e)
+			    	 {
+		    		   logger.info(e.getMessage());
+			    		 e.printStackTrace();
+			    	 }
+		    		 
+		    	 }
+		    	 
+		     }
+		});  
+		t1.start();		
+	}
+	
+	public void doMturkForum()
+	{
+		/*
+		 * reddit scraps take too long, have to thread it.
+		 */		
+		Thread t1 = new Thread(new Runnable() {
+		     public void run() {
+		    	
+		    	 while(true)
+	    		 {
+		    	   try{	
+		    		   	 TurkForum();
+			    		 Thread.sleep(timer.timeInterval());	
+		    		 }
+		    	   catch(Exception e)
+			    	 {
+		    		   logger.info(e.getMessage());
+			    		 e.printStackTrace();
+			    	 }
+		    		 
+		    	 }
+		    	 
+		     }
+		});  
+		t1.start();		
+	}
+	
+	public void doMturkCrowd()
+	{
+		/*
+		 * reddit scraps take too long, have to thread it.
+		 */		
+		Thread t1 = new Thread(new Runnable() {
+		     public void run() {
+		    	
+		    	 while(true)
+	    		 {
+		    	   try{	
+		    		   	 mturkCrowd();
+			    		 Thread.sleep(timer.timeInterval());	
+		    		 }
+		    	   catch(Exception e)
+			    	 {
+		    		   logger.info(e.getMessage());
+			    		 e.printStackTrace();
+			    	 }
+		    		 
+		    	 }
+		    	 
+		     }
+		});  
+		t1.start();		
+	}
+	
 	
 	public void turkerHub() throws Exception
 	{
 		try
 		{
-			logger.info("<<FORUM>> Started Turker Hub");
+			logger.info("<<Turker Hub>> Started Turker Hub");
 			String todayLink = getTodayLinkTHsoup("https://turkerhub.com/forums/daily-threads.2/", true);
 			
 			if(!todayLink.equals(""))
@@ -243,7 +356,7 @@ public class main extends TimerTask
 			}
 			
 			window.getInstance().setLblTime();
-			logger.info("<<FORUM>> Finished Turker Hub");
+			logger.info("<<Turker Hub>> Finished Turker Hub");
 		}
 		catch(Exception e)
 		{
@@ -325,7 +438,14 @@ public class main extends TimerTask
 												
 						//mturk grind forum have </table> on the same line, I need to extract what's before </table>
 						String t = temp.substring(0, temp.lastIndexOf("</table>")+ 8);
+						
+						if(t.contains("mturksuite.com"))
+						{
+							String replaceStr= t.substring(t.indexOf("<div style=\"text-align: center\">"), t.indexOf("</table>"));
+							t = t.replace(replaceStr, "");
+						}
 						textTable.add(t);
+						
 					}
 					
 					if(hasTable)
@@ -561,7 +681,7 @@ public class main extends TimerTask
 		    	   try{		    			    		
 		    			 turkerNation();
 			    	
-			    		 Thread.sleep(timer.timeIntervalTN());	
+			    		 Thread.sleep(timer.timeIntervalLimit());	
 		    		 }
 		    	   catch(Exception e)
 			    	 {
@@ -1236,6 +1356,7 @@ public class main extends TimerTask
 					{
 						hasTable=false;
 						firstTable = false;
+
 					}
 					
 					if(hasTable && firstTable)
@@ -1368,16 +1489,7 @@ public class main extends TimerTask
 				{
 					if(isAHit(textTable)) // if it's likely a hit
 					{
-						//text = textTable;
-						// lets still try to create Export hit
-						CED = createExportHitLinkSOUP(hitLink, textTable); 
-						
-						// if we don't find the hit, we will use textTable. We now need to create CED base on textTable manually (because hit is dead)
-						if(!CED.isFoundHit())
-						{
-					//		CED = createCEDForTextTable(textTable);
-						}
-						
+						CED.setFoundHit(false);
 						
 						// if CED did not found hit, then use textTable, otherwise use create export hit
 						cedtext = new CEDTEXT(createExportHit(CED, textTable),CED);
@@ -1389,8 +1501,35 @@ public class main extends TimerTask
 					}
 				}
 				// DEPRCATING MODE 2
-				/*else if(mode==2) // even though I have textTable I'm might not use it. 
+				// Bringing Mode 2 back, Mode 2 is now basically mode 1 from before, And mode 1 now will be to just take textTable
+				else if(mode==2) // even though I have textTable I'm might not use it. 
 				{
+										
+						if(isAHit(textTable)) // if it's likely a hit
+						{
+							//text = textTable;
+							// lets still try to create Export hit
+							CED = createExportHitLinkSOUP(hitLink, textTable); 
+							
+							// if we don't find the hit, we will use textTable. We now need to create CED base on textTable manually (because hit is dead)
+							if(!CED.isFoundHit())
+							{
+						//		CED = createCEDForTextTable(textTable);
+							}
+							
+							
+							// if CED did not found hit, then use textTable, otherwise use create export hit
+							cedtext = new CEDTEXT(createExportHit(CED, textTable),CED);
+
+						}
+						else // if we have table, but turns out it's not a hit, DO NOT continue
+						{
+							hit = false;
+						}
+					
+					
+					
+					/*
 					CED = createExportHitLinkSOUP(hitLink, new ArrayList<String>()); 
 					
 					if(!CED.isFoundHit()) // if I don't find hit, either none left, or can't view because of qual 
@@ -1421,7 +1560,8 @@ public class main extends TimerTask
 						//Again textTable at second parameter doesn't matter
 						text = createExportHit(CED, new ArrayList<String>());
 					}
-				}*/
+					*/
+				}
 				else if(mode ==3) // I definitely won't use textTable
 				{
 					CED = createExportHitLinkSOUP(hitLink, new ArrayList<String>()); 
@@ -1790,6 +1930,11 @@ public class main extends TimerTask
 												
 						//mturk grind forum have </table> on the same line, I need to extract what's before </table>
 						String t = temp.substring(0, temp.lastIndexOf("</table>")+ 8);
+						if(t.contains("mturksuite.com"))
+						{
+							String replaceStr= t.substring(t.indexOf("<div style=\"text-align: center\">"), t.indexOf("</table>"));
+							t = t.replace(replaceStr, "");
+						}
 						textTable.add(t);
 					}
 					
@@ -1892,7 +2037,7 @@ public class main extends TimerTask
 	public void mturkCrowd() throws Exception
 	{
 		try{
-			logger.info("<<FORUM>> Started Mturk Crowd");	
+			logger.info("<<Mturk Crowd>> Started Mturk Crowd");	
 		String todayLink = getTodayLinkMC("http://www.mturkcrowd.com/forums/daily-work-threads.4/", true);
 		
 		if(!todayLink.equals(""))
@@ -1908,7 +2053,7 @@ public class main extends TimerTask
 		}
 		
 		window.getInstance().setLblTime();
-		logger.info("<<FORUM>> Finished Mturk Crowd");
+		logger.info("<<Mturk Crowd>> Finished Mturk Crowd");
 		}
 		catch(Exception e)
 		{
@@ -1925,7 +2070,7 @@ public class main extends TimerTask
 		HttpURLConnection urlConnection = (HttpURLConnection) pageURL.openConnection();
 		urlConnection.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3");
 		urlConnection.setRequestMethod("GET");
-		urlConnection.connect();
+		urlConnection.connect();				
 		
 		
 		InputStream in = new BufferedInputStream(urlConnection.getInputStream()); 
@@ -2028,7 +2173,7 @@ public class main extends TimerTask
 	public void mturkGrind() throws Exception
 	{
 		try{
-			logger.info("<<FORUM>> Started Mturk Grind");
+			logger.info("<<Mturk Grind>> Started Mturk Grind");
 		String todayLink = getTodayLinkMG("http://www.mturkgrind.com/forums/awesome-hits.4/", true);
 		
 		if(!todayLink.equals(""))
@@ -2044,7 +2189,7 @@ public class main extends TimerTask
 		}
 		
 		window.getInstance().setLblTime();
-		logger.info("<<FORUM>> Finished Mturk Grind");
+		logger.info("<<Mturk Grind>> Finished Mturk Grind");
 		}
 		catch(Exception e)
 		{
@@ -2114,6 +2259,11 @@ public class main extends TimerTask
 												
 						//mturk grind forum have </table> on the same line, I need to extract what's before </table>
 						String t = temp.substring(0, temp.lastIndexOf("</table>")+ 8);
+						if(t.contains("mturksuite.com"))
+						{
+							String replaceStr= t.substring(t.indexOf("<div style=\"text-align: center\">"), t.indexOf("</table>"));
+							t = t.replace(replaceStr, "");
+						}
 						textTable.add(t);
 					}
 					
@@ -3294,7 +3444,7 @@ public class main extends TimerTask
 	public void TurkForum() throws Exception
 	{		
 		try{
-			logger.info("<<FORUM>> Started Mturk Forum");
+			logger.info("<<Mturk Forum>> Started Mturk Forum");
 		String todayLink = getTodayLink("http://mturkforum.com/forumdisplay.php?30-Great-HITS", true);
 		todayLink = window.getInstance().getURL().equals("") ? todayLink : window.getInstance().getURL();
 	//	todayLink =  "showthread.php?13640-Can-t-Find-FUN-HIT-s-01-30-Super-Funbowl-Friday!!";
@@ -3311,7 +3461,7 @@ public class main extends TimerTask
 		}
 		
 		window.getInstance().setLblTime();
-		logger.info("<<FORUM>> Finished Mturk Forum");
+		logger.info("<<Mturk Forum>> Finished Mturk Forum");
 		
 		}
 		catch (Exception e)
@@ -3383,6 +3533,11 @@ public class main extends TimerTask
 					if(temp.contains("</table>")) // we hit the end of table, textTable should contain all the strings within table
 					{
 						hasTable=false;
+						if(temp.contains("mturksuite.com"))
+						{
+							String replaceStr= temp.substring(temp.indexOf("<div style=\"text-align: center\">"), temp.indexOf("</table>"));
+							temp = temp.replace(replaceStr, "");
+						}
 					}
 					
 					if(hasTable)
@@ -3493,7 +3648,7 @@ public class main extends TimerTask
 		if(a.contains("<img src=\""))
 		{
 			ret = false;
-		}
+		}		
 		
 		return ret;
 	}
@@ -3616,18 +3771,32 @@ public class main extends TimerTask
 				ftp.connect("doms.freewha.com");
 				//ftp.login("1929831","biznfsucks11");
 				//ftp.connect("mturkpl.us");
-				System.out.println(ftp.login("www.mturkpl.us","freewebsucks11"));
+				ftp.login("www.mturkpl.us","freewebsucks11");
 				//System.out.println(ftp.login("a4515727","fuckyou11"));
-				System.out.println(ftp.getReplyString());
+				ftp.setBufferSize(1024000);
+				ftp.getReplyString();			
 				ftp.enterLocalPassiveMode();
 				ftp.changeWorkingDirectory(dir);
 				ftp.setRemoteVerificationEnabled(false);
 				count++;
 				is = new FileInputStream(f.getPath());
+															
 				success = ftp.storeFile(f.getName(), is);
 				
+				/*
+				OutputStream outputStream = ftp.storeFileStream(f.getName());
+				byte[] bytesIn = new byte[4096];
+				int read = 0;
+
+				while((read = is.read(bytesIn)) != -1) {
+				    outputStream.write(bytesIn, 0, read);
+				}
+				*/
+
+					
 				
 				is.close();
+				//outputStream.close();
 				
 				ftp.disconnect();
 			
@@ -3703,6 +3872,8 @@ public class main extends TimerTask
 			str += jsonList.get(i) + ",";
 		}
 		
+		jsonList.clear(); // Let's clear it as soon as possible, don't use it after this anymore so should be safe
+		
 		str = str.substring(0,str.length()-1); //get rid of last character which should be ","
 		
 		String finalString = start+str+end;
@@ -3715,12 +3886,14 @@ public class main extends TimerTask
 			pw.print(finalString);
 			pw.close();
 			
-			logger.info("<<FTP>> Starting FTP...");
+			
 			if(!test)
 			{
+				logger.info("<<FTP>> Starting FTP...");
 				FTP(file,"public_html");
+				logger.info("<<FTP>> Finished FTP...");
 			}
-			logger.info("<<FTP>> Finished FTP...");
+			
 		}
 		catch(IOException e)
 		{

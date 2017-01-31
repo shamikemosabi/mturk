@@ -55,12 +55,16 @@ public class timer extends TimerTask
 			
 			task.doRedditHWTF();
 			
-			//task.doTurkerNation();
-			
-			task.doForum();
+			//task.doTurkerNation();			
+			//task.doForum();
 			//task.doMturkList();
 			
-			task.doLiveHitUpdate();
+			//task.doTurkerHub();
+			//task.doMturkGrind();
+			task.doMturkForum();
+			task.doMturkCrowd();
+			
+			//task.doLiveHitUpdate();
 			task.doWriteFTP(); 
 				
 			//task.test();
@@ -79,147 +83,8 @@ public class timer extends TimerTask
 	{
 		try{
 			
-			ArrayList<String> a = new ArrayList<String> ();
-					
-			a.add("https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&searchWords=Text+and+Image+Classification&minReward=0.00&requiresMasterQual=on&x=0&y=0");
-			a.add("https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&searchWords=David+Akers&minReward=0.00&x=0&y=0");
-			a.add("https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&requesterId=A2F2QDJJQD3MSM");
 			
-			
-			
-			for(int i=0; i<a.size() ;i++)
-			{
-				Document doc = Jsoup.connect(a.get(i))
-						.userAgent("Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3").get();			
-				/*
-			     
-				Element e = doc.getElementById("alertboxHeader");				 // qualification do not meet && There are no more available Hits
-				String temp = e.text().toLowerCase();
-				createExportData CED = new createExportData();
-				
-				if(temp.contains("your qualifications do not meet") || temp.contains("there are no hits"))
-				{
-					CED.setFoundHit(false);			
-				}
-				else // we can view hit
-				{
-					Elements es = doc.select("input[name=prevRequester]");			// requester name
-					System.out.println();
-					CED.setRequester(es.get(0).val());
-
-					es = doc.select("input[name=requesterId]");						// requester name
-					System.out.println();
-					CED.setRequesterID(es.get(0).val());
-					
-					es = doc.select("input[name=prevReward]");						// reward
-					System.out.println(es.get(0).val().replace("USD", "$ "));	
-					CED.setReward(es.get(0).val().replace("USD", "$ "));
-					
-					es = doc.select("td.capsulelink_bold");							// title
-					System.out.println();			
-					CED.setTitle(es.text());
-					
-					es = doc.select("td.capsule_field_text");						
-					System.out.println();							// time
-					CED.setTime(es.get(3).text());
-					System.out.println(es.get(4).text());							//qual			
-					CED.setQual(es.get(4).text());
-					
-				}
-				  */
-				
-				createExportData CEData = new createExportData();
-				
-				
-				String s ="";
-				Element e = doc.getElementById("alertboxHeader");
-				
-				Elements es = doc.getElementsByClass("error_title");  //Your search did not match any HITs.
-				System.out.println(es.text());
-				
-				
-				es = doc.getElementsByClass("capsulelink");
-				if(es.size()>0)				
-				{
-					s =  es.get(0).text();
-					CEData.setTitle(s);												// TITLE
-					System.out.println("Title is " + es.get(0).text());  
-				}
-				
-				if(es.size()>0)	
-				{
-					s = es.get(1).childNodes().get(1).attr("href");
-					if(!s.equals("")) // I may have hits that I cant' view the link to //no qual
-					{
-						s = "https://www.mturk.com" + s ;
-						CEData.setLink(s); 											//PREVIEW LINK	
-					
-						System.out.println("full link is : " + s);
-					}
-						
-				}
-				
-				
-				es = doc.getElementsByClass("requesterIdentity");
-				if(es.size()>0)				
-				{
-					s =  es.get(0).text();
-					CEData.setRequester(s);
-					System.out.println("Requester is : " + s);						// REQUESTER NAME
-				}
-				
-				
-				e = doc.getElementById("duration_to_complete.tooltip--0");
-				if(e!=null)
-				{
-					e = e.parent();
-					es = e.siblingElements();
-					s = es.text();
-					CEData.setTime(s);
-					System.out.println("time is : " + s);										// time
-				}
-				
-				e = doc.getElementById("reward.tooltip--0");
-				if(e!=null)
-				{
-					e = e.parent();
-					es = e.siblingElements();
-					s = es.text();
-					CEData.setReward(s);
-					System.out.println("Reward is : " + s);										// REWARD
-				}
-				e = doc.getElementById("description.tooltip--0");
-				if(e!=null)
-				{
-					e = e.parent();
-					es = e.siblingElements();
-					s = es.text();
-					CEData.setDesc(s);
-					System.out.println("Description is : " + s);										// DESC
-				}
-
-				e = doc.getElementById("qualificationsRequired.tooltip--0");
-				if(e!=null)
-				{
-					e = e.parent().parent();
-					es = e.siblingElements();
-					s="";
-					for(Element ele : es)
-					{
-						s +=ele.text()+";";
-					}
-
-					s = s.replace("Masters", "<span style=\"color: red\"><b>Masters </b></span>");
-					
-					CEData.setQual(s);
-					System.out.println("QUal is : " + s);										// QUAL
-				}
-				
-						
-			
-			}
-			
-		
+			timeInterval();
 
 		}
 		catch(Exception e)
@@ -330,6 +195,7 @@ public class timer extends TimerTask
 			else if(isTimeBetweenTwoTime("05:30:00","07:00:00")) 
 			{
 			
+				
 				System.out.println(new Date() +" Between 5:30 - 7");
 				mod1 = rand.nextInt(20 - 10)+10;				
 				mod2 = rand.nextInt(60)+1;
@@ -339,9 +205,13 @@ public class timer extends TimerTask
 				min =  (min * mod1) + (mod2*1000);
 				
 				
+				
+				
+				
 			}
-			else if(isTimeBetweenTwoTime("07:00:00","24:00:00")) //7 am - 5 pm
+			else if(isTimeBetweenTwoTime("07:00:00","24:00:00")) //7 am - 12 am
 			{
+				/*
 				System.out.println(new Date() +" Between 7 - 12");
 				mod1 = 1;
 				mod2 = rand.nextInt(30)+1;
@@ -349,6 +219,16 @@ public class timer extends TimerTask
 				System.out.println(mod1 + " " + mod2);
 				
 				min =  (min * mod1) + (mod2*1000);
+				
+				*/
+				// Let's run it every 5 ~ 10 sec
+				
+				min = 3;
+				mod1 = rand.nextInt(5)+1;
+				
+				min = min + mod1;
+				min = min * 1000;
+				
 																
 				
 			}	
@@ -409,7 +289,7 @@ public class timer extends TimerTask
 			e.printStackTrace();
 		}
 		
-		System.out.println((float)min/60000);
+		//System.out.println((float)min/60000);
 
 		return min;
 		
@@ -419,7 +299,7 @@ public class timer extends TimerTask
 	/*
 	 * Turker nation actively block IP address 
 	 */
-	public static int timeIntervalTN()
+	public static int timeIntervalLimit()
 	{
 		int min = 60000;
 		Random rand = new Random();
