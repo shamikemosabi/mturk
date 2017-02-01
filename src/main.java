@@ -70,8 +70,7 @@ public class main extends TimerTask
 	
 	// specifically for HWTF hits
 	ArrayList<String> alJsonReddit = new ArrayList<String>();
-	
-	boolean VPN = false;
+		
 	log logger = null;
 	
 	public main() throws Exception
@@ -163,13 +162,13 @@ public class main extends TimerTask
 		    				if(alJson.size()>0)
 		    				{
 		    					logger.info("<<FTP>> New hits writing to JSON");
-		    					writeToJSON(alJson, jsonFile );
-		    					//alJson.clear();
+		    					writeToJSON(alJson, jsonFile );	    					
 		    					logger.info("<<FTP>> Cleared alJSON");
 		    				}
 		    				
 		    				cleanHit();
 		    				logger.info("<<FTP>> DOWRITEFTP FINISHED");	
+		    				window.getInstance().setLblTime("FTP");
 		    				Thread.sleep(5000); //FTP 10 secs!
 	    				
 		    		 }
@@ -355,7 +354,7 @@ public class main extends TimerTask
 				window.getInstance().addText("error grabbing TH thread");
 			}
 			
-			window.getInstance().setLblTime();
+			window.getInstance().setLblTime("TH");
 			logger.info("<<Turker Hub>> Finished Turker Hub");
 		}
 		catch(Exception e)
@@ -701,62 +700,7 @@ public class main extends TimerTask
 	
 	
 	
-	public boolean checkExceedVPN(String s) throws Exception
-	 {
-		if(!s.contains("DOC") || VPN)
-		{
-			return true;
-
-		}
-		
-		VPN = true;
-		
-		 String host = "smtp.gmail.com";
-		    String from = "docogo1@gmail.com";
-		    String pass = "vjvviogjtthyttxa";
-		    Properties props = System.getProperties();
-		  		    
-		    props.put("mail.smtp.starttls.enable", "true"); // added this line
-		    props.put("mail.smtp.host", host);
-		    props.put("mail.smtp.user", from);
-		    props.put("mail.smtp.password", pass);
-		    props.put("mail.smtp.port", "587");
-		    props.put("mail.smtp.auth", "true");	
-		    
-		    
-		    //String[] to = {"shamikemosabi@gmail.com"}; // added this line
-		    String[] to = {"6462841208@tmomail.net"}; // added this line
-		    
-		   
-		    Session session = Session.getDefaultInstance(props, new GMailAuthenticator(from, pass));
-		    MimeMessage message = new MimeMessage(session);
-		    message.setFrom(new InternetAddress(from));
-		    
-		    
-		  
-			    InternetAddress[] toAddress = new InternetAddress[to.length];
-			    
-			    for( int i=0; i < to.length; i++ ) { // changed from a while loop
-			        toAddress[i] = new InternetAddress(to[i]);
-			    }
-			    
-			    for( int i=0; i < toAddress.length; i++) { // changed from a while loop
-			        message.addRecipient(Message.RecipientType.TO, toAddress[i]);
-			    }
-		   
-		   
-		    
-		    message.setSubject("VPN exceeded");
-		   //message.setContent(body, "text/html");
-		    message.setContent("VPN exceeded", "text/plain");
-		    Transport transport = session.getTransport("smtp");
-		    transport.connect(host, from, pass);
-		    transport.sendMessage(message, message.getAllRecipients());
-		    transport.close();
-		    
-		    return true;
-	     
-	 }
+	
 	
 	
 	
@@ -773,18 +717,15 @@ public class main extends TimerTask
 	    		 {
 		    		 try{
 		    			 
-		    				URL url = new URL("http://checkip.amazonaws.com/");
-		    				BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
-		    				String temp  = br.readLine();
-		    				logger.info(temp);
 		    				
-		    				checkExceedVPN(temp);
-		    					    				
-		    				br.close();
+		    				
+		    				//checkExceedVPN(temp);
+		    				
 		    			 
 		    			 logger.info("<<REDDIT>> STARTED");		
 			    		 RedditHWTF();
-			    		 logger.info("<<REDDIT>> FINISHED");	 
+			    		 logger.info("<<REDDIT>> FINISHED");
+			    		 window.getInstance().setLblTime("HWTF");			    		 
 			    		 Thread.sleep(60000);
 			    		 		    					    		
 		    		 }
@@ -1216,7 +1157,7 @@ public class main extends TimerTask
 				window.getInstance().addText("error grabbing TN thread");
 			}
 			
-			window.getInstance().setLblTime();
+			window.getInstance().setLblTime("TN");
 			logger.info("<<FORUM>> Finished Turker Nation");
 		}
 		catch(Exception e)
@@ -2052,7 +1993,7 @@ public class main extends TimerTask
 			window.getInstance().addText("error grabbing MC thread");
 		}
 		
-		window.getInstance().setLblTime();
+		window.getInstance().setLblTime("MTC");
 		logger.info("<<Mturk Crowd>> Finished Mturk Crowd");
 		}
 		catch(Exception e)
@@ -2188,7 +2129,7 @@ public class main extends TimerTask
 			window.getInstance().addText("error grabbing MG thread");
 		}
 		
-		window.getInstance().setLblTime();
+		window.getInstance().setLblTime("MTG");
 		logger.info("<<Mturk Grind>> Finished Mturk Grind");
 		}
 		catch(Exception e)
@@ -3460,7 +3401,7 @@ public class main extends TimerTask
 			window.getInstance().addText("error grabbing today's thread");
 		}
 		
-		window.getInstance().setLblTime();
+		window.getInstance().setLblTime("MTF");
 		logger.info("<<Mturk Forum>> Finished Mturk Forum");
 		
 		}
@@ -4209,7 +4150,7 @@ public class main extends TimerTask
 	public class timeThread extends TimerTask {
 		
 		 public void run() {
-			 window.getInstance().setLblTime();
+			 window.getInstance().setLblTime("");
 		 }
 		 
 	

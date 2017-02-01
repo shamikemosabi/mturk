@@ -59,7 +59,7 @@ public class timer extends TimerTask
 			//task.doForum();
 			//task.doMturkList();
 			
-			//task.doTurkerHub();
+			task.doTurkerHub();
 			//task.doMturkGrind();
 			task.doMturkForum();
 			task.doMturkCrowd();
